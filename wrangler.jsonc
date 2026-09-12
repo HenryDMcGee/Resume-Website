@@ -1,0 +1,18 @@
+{
+  // The Worker's name. This MUST match the name of the Worker you
+  // already created in the Cloudflare dashboard. If it doesn't,
+  // `wrangler deploy` will create a second, separate Worker.
+  "name": "resume-website",
+
+  "compatibility_date": "2026-09-01",
+
+  // Keeps the free *.workers.dev URL alive. Wrangler turns this off
+  // by default when it isn't stated explicitly, which silently takes
+  // your test URL offline.
+  "workers_dev": true,
+
+  // No Worker script at all — Cloudflare serves these files directly.
+  "assets": {
+    "directory": "./public"
+  }
+}
