@@ -123,7 +123,10 @@
     position:relative;
     background: var(--night);
     color:#fff;
-    min-height: 100svh;
+    /* Fills the screen on a laptop, but stops growing on large
+       monitors - past ~920px tall the banner just gets emptier,
+       not better. */
+    min-height: min(100svh, 920px);
     display:grid;
     grid-template-columns: minmax(0,.92fr) minmax(0,1.08fr);
     align-items:end;
@@ -165,9 +168,9 @@
 
   .hero-figure{
     position:relative;
-    align-self:end;
-    height: 92svh;
-    max-height: 1000px;
+    align-self:stretch;
+    height: 100%;          /* no cap: a short figure in a tall hero
+                              is what created the empty top band */
     z-index:1;
   }
   .hero-figure img{
@@ -263,6 +266,13 @@
   }
   .hero-scroll svg{ width:11px; height:11px; animation:nudge 2.4s ease-in-out infinite; }
   @keyframes nudge{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(4px);} }
+
+  /* Past this width the hero content would drift far from the
+     1180px column the rest of the page sits in. The background
+     stays full-bleed; only the grid is reined in. */
+  @media (min-width: 1600px){
+    .hero{ padding-inline: calc((100% - 1600px) / 2); }
+  }
 
   /* =========================================================
      SHELL
@@ -602,7 +612,7 @@
     <div class="video-band">
       <div class="video-frame">
         <iframe
-          src="https://www.youtube-nocookie.com/embed/uaF1t3lcYh8?rel=0&amp;modestbranding=1"
+          src="https://www.youtube-nocookie.com/embed/05zyH7eds8s?rel=0&amp;modestbranding=1"
           title="Video"
           loading="lazy"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -613,7 +623,7 @@
           <!-- EDIT: one line on what the video is. -->
           My creative intro
         </p>
-        <a href="https://youtu.be/uaF1t3lcYh8">Watch on YouTube</a>
+        <a href="https://youtu.be/05zyH7eds8s">Watch on YouTube</a>
       </div>
     </div>
 

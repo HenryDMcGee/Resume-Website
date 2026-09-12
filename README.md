@@ -1,5 +1,7 @@
 # Henry McGee — personal site
 
+Live at <https://mcgeehenry.com>
+
 Static site served by Cloudflare Workers Static Assets. No build step.
 
 ## Layout
@@ -16,30 +18,22 @@ public/            everything that gets published
 Keep both the `.webp` and `.jpg` of each photo — the page picks one
 per browser via a `<picture>` element.
 
-## Before this deploys
-
-**Check the Worker name.** The `name` field in `wrangler.jsonc` must
-exactly match the Worker already in your Cloudflare dashboard. If it
-doesn't, `wrangler deploy` creates a second Worker instead of
-updating yours, and you'll be looking at the wrong URL.
-
 ## Deploying
 
-Pushing to `main` triggers the deploy. Manually:
-
-```sh
-npx wrangler deploy
-```
+Pushing to `main` triggers the deploy. Manually: `npx wrangler deploy`
 
 ## Still to do
 
-**Set your domain.** `REPLACE-WITH-YOUR-DOMAIN.com` appears 5 times
-near the top of `public/index.html`. Until it's real, pasting your
-link anywhere shows a bare URL instead of a preview card — social
-previews require an absolute URL.
+**Set the domain in the meta tags.** `REPLACE-WITH-YOUR-DOMAIN.com`
+appears 5 times near the top of `public/index.html`. Change each to
+`mcgeehenry.com`. Until then, pasting your link shows a bare URL
+instead of a preview card — social previews need an absolute URL.
 
-After the domain is live, prime the preview cache at
+After that, prime the cache at
 <https://www.linkedin.com/post-inspector/>. LinkedIn caches hard.
+
+**Add www.** Only the apex is attached as a Custom Domain. Add
+`www.mcgeehenry.com` under the Worker's Domains tab.
 
 **Content worth a second look:**
 
@@ -48,6 +42,15 @@ After the domain is live, prime the preview cache at
 - the Wells Fargo role has no date range; every other entry has one,
   and the resume shows 2022–2026
 - MBA date reads "Expected 2028"; the resume says August 2028
+
+## Hero sizing
+
+The banner caps at `min(100svh, 920px)` and the portrait fills it at
+`height: 100%`. Both matter together: the old rule let the hero grow
+with the viewport while capping the photo at 1000px, so on a large
+monitor the leftover space collected as an empty band above the
+photo. Past 1600px wide the hero also gets side padding so its
+content stays near the 1180px column the rest of the page uses.
 
 ## Contact links
 
@@ -73,5 +76,3 @@ origin.
 ```sh
 cd public && python3 -m http.server 8000
 ```
-
-Then visit <http://localhost:8000>.
