@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Henry McGee — Product Management</title>
+<meta name="description" content="Henry McGee - aspiring product manager and MBA candidate at UT Austin McCombs. Former software engineer on Wells Fargo's currency trading platform.">
+
+<!-- ============ EDIT: YOUR DOMAIN ============
+     Replace https://REPLACE-WITH-YOUR-DOMAIN.com below with your real
+     URL once the site is live. It appears 3 times.
+
+     Social previews REQUIRE an absolute URL - a relative path will
+     not work. Until you set this, pasting your link will show a
+     plain link with no card. -->
+<link rel="canonical" href="https://REPLACE-WITH-YOUR-DOMAIN.com/">
+
+<!-- icons -->
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#0b1018">
+
+<!-- link preview (LinkedIn, Slack, iMessage, Facebook) -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Henry McGee">
+<meta property="og:title" content="Henry McGee - Product Management">
+<meta property="og:description" content="Aspiring product manager and MBA candidate at UT Austin McCombs. Former software engineer on Wells Fargo's currency trading platform.">
+<meta property="og:url" content="https://REPLACE-WITH-YOUR-DOMAIN.com/">
+<meta property="og:image" content="https://REPLACE-WITH-YOUR-DOMAIN.com/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Henry McGee - bridging business and technology">
+
+<!-- link preview (X / Twitter) -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Henry McGee - Product Management">
+<meta name="twitter:description" content="Aspiring product manager and MBA candidate at UT Austin McCombs.">
+<meta name="twitter:image" content="https://REPLACE-WITH-YOUR-DOMAIN.com/og-image.jpg">
+
+<!--
+=============================================================
+  HOW TO EDIT THIS PAGE
+=============================================================
+  Sections you'll want to change are marked with comments.
+  Search the file for "EDIT" to find them.
+
+  FILES THIS PAGE NEEDS
+    henry-portrait.jpg   the hero photo (already prepared)
+  Keep it in the same folder as this HTML file.
+
+  TO ADD A PHOTO
+  Find a block like this:
+      <div class="photo-slot" data-hint="Judo">...</div>
+  Replace the whole div with:
+      <img class="photo" src="judo.jpg" alt="Coaching judo">
+
+  TO PUBLISH
+  Drag the folder onto Netlify Drop, or push to GitHub and
+  turn on Pages. Either takes about five minutes.
+=============================================================
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    /* Surfaces, darkest first. The whole page re-themes from here. */
+    --night:     #0b1018;   /* page background   */
+    --night-2:   #131b28;   /* panels, placeholders */
+    --night-3:   #0e1520;   /* closing band      */
+
+    /* Text named by role, not by colour. */
+    --ink:       #e7eaf0;             /* primary   */
+    --ink-soft:  rgba(231,234,240,.70); /* secondary */
+    --ink-faint: rgba(231,234,240,.42); /* tertiary  */
+
+    --accent:    #5cbfad;
+    --accent-lit:#5cbfad;
+
+    --rule:      rgba(255,255,255,.13);
+    --rule-dark: rgba(255,255,255,.13);
+
+    --display: "Archivo", Helvetica, Arial, sans-serif;
+    --sans:    "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+
+    --rail: 190px;
+    --measure: 63ch;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust:100%; scroll-behavior:smooth; }
+
+  body{
+    margin:0;
+    color-scheme: dark;
+    background: var(--night);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-weight:300;
+    font-size:1.0625rem;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  a { color:inherit; }
+  ::selection{ background: var(--accent); color: var(--night); }
+
+  :focus-visible{ outline:2px solid var(--accent); outline-offset:3px; border-radius:2px; }
+  .hero :focus-visible{ outline-color: var(--accent-lit); }
+
+  .skip{ position:absolute; left:-9999px; top:0; background:var(--ink);
+    color:var(--night); padding:.75rem 1rem; z-index:99; }
+  .skip:focus{ left:.5rem; top:.5rem; }
+
+  /* =========================================================
+     HERO
+     ========================================================= */
+  .hero{
+    position:relative;
+    background: var(--night);
+    color:#fff;
+    min-height: 100svh;
+    display:grid;
+    grid-template-columns: minmax(0,.92fr) minmax(0,1.08fr);
+    align-items:end;
+    overflow:hidden;
+  }
+
+  /* a slow wash of light from the upper left, so the black isn't flat */
+  .hero::before{
+    content:"";
+    position:absolute; inset:0;
+    background:
+      radial-gradient(85% 70% at 22% 12%, rgba(92,191,173,.10), transparent 62%),
+      radial-gradient(70% 60% at 78% 88%, rgba(47,109,98,.12), transparent 70%);
+    pointer-events:none;
+  }
+
+  .hero-topbar{
+    position:absolute; top:0; left:0; right:0;
+    display:flex; justify-content:space-between; align-items:center;
+    padding:1.9rem clamp(1.15rem, 3.4vw, 3rem);
+    z-index:3;
+  }
+  .hero-mark{
+    font-family:var(--display);
+    font-weight:700;
+    font-size:.95rem;
+    letter-spacing:.02em;
+    text-decoration:none;
+  }
+  .hero-mail{
+    font-size:.72rem;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:rgba(255,255,255,.62);
+    text-decoration:none;
+    transition:color .2s ease;
+  }
+  .hero-mail:hover, .hero-mail:focus-visible{ color:var(--accent-lit); }
+
+  .hero-figure{
+    position:relative;
+    align-self:end;
+    height: 92svh;
+    max-height: 1000px;
+    z-index:1;
+  }
+  .hero-figure img{
+    display:block;
+    width:100%; height:100%;
+    object-fit:cover;
+    object-position: 50% 8%;
+  }
+  /* dissolve the plate into the background on every side */
+  .hero-figure::after{
+    content:"";
+    position:absolute; inset:0;
+    background:
+      linear-gradient(to right,  var(--night) 0%, transparent 22%, transparent 74%, var(--night) 99%),
+      linear-gradient(to bottom, var(--night) 0%, transparent 16%, transparent 80%, var(--night) 100%);
+    pointer-events:none;
+  }
+
+  .hero-copy{
+    position:relative;
+    z-index:2;
+    padding: 0 clamp(1.15rem, 3.4vw, 3.6rem) clamp(5.5rem, 11vh, 8rem) 0;
+    align-self:center;
+  }
+
+  .hero-copy h1{
+    font-family:var(--display);
+    font-weight:800;
+    font-size: clamp(3.1rem, 8.4vw, 7.4rem);
+    line-height:.86;
+    letter-spacing:-.035em;
+    margin:0 0 1.45rem;
+    text-transform:uppercase;
+  }
+
+  .hero-role{
+    font-size:.72rem;
+    letter-spacing:.24em;
+    text-transform:uppercase;
+    color:rgba(255,255,255,.55);
+    margin:0 0 1.5rem;
+    padding-top:1.35rem;
+    border-top:1px solid var(--rule-dark);
+    max-width:none;
+  }
+
+  .hero-claim{
+    font-family:var(--display);
+    font-weight:700;
+    font-size:clamp(1.35rem, 2.5vw, 2.05rem);
+    line-height:1.12;
+    letter-spacing:-.02em;
+    margin:0 0 1.1rem;
+    max-width:19ch;
+  }
+
+  .hero-sub{
+    font-size:1rem;
+    line-height:1.6;
+    color:rgba(255,255,255,.7);
+    max-width:40ch;
+    margin:0 0 2.1rem;
+  }
+
+  .hero-actions{ display:flex; flex-wrap:wrap; gap:.9rem; }
+  .btn{
+    font-family:var(--display);
+    font-weight:600;
+    font-size:.85rem;
+    letter-spacing:.01em;
+    text-decoration:none;
+    padding:.72rem 1.4rem;
+    border:1px solid var(--accent-lit);
+    color:var(--night);
+    background:var(--accent-lit);
+    transition:background .2s ease, color .2s ease;
+  }
+  .btn:hover, .btn:focus-visible{ background:transparent; color:var(--accent-lit); }
+  .btn.ghost{ background:transparent; color:#fff; border-color:var(--rule-dark); }
+  .btn.ghost:hover, .btn.ghost:focus-visible{ border-color:#fff; }
+
+  .hero-scroll{
+    position:absolute;
+    bottom:1.9rem; left:50%;
+    transform:translateX(-50%);
+    z-index:3;
+    font-size:.68rem;
+    letter-spacing:.2em;
+    text-transform:uppercase;
+    color:rgba(255,255,255,.45);
+    text-decoration:none;
+    display:flex; align-items:center; gap:.6rem;
+  }
+  .hero-scroll svg{ width:11px; height:11px; animation:nudge 2.4s ease-in-out infinite; }
+  @keyframes nudge{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(4px);} }
+
+  /* =========================================================
+     SHELL
+     ========================================================= */
+  .shell{
+    max-width:1180px; margin:0 auto; padding:0 1.5rem;
+    display:grid; grid-template-columns: var(--rail) minmax(0,1fr);
+    gap:0 3.5rem; align-items:start;
+  }
+
+  .rail{
+    position:sticky; top:0; height:100vh;
+    padding:3.25rem 0;
+    display:flex; flex-direction:column; justify-content:space-between;
+    border-right:1px solid var(--rule); margin-right:-1px;
+  }
+  .rail-mark{
+    font-family:var(--display); font-weight:800;
+    font-size:1.1rem; line-height:1.05; letter-spacing:-.02em;
+    text-transform:uppercase; text-decoration:none;
+  }
+  .rail-mark span{ display:block; font-family:var(--sans); font-weight:300;
+    text-transform:none; letter-spacing:.02em; color:var(--ink-faint);
+    font-size:.8rem; margin-top:.45rem; }
+
+  .rail nav ul{ list-style:none; margin:0; padding:0; }
+  .rail nav li{ margin:0 0 .55rem; }
+  .rail nav a{
+    text-decoration:none; color:var(--ink-soft); font-size:.9rem;
+    display:inline-block; transition:color .18s ease;
+  }
+  .rail nav a::before{
+    content:""; display:inline-block; width:0; height:1px;
+    background:var(--accent); vertical-align:middle; margin-right:0;
+    transition:width .18s ease, margin-right .18s ease;
+  }
+  .rail nav a:hover, .rail nav a:focus-visible, .rail nav a.here{ color:var(--ink); }
+  .rail nav a:hover::before, .rail nav a:focus-visible::before,
+  .rail nav a.here::before{ width:16px; margin-right:8px; }
+
+  .rail-foot{ font-size:.8rem; color:var(--ink-faint); line-height:1.5; }
+
+  main{ padding:3.25rem 0 5rem; min-width:0; }
+  section{ padding:0 0 4.25rem; }
+  section + section{ padding-top:.5rem; }
+
+  h2{
+    font-family:var(--display);
+    font-weight:800;
+    font-size:clamp(1.35rem,2.2vw,1.7rem);
+    letter-spacing:-.02em;
+    text-transform:uppercase;
+    margin:0 0 1.5rem;
+    padding-bottom:.6rem;
+    border-bottom:1px solid var(--rule);
+  }
+  h3{ font-family:var(--sans); font-weight:500; font-size:1.02rem; margin:0; }
+
+  p{ max-width:var(--measure); margin:0 0 1.05rem; }
+  p:last-child{ margin-bottom:0; }
+
+  /* ---------- video ---------- */
+  .video-band{ padding-bottom:3.5rem; margin-bottom:3.25rem;
+    border-bottom:1px solid var(--rule); }
+  .video-frame{
+    position:relative; width:100%; aspect-ratio:16/9;
+    background:var(--night-2); border-radius:2px; overflow:hidden;
+  }
+  .video-frame iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
+  .video-caption{
+    display:flex; flex-wrap:wrap; justify-content:space-between;
+    align-items:baseline; gap:.5rem 2rem; margin-top:1.35rem;
+  }
+  .video-caption p{ margin:0; max-width:52ch; font-size:.95rem; color:var(--ink-soft); }
+  .video-caption a{
+    font-size:.85rem; color:var(--ink-faint); text-decoration:none;
+    border-bottom:1px solid var(--rule); padding-bottom:2px; white-space:nowrap;
+    transition:color .18s ease, border-color .18s ease;
+  }
+  .video-caption a:hover, .video-caption a:focus-visible{
+    color:var(--accent); border-color:var(--accent);
+  }
+
+  /* ---------- photos ---------- */
+  .photo, .photo-slot{ display:block; width:100%; border-radius:2px; }
+  .photo{ height:auto; object-fit:cover; }
+  .photo-slot{
+    aspect-ratio:4/5; border:1px dashed rgba(255,255,255,.20);
+    background:var(--night-2); color:var(--ink-faint);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:.35rem; text-align:center; padding:1rem; font-size:.82rem; line-height:1.45;
+  }
+  .photo-slot::before{
+    content:attr(data-hint); color:var(--ink-soft); font-weight:500; font-size:.9rem;
+  }
+  .photo-slot.wide{ aspect-ratio:3/2; }
+  .gallery figure{ margin:0; }
+  .gallery img{
+    display:block; width:100%; height:auto;
+    aspect-ratio:4/3; object-fit:cover; border-radius:2px;
+  }
+  .gallery{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+    gap:1rem; margin-top:1.75rem;
+  }
+
+  /* ---------- about ---------- */
+  .about-photo{ margin:0; }
+  .about-photo figcaption{
+    margin-top:.65rem;
+    font-size:.8rem;
+    line-height:1.45;
+    color:var(--ink-faint);
+  }
+
+  .about{ display:grid; grid-template-columns:minmax(0,1fr) 230px;
+    gap:2.75rem; align-items:start; }
+
+  /* ---------- approach ---------- */
+  .approach{ margin:0; }
+  .approach > div{
+    padding:1.35rem 0; border-top:1px solid var(--rule);
+    display:grid; grid-template-columns:210px minmax(0,1fr); gap:2rem;
+  }
+  .approach > div:first-child{ border-top:none; padding-top:0; }
+  .approach dt{
+    font-family:var(--display); font-weight:700; font-size:1.02rem;
+    line-height:1.3; letter-spacing:-.01em; color:var(--accent);
+  }
+  .approach dd{ margin:0; }
+  .approach dd p{ max-width:58ch; }
+
+  /* ---------- experience ---------- */
+  .role{ padding:1.6rem 0; border-top:1px solid var(--rule); }
+  .role:first-of-type{ border-top:none; padding-top:0; }
+  .role-head{
+    display:flex; flex-wrap:wrap; align-items:baseline;
+    justify-content:space-between; gap:.4rem 1.5rem; margin-bottom:.15rem;
+  }
+  .org{ font-family:var(--display); font-weight:700; font-size:1.2rem;
+    letter-spacing:-.015em; margin:0; }
+  .when{ font-size:.88rem; color:var(--ink-faint); white-space:nowrap; }
+  .where{ font-size:.88rem; color:var(--ink-faint); margin:0 0 1.1rem; }
+
+  .stint{ margin-top:1.35rem; }
+  .stint:first-of-type{ margin-top:0; }
+  .stint-head{
+    display:flex; flex-wrap:wrap; align-items:baseline;
+    justify-content:space-between; gap:.2rem 1.5rem; margin-bottom:.55rem;
+  }
+  .role ul{ list-style:none; margin:0; padding:0; max-width:var(--measure); }
+  .role li{ position:relative; padding-left:1.15rem; margin-bottom:.55rem; color:var(--ink-soft); }
+  .role li::before{ content:""; position:absolute; left:0; top:.72em;
+    width:5px; height:1px; background:var(--accent); }
+  .role li:last-child{ margin-bottom:0; }
+
+  /* ---------- education ---------- */
+  .edu{ border-top:1px solid var(--rule); padding-top:1.4rem; }
+  .edu:first-of-type{ border-top:none; padding-top:0; }
+  .edu + .edu{ margin-top:1.5rem; }
+  .edu p{ margin:.15rem 0 0; color:var(--ink-soft); font-size:.97rem; }
+
+  /* ---------- contact, dark bookend ---------- */
+  .closing{
+    background:var(--night-3);
+    border-top:1px solid var(--rule);
+    color:#fff;
+    margin-top:1rem;
+  }
+  .closing-inner{
+    max-width:1180px; margin:0 auto;
+    padding:clamp(3.5rem,9vw,6rem) 1.5rem;
+  }
+  .closing h2{
+    color:#fff; border-bottom-color:var(--rule-dark);
+    font-size:clamp(1.9rem,5vw,3.2rem); line-height:.95;
+  }
+  .closing p{ color:rgba(255,255,255,.72); max-width:44ch; font-size:1.05rem; }
+  .closing-links{ display:flex; flex-wrap:wrap; gap:.9rem; margin-top:1.9rem; }
+  a[data-mail], a[data-url]{ cursor:pointer; }
+  .noscript-contact{
+    margin-top:1.6rem; font-size:.95rem; color:rgba(255,255,255,.72);
+  }
+  .closing-foot{
+    margin-top:3.25rem; padding-top:1.5rem; border-top:1px solid var(--rule-dark);
+    display:flex; flex-wrap:wrap; gap:.5rem 1.5rem; justify-content:space-between;
+    font-size:.8rem; color:rgba(255,255,255,.42);
+  }
+
+  /* ---------- entrance: one moment, on load ---------- */
+  .hero-copy h1, .hero-role, .hero-claim, .hero-sub, .hero-actions, .hero-figure{
+    animation:rise .85s cubic-bezier(.22,.61,.36,1) backwards;
+  }
+  .hero-figure { animation-delay:.05s; }
+  .hero-role   { animation-delay:.16s; }
+  .hero-claim  { animation-delay:.22s; }
+  .hero-sub    { animation-delay:.28s; }
+  .hero-actions{ animation-delay:.34s; }
+  @keyframes rise{ from{ opacity:0; transform:translateY(18px);} to{ opacity:1; transform:none;} }
+
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior:auto; }
+    *, *::before, *::after{
+      animation-duration:.001ms !important; animation-iteration-count:1 !important;
+      transition-duration:.001ms !important;
+    }
+  }
+
+  /* =========================================================
+     RESPONSIVE
+     ========================================================= */
+  @media (max-width: 940px){
+    .hero{
+      grid-template-columns:1fr;
+      align-items:stretch;
+      min-height:100svh;
+    }
+    .hero-figure{
+      position:absolute; inset:0;
+      height:100%; max-height:none;
+      opacity:.5;
+    }
+    .hero-figure img{ object-position:50% 6%; }
+    .hero-figure::after{
+      background:linear-gradient(to bottom,
+        rgba(11,16,24,.35) 0%, rgba(11,16,24,.72) 46%, var(--night) 88%);
+    }
+    .hero-copy{
+      align-self:end;
+      padding:0 clamp(1.15rem,5vw,2rem) clamp(5rem,13vh,7rem);
+    }
+    .hero-sub{ max-width:32ch; }
+
+    .shell{ grid-template-columns:1fr; gap:0; }
+    .rail{
+      position:static; height:auto; border-right:none;
+      border-bottom:1px solid var(--rule);
+      padding:1.75rem 0 1.25rem; margin-right:0;
+      flex-direction:row; align-items:center; flex-wrap:wrap; gap:1rem 2rem;
+    }
+    .rail nav ul{ display:flex; flex-wrap:wrap; gap:.25rem 1.35rem; }
+    .rail nav li{ margin:0; }
+    .rail-foot{ display:none; }
+    main{ padding-top:2.5rem; }
+    .about{ grid-template-columns:1fr; gap:2rem; }
+    .about .photo-slot, .about .photo{ max-width:260px; }
+    .approach > div{ grid-template-columns:1fr; gap:.5rem; }
+  }
+
+  @media (max-width: 520px){
+    .shell{ padding:0 1.15rem; }
+    body{ font-size:1rem; }
+    .hero-scroll{ display:none; }
+  }
+
+  @media print{
+    .rail, .photo-slot, .video-band, .hero-figure, .hero-scroll,
+    .hero-topbar, .hero-actions, .closing-links{ display:none; }
+    html, body, .hero, .closing{ background:#fff !important; color:#000 !important; }
+    h2, h3, .org, .hero-copy h1, .hero-claim, .closing h2,
+    .approach dt{ color:#000 !important; }
+    p, li, .hero-sub, .closing p, .when, .where, .hero-role{ color:#333 !important; }
+    .hero{ min-height:auto; display:block; padding:0 0 1rem; }
+    .hero-copy{ padding:0; }
+    h2, .role, .edu, .approach > div, .closing{ border-color:#ccc !important; }
+    .shell{ display:block; }
+  }
+</style>
+</head>
+
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<!-- ============ EDIT: HERO ============ -->
+<header class="hero" id="top">
+  <div class="hero-topbar">
+    <a class="hero-mark" href="#top">HM</a>
+    <a class="hero-mail" data-mail="aGVucnltY2dlZUBteS51dGV4YXMuZWR1">Email</a>
+  </div>
+
+  <div class="hero-figure">
+    <img src="henry-portrait.jpg" alt="Henry McGee">
+  </div>
+
+  <div class="hero-copy">
+    <h1>Henry<br>McGee</h1>
+
+    <p class="hero-role">Aspiring Product Manager &mdash; MBA candidate</p>
+
+    <p class="hero-claim">Bridging the gap between business and technology.</p>
+
+    <p class="hero-sub">
+      Spent 3.5 years maintaining Wells Fargo’s currency trading tools,
+      supporting hundreds of thousands of daily trades worldwide. Now
+      pursuing Product Management, combining my passions for innovation,
+      business, and diverse cultures.
+    </p>
+
+    <div class="hero-actions">
+      <a class="btn" href="#experience">See the work</a>
+      <a class="btn ghost" href="#contact">Get in touch</a>
+    </div>
+  </div>
+
+  <a class="hero-scroll" href="#about">
+    Scroll
+    <svg viewBox="0 0 12 12" fill="none" aria-hidden="true">
+      <path d="M6 1v9M2.5 6.5 6 10l3.5-3.5" stroke="currentColor" stroke-width="1.3"/>
+    </svg>
+  </a>
+</header>
+
+<div class="shell">
+
+  <aside class="rail">
+    <a class="rail-mark" href="#top">Henry<br>McGee<span>Product management</span></a>
+
+    <nav aria-label="Sections">
+      <ul>
+        <li><a href="#about">About</a></li>
+        <li><a href="#approach">How I work</a></li>
+        <li><a href="#experience">Experience</a></li>
+        <li><a href="#education">Education</a></li>
+        <li><a href="#beyond">Outside work</a></li>
+        <li><a href="#contact">Get in touch</a></li>
+      </ul>
+    </nav>
+
+    <p class="rail-foot">Austin, Texas<br>Open to summer 2027 internships</p>
+  </aside>
+
+  <main id="main">
+
+    <!-- ============ EDIT: VIDEO ============
+         For https://youtu.be/ABC123 the ID is ABC123. It appears
+         once in the iframe src and once in the link below. -->
+    <div class="video-band">
+      <div class="video-frame">
+        <iframe
+          src="https://www.youtube-nocookie.com/embed/05zyH7eds8s?rel=0&amp;modestbranding=1"
+          title="Video"
+          loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen></iframe>
+      </div>
+      <div class="video-caption">
+        <p>
+          <!-- EDIT: one line on what the video is. -->
+          My creative intro
+        </p>
+        <a href="https://youtu.be/05zyH7eds8s">Watch on YouTube</a>
+      </div>
+    </div>
+
+    <!-- ============ EDIT: ABOUT ME ============
+         Rewrite this in your own voice. Two or three short
+         paragraphs beats one long one. -->
+    <section id="about">
+      <h2>About me</h2>
+      <div class="about">
+        <div>
+          <p>
+            After graduating from Clemson in computer science during COVID, 
+            I built an AI scavenger hunt with my best friend that landed me a role at Wells Fargo. 
+            There, I developed a passion for bridging business and technical teams, 
+            balancing stakeholder priorities and deadlines with developers’ focus on scalability and reducing technical debt.
+          </p>
+          <p>
+            I have a passion for servant leadership and foreign cultures. During the 7 months gap before my 
+            MBA program started I took Japanese, green tea, classic Japanese Literature, and Judo courses at University of Hawaii.
+            At my Hawaii Judo Dojo I used my Japanese skills to be the camp counselor for Japanese students during a Spring Judo camp.
+            I also started Honolulu Language Exchange and was an assistant coach for kids special needs Judo classes.
+          </p>
+          <p>
+            As a project manager, I hope to bridge business and technology while collaborating with a team of diverse backgrounds and perspectives.          
+          </p>
+        </div>
+        <figure class="about-photo">
+          <picture>
+            <source srcset="henry-wiring.webp" type="image/webp">
+            <img class="photo" src="henry-wiring.jpg"
+                 width="560" height="747"
+                 loading="lazy" decoding="async"
+                 alt="Rewiring the dashboard of a classic car, wiring harness pulled out from under the dash">
+          </picture>
+          <!-- EDIT: one line on what this is. -->
+          <figcaption>A passion for system design in all its forms</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="approach">
+      <h2>How I work</h2>
+      <dl class="approach">
+        <div>
+          <dt>Close to the user, close to the system</dt>
+          <dd>
+            <p>
+              Our traders placed 50,000 to 100,000 trades a day. When
+              something broke, I triaged it directly with the person it
+              broke for, then worked with the engineering team on a fix
+              that would hold. Doing both ends of that &mdash; hearing the
+              problem firsthand and knowing what it costs to solve &mdash;
+              is the habit I want to keep as a PM.
+            </p>
+          </dd>
+        </div>
+        <div>
+          <dt>Requirements are a decision, not a transcription</dt>
+          <dd>
+            <p>
+              Our stakeholders had a long-term vision for the platform.
+              Turning it into quarterly work meant scoping requests,
+              testing whether they were feasible in the quarter, and being
+              willing to say a request didn't fit the direction we'd
+              committed to. I learned to treat prioritization as the job
+              rather than the paperwork around it.
+            </p>
+          </dd>
+        </div>
+        <div>
+          <dt>Practical fluency with AI</dt>
+          <dd>
+            <p>
+              In 2025 our team started using AI to generate test cases and
+              cut down on long-standing technical debt, and I piloted
+              GitHub Copilot across our development workflow. On my own I
+              earned an Azure AI certification and built an AI scavenger
+              hunt, which was the fastest way I found to understand what
+              these systems are good at and where they fall over.
+            </p>
+          </dd>
+        </div>
+        <div>
+          <dt>Building across differences</dt>
+          <dd>
+            <p>
+              Two and a half years of Japanese study, founding the Honolulu
+              Japanese Language Exchange, and teaching judo to children with
+              special needs have all trained the same muscle: getting a
+              group of people who don't start from the same place to work
+              toward something together.
+            </p>
+          </dd>
+        </div>
+      </dl>
+    </section>
+
+    <section id="experience">
+      <h2>Experience</h2>
+
+      <div class="role">
+        <div class="role-head">
+          <h3 class="org">Wells Fargo</h3>
+        </div>
+        <p class="where">Charlotte, North Carolina</p>
+
+        <div class="stint">
+          <div class="stint-head">
+            <h3>Software Developer, Foreign Exchange Platform UI</h3>
+            <span class="when">2025 &ndash; 2026</span>
+          </div>
+          <ul>
+            <li>Improved reliability of a global trading platform supporting
+              50,000 to 100,000 daily transactions by triaging application
+              issues, prioritizing production fixes, and partnering with
+              engineering teams on user-impacting problems.</li>
+            <li>Translated business needs into scalable product solutions,
+              working with stakeholders to define requirements, weigh
+              implementation approaches, and ship enhancements across
+              enterprise financial applications.</li>
+            <li>Coordinated release schedules and development dependencies
+              across cross-functional teams using Agile workflows, making
+              delivery timelines more predictable.</li>
+            <li>Piloted GitHub Copilot within development workflows and
+              assessed adoption trade-offs between speed and code quality.</li>
+          </ul>
+        </div>
+
+        <div class="stint">
+          <div class="stint-head">
+            <h3>Associate Software Developer, FX Profile Management UI</h3>
+            <span class="when">2022 &ndash; 2025</span>
+          </div>
+          <ul>
+            <li>Delivered a React-based platform for foreign exchange profile
+              management, translating stakeholder needs into product
+              specifications and improving workflow efficiency for internal
+              users.</li>
+            <li>Designed and launched a dashboard with cross-functional
+              technology partners, giving the team faster access to
+              operational insights.</li>
+            <li>Implemented OAuth authentication across three applications
+              with security stakeholders, standardizing how user access was
+              managed.</li>
+            <li>Built onboarding resources and led training for three new
+              engineers, shortening ramp-up time and reducing repeat support
+              questions.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="role">
+        <div class="role-head">
+          <h3 class="org">Risk Mitigation Consulting</h3>
+          <span class="when">2021</span>
+        </div>
+        <p class="where">Albany, Georgia &mdash; contractor at Marine Corps Logistics Base Albany</p>
+        <div class="stint">
+          <div class="stint-head"><h3>Software Developer</h3></div>
+          <ul>
+            <li>Modernized mission-critical government systems by improving
+              smart-grid infrastructure and financial database functionality.</li>
+            <li>Applied security best practices and maintained the technical
+              certifications and clearance required for secure delivery.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="education">
+      <h2>Education</h2>
+
+      <div class="edu">
+        <div class="role-head">
+          <h3 class="org">The University of Texas at Austin</h3>
+          <span class="when">Expected 2028</span>
+        </div>
+        <p>McCombs School of Business &mdash; MBA, International Business</p>
+        <p>Forte Fellow</p>
+      </div>
+
+      <div class="edu">
+        <div class="role-head">
+          <h3 class="org">Clemson University</h3>
+          <span class="when">December 2020</span>
+        </div>
+        <p>School of Computing &mdash; BA in Computer Science, minor in Economics</p>
+      </div>
+
+      <div class="edu">
+        <div class="role-head"><h3 class="org">Certifications</h3></div>
+        <p>Azure Fundamentals &nbsp;&middot;&nbsp; Azure Administrator &nbsp;&middot;&nbsp;
+           Azure AI Fundamentals &nbsp;&middot;&nbsp; Dale Carnegie Course</p>
+      </div>
+    </section>
+
+    <!-- ============ EDIT: OUTSIDE WORK ============ -->
+    <section id="beyond">
+      <h2>Outside work</h2>
+      <p>
+        I studied Japanese, judo, tea ceremony, and classical Japanese
+        literature at the University of Hawai'i at Mānoa. I've coached judo
+        for children with special needs, organized a spring judo camp, and
+        founded the Honolulu Japanese Language Exchange &mdash; which meant
+        doing the marketing myself until people started showing up.
+      </p>
+
+      <div class="gallery">
+        <figure>
+          <picture>
+            <source srcset="henry-judo.webp" type="image/webp">
+            <img src="henry-judo.jpg" width="900" height="675"
+                 loading="lazy" decoding="async"
+                 alt="Completing a judo throw, training partner airborne above the mat">
+          </picture>
+        </figure>
+
+        <figure>
+          <picture>
+            <source srcset="henry-tea.webp" type="image/webp">
+            <img src="henry-tea.jpg" width="900" height="675"
+                 loading="lazy" decoding="async"
+                 alt="Kneeling in a tatami tea room beside my green tea ceremony instructor">
+          </picture>
+        </figure>
+
+        <figure>
+          <picture>
+            <source srcset="henry-dog.webp" type="image/webp">
+            <img src="henry-dog.jpg" width="900" height="675"
+                 loading="lazy" decoding="async"
+                 alt="Holding my dog outdoors in autumn">
+          </picture>
+        </figure>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ============ EDIT: CONTACT ============ -->
+<section class="closing" id="contact">
+  <div class="closing-inner">
+    <h2>Get in touch</h2>
+    <p>
+      I'm looking for a product management internship for summer 2027.
+      If you're hiring, or you just want to talk about what the work is
+      really like, I'd like to hear from you.
+    </p>
+    <div class="closing-links">
+      <a class="btn" data-mail="aGVucnltY2dlZUBteS51dGV4YXMuZWR1">Email me</a>
+      <a class="btn ghost" data-url="aHR0cHM6Ly93d3cubGlua2VkaW4uY29tL2luL2hlbnJ5LW1jZ2VlLw==" rel="noopener">LinkedIn</a>
+      <!-- Uncomment to show your phone number publicly:
+      <a class="btn ghost" href="tel:+12294492585">(229) 449-2585</a> -->
+    </div>
+    <noscript>
+      <p class="noscript-contact">
+        henrymcgee <span>at</span> my <span>dot</span> utexas <span>dot</span> edu
+        &nbsp;&middot;&nbsp; search &ldquo;Henry McGee&rdquo; on LinkedIn
+      </p>
+    </noscript>
+
+    <div class="closing-foot">
+      <span>Henry McGee</span>
+      <span>Austin, Texas</span>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Contact links are assembled at runtime so the address never
+  // appears in the page source. Stops address-harvesting bots that
+  // scan HTML for an email pattern; it is not a guarantee.
+  (function () {
+    function decode(v) { try { return atob(v); } catch (e) { return ''; } }
+
+    document.querySelectorAll('a[data-mail]').forEach(function (a) {
+      var addr = decode(a.getAttribute('data-mail'));
+      if (!addr) return;
+      a.setAttribute('href', 'mail' + 'to:' + addr);
+      a.setAttribute('title', addr);
+      a.removeAttribute('data-mail');
+    });
+
+    document.querySelectorAll('a[data-url]').forEach(function (a) {
+      var url = decode(a.getAttribute('data-url'));
+      if (!url) return;
+      a.setAttribute('href', url);
+      a.setAttribute('rel', 'noopener');
+      a.removeAttribute('data-url');
+    });
+  })();
+</script>
+
+<script>
+  // Highlights the rail link for whichever section you're reading.
+  (function () {
+    var links = Array.prototype.slice.call(document.querySelectorAll('.rail nav a'));
+    var targets = [];
+    links.forEach(function (a) {
+      var el = document.querySelector(a.getAttribute('href'));
+      if (el) targets.push(el);
+    });
+    if (!('IntersectionObserver' in window) || !targets.length) return;
+
+    var seen = Object.create(null);
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { seen[e.target.id] = e.isIntersecting; });
+      links.forEach(function (a) { a.classList.remove('here'); });
+      for (var i = 0; i < links.length; i++) {
+        if (seen[links[i].getAttribute('href').slice(1)]) {
+          links[i].classList.add('here');
+          break;
+        }
+      }
+    }, { rootMargin: '-15% 0px -70% 0px' });
+
+    targets.forEach(function (el) { io.observe(el); });
+  })();
+</script>
+</body>
+</html>
