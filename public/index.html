@@ -593,7 +593,7 @@
     <nav aria-label="Sections">
       <ul>
         <li><a href="#about">About</a></li>
-        <li><a href="#approach">How I work</a></li>
+        <li><a href="#ai-fluency">AI fluency</a></li>
         <li><a href="#experience">Experience</a></li>
         <li><a href="#education">Education</a></li>
         <li><a href="#beyond">Outside work</a></li>
@@ -635,8 +635,8 @@
       <div class="about">
         <div>
           <p>
-            After graduating from Clemson in computer science during COVID, 
-            I built an AI scavenger hunt with my best friend that landed me a role at Wells Fargo. 
+            After graduating from Clemson in computer science, I built an AI scavenger hunt
+            with my best friend as a COVID project, and it landed me a role at Wells Fargo. 
             There, I developed a passion for bridging business and technical teams, 
             balancing stakeholder priorities and deadlines with developers’ focus on scalability and reducing technical debt.
           </p>
@@ -647,7 +647,7 @@
             I also started Honolulu Language Exchange and was an assistant coach for kids special needs Judo classes.
           </p>
           <p>
-            As a project manager, I hope to bridge business and technology while collaborating with a team of diverse backgrounds and perspectives.          
+            As a product manager, I hope to bridge business and technology while collaborating with a team of diverse backgrounds and perspectives.          
           </p>
         </div>
         <figure class="about-photo">
@@ -664,57 +664,70 @@
       </div>
     </section>
 
-    <section id="approach">
-      <h2>How I work</h2>
+    <section id="ai-fluency">
+      <h2>AI fluency</h2>
       <dl class="approach">
         <div>
-          <dt>Close to the user, close to the system</dt>
+          <dt>Internship Watch: <span style="white-space:nowrap">spec-driven</span> development with AI agents</dt>
           <dd>
             <p>
-              Our traders placed 50,000 to 100,000 trades a day. When
-              something broke, I triaged it directly with the person it
-              broke for, then worked with the engineering team on a fix
-              that would hold. Doing both ends of that &mdash; hearing the
-              problem firsthand and knowing what it costs to solve &mdash;
-              is the habit I want to keep as a PM.
+              I identified a bottleneck in my application process: finding
+              new openings meant checking company career sites by hand. I
+              built Internship Watch to automate it. Every morning it checks
+              about 100 tech companies and gathers new Summer 2027 product
+              roles on one dashboard. I managed the build with spec-driven
+              development: I wrote the product spec, broke a six-phase
+              roadmap into specs with clear scope and acceptance criteria,
+              and directed Claude Code agents to build against them. The
+              spec also sets daily, weekly, and monthly AI budgets, and when
+              the budget runs low, lower-priority steps are cut first. Any
+              change outside a spec needs a written proposal I approve
+              first. I review each of more than 50 pull requests against its
+              acceptance criteria, and automated tests must pass before
+              anything merges.
             </p>
           </dd>
         </div>
         <div>
-          <dt>Requirements are a decision, not a transcription</dt>
+          <dt>Copilot at Wells Fargo, held to clean code standards</dt>
           <dd>
             <p>
-              Our stakeholders had a long-term vision for the platform.
-              Turning it into quarterly work meant scoping requests,
-              testing whether they were feasible in the quarter, and being
-              willing to say a request didn't fit the direction we'd
-              committed to. I learned to treat prioritization as the job
-              rather than the paperwork around it.
+              In 2025 I piloted GitHub Copilot across our team's development
+              workflow. When I moved to the FX Platform team, I used AI to
+              learn our code base's style and brainstorm clean code
+              solutions. On the team, I used AI to keep test coverage at 80%
+              under our test-driven development standards. Code reviews
+              showed we kept the same standards while moving faster, because
+              the team kept ownership of quality.
             </p>
           </dd>
         </div>
         <div>
-          <dt>Practical fluency with AI</dt>
+          <dt>Grounded in the fundamentals</dt>
           <dd>
             <p>
-              In 2025 our team started using AI to generate test cases and
-              cut down on long-standing technical debt, and I piloted
-              GitHub Copilot across our development workflow. On my own I
-              earned an Azure AI certification and built an AI scavenger
-              hunt, which was the fastest way I found to understand what
-              these systems are good at and where they fall over.
+              I earned Microsoft's Azure AI Fundamentals certification to
+              learn the foundations: machine learning, computer vision,
+              language models, and responsible AI. I then took a Udemy
+              course on Claude Code so I could run agent-driven development
+              on a real project, not just a demo.
             </p>
           </dd>
         </div>
         <div>
-          <dt>Building across differences</dt>
+          <dt>CUFindIt: machine learning from the ground up</dt>
           <dd>
             <p>
-              Two and a half years of Japanese study, founding the Honolulu
-              Japanese Language Exchange, and teaching judo to children with
-              special needs have all trained the same muscle: getting a
-              group of people who don't start from the same place to work
-              toward something together.
+              After graduating from Clemson, my best friend and I built
+              CUFindIt as a COVID project: an AI scavenger hunt for Clemson
+              students. We used transfer learning to adapt a pretrained
+              TensorFlow model and trained it with supervised learning on
+              labeled photos of campus locations. With OpenCV, we altered the
+              photos using Gaussian blur, salt-and-pepper noise, and image
+              hashing to bring out key features and avoid overfitting. Building
+              the model end to end gave me a core understanding of how AI
+              learns. A model is only as good as its training data, and it has
+              to handle photos it has never seen.
             </p>
           </dd>
         </div>
@@ -727,6 +740,7 @@
       <div class="role">
         <div class="role-head">
           <h3 class="org">Wells Fargo</h3>
+          <span class="when">2022 &ndash; 2026</span>
         </div>
         <p class="where">Charlotte, North Carolina</p>
 
