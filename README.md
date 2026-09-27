@@ -37,8 +37,6 @@ After that, prime the cache at
 
 **Content worth a second look:**
 
-- "As a project manager, I hope to bridge…" in About me probably
-  wants to read *product* manager
 - the Wells Fargo role has no date range; every other entry has one,
   and the resume shows 2022–2026
 - MBA date reads "Expected 2028"; the resume says August 2028
