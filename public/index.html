@@ -370,6 +370,12 @@
   }
   .photo-slot.wide{ aspect-ratio:3/2; }
   .gallery figure{ margin:0; }
+  .gallery figcaption{
+    margin-top:.65rem;
+    font-size:.8rem;
+    line-height:1.45;
+    color:var(--ink-faint);
+  }
   .gallery img{
     display:block; width:100%; height:auto;
     aspect-ratio:4/3; object-fit:cover; border-radius:2px;
@@ -680,11 +686,7 @@
               roadmap into specs with clear scope and acceptance criteria,
               and directed Claude Code agents to build against them. The
               spec also sets daily, weekly, and monthly AI budgets, and when
-              the budget runs low, lower-priority steps are cut first. Any
-              change outside a spec needs a written proposal I approve
-              first. I review each of more than 50 pull requests against its
-              acceptance criteria, and automated tests must pass before
-              anything merges.
+              the budget runs low, lower-priority steps are cut first.
             </p>
           </dd>
         </div>
@@ -695,10 +697,12 @@
               In 2025 I piloted GitHub Copilot across our team's development
               workflow. When I moved to the FX Platform team, I used AI to
               learn our code base's style and brainstorm clean code
-              solutions. On the team, I used AI to keep test coverage at 80%
-              under our test-driven development standards. Code reviews
-              showed we kept the same standards while moving faster, because
-              the team kept ownership of quality.
+              solutions. On a large, established trading platform, managing
+              technical debt was a top priority. I used AI to improve test
+              coverage and hold it at 80% under our test-driven development
+              standards, while keeping the code readable and technical debt
+              low. Code reviews showed we moved faster without lowering our
+              standards, because the team kept ownership of quality.
             </p>
           </dd>
         </div>
@@ -838,11 +842,28 @@
     <section id="beyond">
       <h2>Outside work</h2>
       <p>
-        I studied Japanese, judo, tea ceremony, and classical Japanese
-        literature at the University of Hawai'i at Mānoa. I've coached judo
-        for children with special needs, organized a spring judo camp, and
-        founded the Honolulu Japanese Language Exchange &mdash; which meant
-        doing the marketing myself until people started showing up.
+        Coaching judo for children with special needs taught me that
+        leadership means meeting people where they are, adjusting the
+        lesson rather than the child, and reading frustration before it
+        became a shutdown. Patience, I found, is a skill rather than a
+        personality trait.
+      </p>
+      <p>
+        Organizing a spring judo camp stretched that further: I managed
+        scheduling, logistics, and volunteer recruitment while bridging
+        differences in how Japanese, Hawaiian, and mainland judo
+        communities approach hierarchy and teaching. It was hands-on
+        experience leading a project under real constraints with a group
+        that didn't share a single cultural frame of reference.
+      </p>
+      <p>
+        Founding the Honolulu Japanese Language Exchange tested my
+        persistence in a different way, since attendance was thin for
+        weeks, but I kept showing up at the same time and place and
+        treated growth as a marketing problem, posting flyers across
+        campus where Japanese learners and native speakers already
+        gathered. Attendance rose steadily, and the exchange became a real
+        community.
       </p>
 
       <div class="gallery">
@@ -853,6 +874,7 @@
                  loading="lazy" decoding="async"
                  alt="Completing a judo throw, training partner airborne above the mat">
           </picture>
+          <figcaption>Judo Nagekomi</figcaption>
         </figure>
 
         <figure>
@@ -862,15 +884,17 @@
                  loading="lazy" decoding="async"
                  alt="Kneeling in a tatami tea room beside my green tea ceremony instructor">
           </picture>
+          <figcaption>Green Tea Ceremony Class</figcaption>
         </figure>
 
         <figure>
           <picture>
-            <source srcset="henry-dog.webp" type="image/webp">
-            <img src="henry-dog.jpg" width="900" height="675"
+            <source srcset="henry-exchange.webp" type="image/webp">
+            <img src="henry-exchange.jpg" width="900" height="675"
                  loading="lazy" decoding="async"
-                 alt="Holding my dog outdoors in autumn">
+                 alt="A Honolulu Japanese Language Exchange meetup, sitting in a circle on the mats at Honolulu Judo Club">
           </picture>
+          <figcaption>Honolulu Japanese Language Exchange</figcaption>
         </figure>
       </div>
     </section>
