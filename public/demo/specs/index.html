@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Internship Watch · spec sheets</title>
+<style>
+:root{--bg:#0f1622;--side:#141d2c;--ink:#e7eaf0;--ink2:#a9b3c4;--ink3:#76839a;--line:rgba(255,255,255,.1);--accent:#5cbfad;--amber:#f2b33d}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:var(--bg);display:flex;flex-direction:column;overflow:hidden}
+button{font:inherit;color:inherit}
+.bar{flex:none;display:flex;align-items:center;gap:10px;padding:7px 16px;background:#16213a;color:#ffe9a8;font-size:12.5px;font-weight:600}
+.bar i{width:8px;height:8px;border-radius:50%;background:var(--amber);flex:none}
+.bar span{opacity:.8;font-weight:500}
+.wrap{flex:1;min-height:0;display:grid;grid-template-columns:290px minmax(0,1fr)}
+nav{background:var(--side);border-right:1px solid var(--line);overflow-y:auto;padding:18px 12px}
+nav h1{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin:0 8px 12px;font-weight:700}
+.ph{display:grid;grid-template-columns:30px minmax(0,1fr);gap:2px 10px;width:100%;text-align:left;border:1px solid transparent;background:none;border-radius:10px;padding:9px 10px;cursor:pointer;margin-bottom:4px}
+.ph:hover{background:rgba(255,255,255,.04)}
+.ph[aria-current=true]{background:rgba(92,191,173,.12);border-color:rgba(92,191,173,.45)}
+.ph .n{grid-row:span 2;width:28px;height:28px;border-radius:50%;background:#22304a;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12.5px;color:var(--ink2)}
+.ph[aria-current=true] .n{background:var(--accent);color:#0b1018}
+.ph .t{font-weight:600;font-size:13.5px;line-height:1.3}
+.ph .m{font-size:11.5px;color:var(--ink3)}
+main{overflow-y:auto;padding:24px clamp(14px,3vw,40px) 40px;scroll-behavior:smooth}
+.head{max-width:860px;margin:0 auto 18px;display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.head h2{margin:0;font-size:22px}
+.head p{margin:2px 0 0;color:var(--ink2);font-size:13px}
+.pages{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.pages img{display:block;width:100%;height:auto;aspect-ratio:1020/1320;background:#fff;border-radius:4px;box-shadow:0 10px 30px rgba(0,0,0,.45)}
+.pager{max-width:860px;margin:22px auto 0;display:flex;justify-content:space-between;gap:12px}
+.pager button{border:1px solid rgba(92,191,173,.5);background:transparent;border-radius:999px;padding:10px 18px;cursor:pointer;font-weight:600;color:var(--accent)}
+.pager button:hover{background:rgba(92,191,173,.12)}
+.pager button[hidden]{display:none}
+.pick{display:none}
+@media (max-width:760px){
+  .wrap{grid-template-columns:1fr}
+  nav{display:none}
+  .pick{display:block;flex:none;padding:10px 14px;background:var(--side);border-bottom:1px solid var(--line)}
+  .pick select{width:100%;font:inherit;font-size:14px;padding:9px 10px;border-radius:8px;background:#0f1622;color:var(--ink);border:1px solid var(--line)}
+  main{padding:16px 10px 30px}
+  .head h2{font-size:18px}
+}
+</style>
+</head>
+<body>
+<div class="bar" role="note"><i></i>SPEC SHEETS <span>· Henry&rsquo;s nine Internship Watch phase plans, one per epic</span></div>
+<div class="pick"><select id="pick" aria-label="Choose a phase"></select></div>
+<div class="wrap">
+  <nav aria-label="Phases"><h1>9 spec sheets</h1><div id="list"></div></nav>
+  <main id="main">
+    <div class="head"><div><h2 id="title"></h2><p id="meta"></p></div></div>
+    <div class="pages" id="pages"></div>
+    <div class="pager"><button id="prevPh" type="button"></button><button id="nextPh" type="button"></button></div>
+  </main>
+</div>
+<script>
+(function () {
+  var P = [
+    [1, 'Local version', 3, 'release apples · shipped Sep 21'],
+    [2, 'Daily job', 3, 'release bananas · shipped Sep 22'],
+    [3, 'Claude agent', 3, 'shipped by Sep 24'],
+    [4, 'Automatic deploys and backups', 2, 'shipped Sep 21–24'],
+    [5, 'Caching', 5, 'release daiquiri · shipped Sep 25'],
+    [6, 'Careers pages', 4, 'release eggfruit · shipped Oct 5'],
+    [7, 'Public job board and feedback', 4, 'release fig · shipped Oct 14'],
+    [8, 'City background', 4, 'release guava · shipped Oct 15'],
+    [9, 'Budgets dialog redesign, dollars-only billing', 3, 'release hazelnut · approved Oct 19']
+  ];
+  var $ = function (s) { return document.querySelector(s); }, cur = 0;
+  $('#list').innerHTML = P.map(function (p, i) {
+    return '<button class="ph" type="button" data-i="' + i + '"><span class="n">' + p[0] + '</span><span class="t">Phase ' + p[0] + ': ' + p[1] + '</span><span class="m">' + p[3] + ' · ' + p[2] + ' pages</span></button>';
+  }).join('');
+  $('#pick').innerHTML = P.map(function (p, i) { return '<option value="' + i + '">Phase ' + p[0] + ': ' + p[1] + '</option>'; }).join('');
+  function show(i) {
+    cur = Math.max(0, Math.min(P.length - 1, i)); var p = P[cur], h = '';
+    for (var k = 1; k <= p[2]; k++) h += '<img src="phase' + p[0] + '-' + k + '.webp" width="1020" height="1320" alt="Phase ' + p[0] + ' spec sheet, page ' + k + ' of ' + p[2] + '"' + (k > 1 ? ' loading="lazy"' : '') + ' decoding="async">';
+    $('#pages').innerHTML = h;
+    $('#title').textContent = 'Phase ' + p[0] + ': ' + p[1];
+    $('#meta').textContent = p[3] + ' · ' + p[2] + ' pages';
+    Array.prototype.forEach.call(document.querySelectorAll('.ph'), function (b, j) { b.setAttribute('aria-current', j === cur); });
+    $('#pick').value = cur;
+    var pv = $('#prevPh'), nx = $('#nextPh');
+    pv.hidden = cur === 0; nx.hidden = cur === P.length - 1;
+    if (cur > 0) pv.textContent = '← Phase ' + P[cur - 1][0] + ': ' + P[cur - 1][1];
+    if (cur < P.length - 1) nx.textContent = 'Phase ' + P[cur + 1][0] + ': ' + P[cur + 1][1] + ' →';
+    $('#main').scrollTop = 0;
+  }
+  document.addEventListener('click', function (e) { var b = e.target.closest('.ph'); if (b) show(+b.dataset.i); });
+  $('#pick').addEventListener('change', function () { show(+this.value); });
+  $('#prevPh').addEventListener('click', function () { show(cur - 1); });
+  $('#nextPh').addEventListener('click', function () { show(cur + 1); });
+  show(0);
+})();
+</script>
+</body>
+</html>

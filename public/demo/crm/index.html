@@ -1,0 +1,1324 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<div class="demo-bar"><b>DEMO</b> Internship CRM with sample data — edits stay in this tab and are not saved. <a href="https://github.com/HenryDMcGee/AI-Hub-channels" target="_blank" rel="noopener">Part of AI-HUB</a></div>
+<title>Internship CRM — demo</title>
+<script>
+/* ---- DEMO BUILD: sample data, kept in memory for this tab only. Nothing here is real. ---- */
+(function () {
+  var C = [{"_id": "c1", "name": "Jordan Lee", "email": "jordan.lee@example.com", "phone": "", "linkedin": "https://www.linkedin.com/in/example-jordan", "title": "Technical Customer Manager, AI", "company": "Micron", "website": "micron.com", "how_met": "Career fair booth", "todo": "Send referral note", "last_contact": "2026-10-28", "format": "In person", "followup": "Yes", "notes": "Referred me to the Longmont team"}, {"_id": "c2", "name": "Priya Natarajan", "email": "", "phone": "", "linkedin": "https://www.linkedin.com/in/example-priya", "title": "Product Manager, Cloud", "company": "Google", "website": "cloud.google.com", "how_met": "Tech trek, San Jose", "todo": "Ask for a coffee chat", "last_contact": "2026-10-21", "format": "Video", "followup": "Yes", "notes": "Tokyo office is a draw"}, {"_id": "c3", "name": "Marcus Bell", "email": "", "phone": "", "linkedin": "https://www.linkedin.com/in/example-marcus", "title": "Engineering Product Manager", "company": "Cisco", "website": "cisco.com", "how_met": "Intro from family", "todo": "", "last_contact": "2026-10-14", "format": "Phone", "followup": "No", "notes": "Suggested the ops internship opening in Nov"}, {"_id": "c4", "name": "Elena Ruiz", "email": "", "phone": "", "linkedin": "https://www.linkedin.com/in/example-elena", "title": "Presales Solutions Architect", "company": "Dell", "website": "dell.com", "how_met": "Campus session", "todo": "Schedule chat about presales programs", "last_contact": "2026-10-09", "format": "Video", "followup": "Yes", "notes": ""}, {"_id": "c5", "name": "Sam Okafor", "email": "", "phone": "", "linkedin": "https://www.linkedin.com/in/example-sam", "title": "MBA Recruiter", "company": "Microsoft", "website": "microsoft.com", "how_met": "Career fair", "todo": "Follow up on PM internship timeline", "last_contact": "2026-10-03", "format": "In person", "followup": "Yes", "notes": ""}, {"_id": "c6", "name": "Hana Kimura", "email": "", "phone": "", "linkedin": "https://www.linkedin.com/in/example-hana", "title": "Solutions Consultant, GenStudio", "company": "Adobe", "website": "adobe.com", "how_met": "Coffee chat", "todo": "", "last_contact": "2026-09-26", "format": "Video", "followup": "No", "notes": "Content supply chain"}, {"_id": "c7", "name": "Derek Walsh", "email": "", "phone": "", "linkedin": "", "title": "Brand Manager", "company": "Keurig Dr Pepper", "website": "", "how_met": "Office hours", "todo": "Prep questions for brand team", "last_contact": "2026-10-17", "format": "Video", "followup": "Yes", "notes": ""}, {"_id": "c8", "name": "Aisha Rahman", "email": "", "phone": "", "linkedin": "https://www.linkedin.com/in/example-aisha", "title": "Product Owner, Salesforce", "company": "Waymo", "website": "waymo.com", "how_met": "LinkedIn", "todo": "", "last_contact": "2026-09-30", "format": "Message", "followup": "No", "notes": ""}];
+  var A = [{"_id": "a1", "company": "Amazon", "role": "MBA Product Manager \u2013 Technical (PMT)", "status": "Applied", "updated": "2026-10-30", "next_step": "Wait for OA invite", "location": "Seattle, WA", "notes": ""}, {"_id": "a2", "company": "NVIDIA", "role": "MBA Product Management Intern, Local AI", "status": "Applied", "updated": "2026-10-27", "next_step": "", "location": "Santa Clara, CA", "notes": ""}, {"_id": "a3", "company": "IBM", "role": "Power Product Management Intern", "status": "Interview", "updated": "2026-10-24", "next_step": "Record Knockri interview by Nov 5", "location": "Austin, TX", "notes": "Competency interview"}, {"_id": "a4", "company": "Datadog", "role": "Product Management Intern", "status": "Interview", "updated": "2026-10-22", "next_step": "Essays due Nov 3", "location": "New York, NY", "notes": "May 24 session"}, {"_id": "a5", "company": "Visa", "role": "Associate Product Manager Intern", "status": "Applied", "updated": "2026-10-20", "next_step": "", "location": "Austin, TX", "notes": ""}, {"_id": "a6", "company": "Intuit", "role": "Product Management Intern (Rotational)", "status": "Applied", "updated": "2026-10-18", "next_step": "", "location": "Mountain View, CA", "notes": ""}, {"_id": "a7", "company": "Databricks", "role": "Product Management Intern", "status": "Materials ready", "updated": "2026-10-16", "next_step": "Submit by Nov 10", "location": "Bellevue, WA", "notes": ""}, {"_id": "a8", "company": "Google", "role": "US MBA Intern, Summer 2027", "status": "Watching", "updated": "2026-10-12", "next_step": "Posting not live yet", "location": "Sunnyvale, CA", "notes": "PM preference"}, {"_id": "a9", "company": "Micron", "role": "Technical Customer Management (AI) Intern", "status": "Networking", "updated": "2026-10-28", "next_step": "Referral note to Jordan", "location": "Longmont, CO", "notes": ""}, {"_id": "a10", "company": "Qualcomm", "role": "Product Management Intern", "status": "Applied", "updated": "2026-10-08", "next_step": "", "location": "San Diego, CA", "notes": ""}, {"_id": "a11", "company": "Duolingo", "role": "Associate Product Manager Intern", "status": "Rejected", "updated": "2026-10-15", "next_step": "", "location": "Pittsburgh, PA", "notes": ""}, {"_id": "a12", "company": "Roblox", "role": "Product Management Intern", "status": "Applied", "updated": "2026-10-06", "next_step": "", "location": "San Mateo, CA", "notes": ""}, {"_id": "a13", "company": "Cisco", "role": "Engineering PM Specialist II (Intern)", "status": "Applied", "updated": "2026-10-29", "next_step": "", "location": "Hybrid", "notes": ""}, {"_id": "a14", "company": "Palantir", "role": "Deployment Strategist Intern", "status": "Rejected", "updated": "2026-10-02", "next_step": "", "location": "New York, NY", "notes": ""}];
+  var subs = { contacts: [], applications: [] }, store = { contacts: C, applications: A };
+  function snap(n) { return { docs: store[n].map(function (r) { return { id: r._id, data: function () { var c = Object.assign({}, r); delete c._id; return c; } }; }) }; }
+  function emit(n) { subs[n].forEach(function (cb) { cb(snap(n)); }); }
+  function col(n) {
+    return {
+      onSnapshot: function (cb) { subs[n].push(cb); setTimeout(function () { cb(snap(n)); }, 60); return function () { subs[n] = subs[n].filter(function (x) { return x !== cb; }); }; },
+      add: function (d) { var id = 'd' + Date.now().toString(36); store[n].push(Object.assign({ _id: id }, d)); emit(n); return Promise.resolve({ id: id }); },
+      doc: function (id) { return {
+        set: function (d) { var i = store[n].findIndex(function (r) { return r._id === id; }); var row = Object.assign({}, d, { _id: id }); if (i >= 0) store[n][i] = row; else store[n].push(row); emit(n); return Promise.resolve(); },
+        update: function (d) { var r = store[n].find(function (r) { return r._id === id; }); if (r) Object.assign(r, d); emit(n); return Promise.resolve(); },
+        delete: function () { store[n] = store[n].filter(function (r) { return r._id !== id; }); emit(n); return Promise.resolve(); }
+      }; }
+    };
+  }
+  function slugName(url) { var m = /linkedin\.com\/in\/([^/?#]+)/i.exec(url || ''); if (!m) return 'Sample Person'; return m[1].split(/[-_]/).filter(function (p) { return p && !/\d/.test(p); }).slice(0, 3).map(function (p) { return p[0].toUpperCase() + p.slice(1); }).join(' '); }
+  var TITLES = ['Product Manager, Platform', 'Senior Product Manager', 'Technical Program Manager', 'Director of Product', 'Product Lead, Growth'];
+  var COS = ['Acme Cloud', 'Northwind Labs', 'Contoso', 'Globex', 'Initech'];
+  var demoClaude = {
+    use: function (cap) {
+      if (cap === 'db') return Promise.resolve({ collection: col });
+      if (cap === 'user') return Promise.resolve({ can: function () { return Promise.resolve(true); } });
+      if (cap === 'mcp') return Promise.resolve({
+        watchTool: function (server, tool, args, cb) {
+      const pl = server === 'Gmail' ? (JSON.stringify(args.query || '').toLowerCase().includes('linkedin') ? {"threads": [{"viewUrl": "#", "messages": [{"date": "2026-10-28", "sender": "LinkedIn <messages-noreply@example.com>", "subject": "Jordan Lee sent you a message", "snippet": "Great meeting you at the booth, here is my colleague's contact."}]}, {"viewUrl": "#", "messages": [{"date": "2026-10-21", "sender": "LinkedIn <messages-noreply@example.com>", "subject": "Priya Natarajan accepted your connection", "snippet": "You are now connected."}]}]} : {"threads": [{"viewUrl": "#", "messages": [{"date": "2026-10-30", "sender": "Amazon Recruiting <noreply@example.com>", "subject": "Thank you for applying \u2014 MBA PMT Intern", "snippet": "We received your application and will be in touch about next steps."}]}, {"viewUrl": "#", "messages": [{"date": "2026-10-24", "sender": "IBM Talent <noreply@example.com>", "subject": "Invitation: recorded competency interview", "snippet": "Please complete your Knockri interview within 10 days."}]}, {"viewUrl": "#", "messages": [{"date": "2026-10-22", "sender": "Datadog Careers <noreply@example.com>", "subject": "Next steps for the PM Intern role", "snippet": "Please complete the two short essays by Nov 3."}]}, {"viewUrl": "#", "messages": [{"date": "2026-10-15", "sender": "Duolingo <noreply@example.com>", "subject": "Your application to Duolingo", "snippet": "We have decided to move forward with other candidates."}]}]}) : [];
+          setTimeout(function () { cb({ type: 'data', result: { payload: pl, cache: { storedAt: Date.now() } } }); }, 120);
+          return function () {};
+        },
+        callTool: function (server, tool, args) {
+          if (server === 'Crustdata') {
+            var url = (((args || {}).params || {}).professional_network_profile_urls || [''])[0], n = slugName(url), k = n.length % 5;
+            return new Promise(function (r) { setTimeout(function () { r({ payload: [{ matches: [{ person_data: { basic_profile: { name: n, current_title: TITLES[k] }, experience: { employment_details: { current: [{ name: COS[k], title: TITLES[k], is_default: true }] } } } }] }] }); }, 700); });
+          }
+          return Promise.reject({ code: 'server_not_connected', message: 'Not available in the demo' });
+        }
+      });
+      return Promise.resolve(null);
+    }
+  };
+  window.__demoClaude = demoClaude;
+  try { window.claude = demoClaude; } catch (e) {}
+})();
+</script>
+<style>
+.demo-bar{position:sticky;top:0;z-index:50;display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;margin:0 calc(-1 * max(16px, 1.5vw)) 12px;padding:8px 16px;background:#20241f;color:#f6f5f1;font:500 12px/1.4 var(--font-ui);letter-spacing:.02em}
+.demo-bar b{color:#8fd3b6;letter-spacing:.08em}
+.demo-bar a{color:#cfe9dd;text-decoration:underline}
+</style>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/ag-grid-community@33.3.2/dist/ag-grid-community.min.js"></script>
+<style>
+:root {
+  --bg: #f6f5f1; --panel: #ffffff; --border: #e2e0d8; --fg: #20241f; --fg-muted: #6c7268;
+  --accent: #1f6f54; --ok: #1f7a4d; --warn: #92650a; --bad: #b23a30;
+  --chart1: #2e7d63; --chart2: #4a7fa5; --chart-grid: #e8e6df;
+  --font-ui: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Source Serif 4", Georgia, serif;
+}
+:root[data-theme="dark"] {
+  --bg: #151815; --panel: #1d211d; --border: #313630; --fg: #e8eae4; --fg-muted: #9aa094;
+  --accent: #5bbd97; --ok: #58b184; --warn: #d9a94e; --bad: #e06c5e;
+  --chart1: #58b189; --chart2: #7aa8cc; --chart-grid: #2a2f2a; color-scheme: dark;
+}
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--font-ui); font-size: 14px;
+  padding-left: max(16px, 1.5vw, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, 1.5vw, env(safe-area-inset-right, 0px));
+  padding-block: 0 32px;
+}
+.crm { max-width: none; margin-inline: auto; }
+.crm * { box-sizing: border-box; }
+.crm-header { padding-block: 18px 10px; }
+.crm-header h1 { font-family: var(--font-display); font-weight: 600; font-size: 1.6rem; margin: 0 0 4px; }
+.takeaway { margin: 0; color: var(--fg-muted); }
+.crm-nav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; display: flex; flex-wrap: wrap; gap: 4px; padding-block: 6px; margin-bottom: 12px; background: var(--bg); border-bottom: 1px solid var(--border); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.crm-nav button { all: unset; cursor: pointer; padding: 5px 12px; border-radius: 7px; color: var(--fg-muted); }
+.crm-nav button:hover { color: var(--fg); }
+.crm-nav button:focus-visible { outline: 2px solid var(--accent); }
+.crm-nav button.on { background: var(--panel); color: var(--fg); border: 1px solid var(--border); }
+.page[hidden] { display: none !important; }
+.note { font-size: 12px; color: var(--fg-muted); margin: 0 0 10px; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr)); gap: 12px; margin-bottom: 12px; }
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 16px; min-width: 0; }
+.tile-label { font-size: 11px; color: var(--fg-muted); text-transform: uppercase; letter-spacing: .05em; }
+.tile-num { font-family: var(--font-display); font-weight: 400; font-size: 2.1rem; line-height: 1.15; font-variant-numeric: tabular-nums; margin: 2px 0; }
+.tile-sub { font-size: 12px; color: var(--fg-muted); }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: 12px; margin-bottom: 12px; }
+.card-title { font-size: 14px; font-weight: 600; margin: 0 0 2px; }
+.card-note { font-size: 12px; color: var(--fg-muted); margin: 0 0 10px; }
+.chart { position: relative; min-height: 200px; }
+.chart svg { display: block; }
+.crm text { font-family: var(--font-ui); }
+.tip { position: absolute; background: var(--panel); border: 1px solid var(--border); border-radius: 7px; box-shadow: 0 4px 14px rgba(0,0,0,.14); padding: 4px 8px; font-size: 12px; pointer-events: none; white-space: nowrap; z-index: 5; }
+.tip .tip-head { color: var(--fg-muted); }
+.fail { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 120px; color: var(--fg-muted); font-size: 12px; text-align: center; padding-inline: 8px; }
+.fail::before { content: ""; width: .375rem; height: .375rem; border-radius: 50%; background: var(--bad); flex: none; }
+.empty { color: var(--fg-muted); font-size: 12px; padding: 8px 0; }
+.tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
+.tools input[type=search] { flex: 1 1 14rem; max-width: 22rem; min-width: 0; background: var(--bg); color: var(--fg); border: 1px solid var(--border); border-radius: 7px; padding: 6px 10px; font: inherit; }
+.count { font-size: 12px; color: var(--fg-muted); font-variant-numeric: tabular-nums; }
+.btn { all: unset; cursor: pointer; background: var(--accent); color: var(--bg); font-weight: 600; padding: 6px 14px; border-radius: 7px; }
+.btn:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+.btn[disabled] { opacity: .5; cursor: default; }
+.btn-quiet { all: unset; cursor: pointer; color: var(--fg-muted); border: 1px solid var(--border); padding: 5px 12px; border-radius: 7px; }
+.btn-quiet:hover { color: var(--fg); }
+.btn-quiet:focus-visible { outline: 2px solid var(--accent); }
+.btn-danger { all: unset; cursor: pointer; color: var(--bad); border: 1px solid var(--border); padding: 5px 12px; border-radius: 7px; }
+.btn-danger:focus-visible { outline: 2px solid var(--bad); }
+.table-box { max-height: max(420px, 55vh); overflow: auto; border: 1px solid var(--border); border-radius: 8px; }
+.crm table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.crm th { position: sticky; top: 0; background: var(--panel); text-align: left; border-bottom: 1px solid var(--border); padding: 0; z-index: 2; }
+.crm th .sort, .crm th .plain { all: unset; display: block; width: 100%; padding: 6px 10px; font-size: 11.5px; font-weight: 600; color: var(--fg-muted); white-space: nowrap; }
+.crm th .sort { cursor: pointer; }
+.crm th .sort:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.crm th[aria-sort] .sort { color: var(--fg); }
+.crm td { padding: 6px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.crm tbody tr:last-child td { border-bottom: 0; }
+.crm td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.crm a { color: inherit; text-decoration-color: var(--border); text-underline-offset: 2px; }
+.muted { color: var(--fg-muted); }
+.pill { display: inline-block; border: 1px solid currentColor; border-radius: 999px; padding: 1px 8px; font-size: 11.5px; white-space: nowrap; }
+.st-warn { color: var(--warn); } .st-bad { color: var(--bad); } .st-ok { color: var(--ok); } .st-muted { color: var(--fg-muted); } .st-plain { color: var(--fg); }
+.xl-box { max-height: 540px; }
+.xl { min-width: 1360px; }
+.xl th, .xl td { border-right: 1px solid var(--border); }
+.xl th:last-child, .xl td:last-child { border-right: 0; }
+.xl th:first-child, .xl td:first-child { position: sticky; left: 0; background: var(--panel); border-right: 1px solid var(--border); }
+.xl th:first-child { z-index: 3; }
+.xl td:first-child { z-index: 1; }
+.xl td { white-space: nowrap; max-width: 15rem; overflow: hidden; text-overflow: ellipsis; }
+.xl td.wrap { white-space: normal; min-width: 14rem; max-width: 20rem; overflow: visible; text-overflow: clip; }
+[contenteditable] { outline: none; border-radius: 4px; }
+[contenteditable]:hover { box-shadow: inset 0 0 0 1px var(--border); cursor: text; }
+[contenteditable]:focus { background: var(--bg); box-shadow: inset 0 0 0 2px var(--accent); }
+.licell { display: flex; gap: 6px; align-items: center; }
+.licell .ecell { flex: 1; min-width: 7rem; max-width: 13rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.licell .ecell:focus { overflow: visible; text-overflow: clip; white-space: normal; word-break: break-all; }
+.licell a { flex: none; }
+.iconbtn { all: unset; cursor: pointer; flex: none; font-size: 11px; font-weight: 600; color: var(--accent); border: 1px solid var(--border); border-radius: 6px; padding: 2px 7px; white-space: nowrap; }
+.iconbtn:hover { border-color: var(--accent); }
+.iconbtn:focus-visible { outline: 2px solid var(--accent); }
+.iconbtn[disabled] { opacity: .5; cursor: default; }
+.rowdel { all: unset; cursor: pointer; color: var(--fg-muted); padding: 0 4px; border-radius: 5px; font-size: 12px; white-space: nowrap; }
+.rowdel:hover, .rowdel.armed { color: var(--bad); }
+.rowdel:focus-visible { outline: 2px solid var(--bad); }
+.btn-remove { all: unset; cursor: pointer; font-size: 11px; font-weight: 600; color: #fff; background: var(--bad); border-radius: 6px; padding: 3px 10px; }
+.btn-remove:hover { filter: brightness(1.1); }
+.btn-remove:focus-visible { outline: 2px solid var(--bad); outline-offset: 2px; }
+.confirm-wrap { position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 60; display: flex; align-items: center; justify-content: center; padding: 16px; }
+.confirm { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px; width: min(400px, 100%); }
+.confirm h3 { margin: 0 0 6px; font-size: 15px; font-family: var(--font-display); }
+.confirm p { margin: 0 0 14px; color: var(--fg-muted); font-size: 13px; }
+.confirm-foot { display: flex; gap: 8px; justify-content: flex-end; }
+.confirm-foot .btn-remove { padding: 6px 14px; font-size: 13px; }
+tr.draft td, .xl tr.draft td:first-child { background: color-mix(in srgb, var(--accent) 7%, var(--panel)); }
+.skel { position: relative; color: transparent !important; }
+.skel::after { content: ""; position: absolute; inset: 20% 40% 20% 0; border-radius: 6px; background: var(--border); }
+.feed-meta { font-size: 11.5px; color: var(--fg-muted); margin-top: 8px; }
+.confirm.shot { width: min(460px, 100%); }
+.shot-open { display: inline-block; margin: 0 0 12px; }
+.shot-drop { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; min-height: 130px; border: 1.5px dashed var(--border); border-radius: 10px; padding: 12px; margin-bottom: 10px; color: var(--fg-muted); font-size: 13px; text-align: center; cursor: pointer; }
+.shot-drop.over, .shot-drop:focus-within { border-color: var(--accent); color: var(--fg); }
+.shot-drop img { max-width: 100%; max-height: 190px; border-radius: 6px; border: 1px solid var(--border); }
+.shot-drop input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.shot-status { min-height: 1.3em; margin: 0 0 12px; font-size: 12.5px; color: var(--fg-muted); }
+.shot-status.err { color: var(--bad); }
+</style>
+
+<div class="crm">
+  <header class="crm-header">
+    <h1>Internship CRM</h1>
+    <p class="takeaway" id="takeaway">&nbsp;</p>
+  </header>
+
+  <nav class="crm-nav" aria-label="Sections">
+    <button data-go="overview" class="on">Overview</button>
+    <button data-go="pipeline">Applications</button>
+    <button data-go="network">Network</button>
+    <button data-go="activity">Live activity</button>
+  </nav>
+
+  <div class="page" id="overview">
+    <section class="tiles">
+      <div class="card"><div class="tile-label">Applications</div><div class="tile-num skel" data-t="total">—</div><div class="tile-sub">roles in the pipeline</div></div>
+      <div class="card"><div class="tile-label">In interview</div><div class="tile-num skel" data-t="interview">—</div><div class="tile-sub">interview stage now</div></div>
+      <div class="card"><div class="tile-label">Applied</div><div class="tile-num skel" data-t="applied">—</div><div class="tile-sub">awaiting a reply</div></div>
+      <div class="card"><div class="tile-label">Rejected</div><div class="tile-num skel" data-t="rejected">—</div><div class="tile-sub">closed so far</div></div>
+      <div class="card"><div class="tile-label">Contacts</div><div class="tile-num skel" data-t="contacts">—</div><div class="tile-sub">people in the network</div></div>
+      <div class="card"><div class="tile-label">Follow-ups</div><div class="tile-num skel" data-t="flagged">—</div><div class="tile-sub">open next steps</div></div>
+    </section>
+    <section class="grid">
+      <div class="card">
+        <h2 class="card-title">Next steps</h2>
+        <p class="card-note">Open actions on the pipeline</p>
+        <div class="table-box"><table id="appq-table">
+          <thead><tr><th><span class="plain">Company</span></th><th><span class="plain">Next step</span></th><th><span class="plain">Stage</span></th></tr></thead>
+          <tbody></tbody></table></div>
+        <div class="empty" id="appq-empty" hidden>No open next steps.</div>
+      </div>
+      <div class="card">
+        <h2 class="card-title">Network follow-up queue</h2>
+        <p class="card-note">Contacts flagged for follow-up or with an open next step, longest-waiting first</p>
+        <div class="table-box"><table id="queue-table">
+          <thead><tr><th><span class="plain">Name</span></th><th><span class="plain">Company</span></th><th><span class="plain">Next step</span></th><th><span class="plain">Last contact</span></th></tr></thead>
+          <tbody></tbody></table></div>
+        <div class="empty" id="queue-empty" hidden>Nothing flagged right now.</div>
+      </div>
+    </section>
+  </div>
+
+  <div class="page" id="pipeline" hidden>
+    <p class="note">Summer 2027 internship pipeline — edit statuses here or tell Claude and they update everywhere</p>
+    <section class="card" style="margin-bottom:12px;">
+      <h2 class="card-title">Pipeline by stage</h2>
+      <p class="card-note">Every tracked role by its current stage</p>
+      <div class="chart" id="chart-status"></div>
+    </section>
+    <section class="card" style="margin-bottom:12px;">
+      <h2 class="card-title">All applications</h2>
+      <div class="tools">
+        <input type="search" id="app-search" placeholder="Search company, role, status…" aria-label="Search applications">
+        <span class="count" id="app-count"></span>
+        <button class="btn" id="add-app-btn" hidden>Add application</button>
+      </div>
+      <div class="table-box"><table id="apps-table">
+        <thead><tr>
+          <th></th>
+          <th><button class="sort" data-k="company">Company</button></th>
+          <th><button class="sort" data-k="role">Role</button></th>
+          <th><button class="sort" data-k="status">Stage</button></th>
+          <th><button class="sort" data-k="updated">Last update</button></th>
+          <th><button class="sort" data-k="next_step">Next step</button></th>
+          <th><button class="sort" data-k="location">Location</button></th>
+          <th><button class="sort" data-k="notes">Notes</button></th>
+        </tr></thead>
+        <tbody></tbody></table></div>
+    </section>
+  </div>
+
+  <div class="page" id="network" hidden>
+    <p class="note">Your networking tracker — add people here or paste a LinkedIn profile to autofill</p>
+    <section class="grid">
+      <div class="card">
+        <h2 class="card-title">Contacts by company</h2>
+        <p class="card-note">Company names normalized for capitalization</p>
+        <div class="chart" id="chart-companies"></div>
+      </div>
+      <div class="card">
+        <h2 class="card-title">Outreach cadence</h2>
+        <p class="card-note">Contacts whose last touchpoint falls in each week</p>
+        <div class="chart" id="chart-weeks"></div>
+      </div>
+    </section>
+    <section class="card" style="margin-bottom:12px;">
+      <h2 class="card-title">All contacts</h2>
+      <p class="card-note">AG Grid test — double-click a cell to edit (Enter saves and moves down, like Excel); drag column edges to resize, drag headers to reorder</p>
+      <div class="tools">
+        <input type="search" id="contact-search" placeholder="Search name, company, notes…" aria-label="Search contacts">
+        <span class="count" id="contact-count"></span>
+        <span class="count" id="grid-msg" aria-live="polite"></span>
+        <button class="btn" id="add-contact-btn">Add contact</button>
+      </div>
+      <div id="contacts-grid" style="height: max(480px, calc(100vh - 320px));"></div>
+    </section>
+  </div>
+
+  <div class="page" id="activity" hidden>
+    <p class="note">Pulled live from your Gmail and your UT Outlook inbox each time this page is open. The first load asks you to allow each connector for this page.</p>
+    <section class="card" style="margin-bottom:12px;">
+      <h2 class="card-title">Application email updates</h2>
+      <p class="card-note">Confirmations, interview invites and decisions from the last 180 days, matched to your pipeline where possible</p>
+      <div id="act-wrap">
+        <div class="table-box"><table id="act-table">
+          <thead><tr><th><span class="plain">Date</span></th><th><span class="plain">Company</span></th><th><span class="plain">Email</span></th><th><span class="plain">Preview</span></th></tr></thead>
+          <tbody></tbody></table></div>
+      </div>
+      <div class="feed-meta" id="act-meta"></div>
+    </section>
+    <section class="card" style="margin-bottom:12px;">
+      <h2 class="card-title">LinkedIn activity</h2>
+      <p class="card-note">New messages, InMail replies and connection updates from the last 90 days, matched to tracked contacts where possible</p>
+      <div id="li-wrap">
+        <div class="table-box"><table id="li-table">
+          <thead><tr><th><span class="plain">Date</span></th><th><span class="plain">Activity</span></th><th><span class="plain">Who</span></th><th><span class="plain">Tracked contact</span></th><th><span class="plain">Notification</span></th></tr></thead>
+          <tbody></tbody></table></div>
+      </div>
+      <div class="feed-meta" id="li-meta"></div>
+    </section>
+    <section class="card">
+      <h2 class="card-title">UT inbox updates (Outlook)</h2>
+      <p class="card-note">Recruiting mail from your UT Austin inbox over the last 60 days — ATS updates, recruiter notes and coffee-chat replies, matched to your pipeline and contacts (newsletters filtered out)</p>
+      <div id="ut-wrap">
+        <div class="table-box"><table id="ut-table">
+          <thead><tr><th><span class="plain">Date</span></th><th><span class="plain">Company</span></th><th><span class="plain">Email</span></th><th><span class="plain">Preview</span></th></tr></thead>
+          <tbody></tbody></table></div>
+      </div>
+      <div class="feed-meta" id="ut-meta"></div>
+    </section>
+  </div>
+</div>
+
+<script>
+'use strict';
+const $ = (s) => document.querySelector(s);
+const fmtDate = d3.utcFormat('%b %-d');
+const fmtN = d3.format(',');
+
+const APP_QUERY = '{"thank you for applying" "thank you for your interest" "application received" "your application" "application update" "successfully submitted" subject:interview subject:assessment subject:offer} -category:promotions -from:linkedin.com -from:ripplematch.com -from:simplify.jobs -from:handshake.com -from:virginia.edu -from:dartmouth.edu -from:chicagobooth.edu -from:mit.edu -from:utexas.edu -from:usajudo.us -from:therangeaustin.com -from:breakinto.tech -from:venmo.com -from:rentcafe.com -from:pods.com -from:quora.com -from:qemailserver.com -from:ccsend.com -from:petscreening.com -from:mycommunityvip.com -from:edx.org -from:bigoakskennel@gmail.com newer_than:180d';
+const LI_QUERY = '{from:hit-reply@linkedin.com from:invitations@linkedin.com from:messaging-digest-noreply@linkedin.com} newer_than:90d';
+const UT_QUERY = 'internship OR interview OR application OR recruiter OR "coffee chat"';
+
+const state = {
+  db: null, dbMissing: false, dbReady: { contacts: false, applications: false },
+  contacts: [], applications: [],
+  mcp: null, mcpMissing: false,
+  sample: null, sampleImages: false,
+  appMail: { rows: null, err: null, at: null },
+  liMail: { rows: null, err: null, at: null },
+  utMail: { rows: null, err: null, at: null },
+  canWrite: null,
+};
+
+const canon = (s) => (s || '').trim().split(/\s+/).filter(Boolean).map((w) => (w.length <= 2 && w === w.toUpperCase()) ? w : w[0].toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+const slugify = (s) => (s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 80) || 'x';
+
+/* ---------- small builders ---------- */
+function textCell(v, cls) { const td = document.createElement('td'); if (cls) td.className = cls; td.textContent = v || ''; return td; }
+function dateCell(v) { const td = document.createElement('td'); td.className = 'num'; if (v) td.textContent = fmtDate(new Date(v + 'T00:00:00Z')); else { td.textContent = '—'; td.classList.add('muted'); } return td; }
+function linkCell(text, href, cls) {
+  const td = document.createElement('td'); if (cls) td.className = cls;
+  if (href) { const a = document.createElement('a'); a.href = href; a.textContent = text || ''; td.appendChild(a); }
+  else td.textContent = text || '';
+  return td;
+}
+function pillCell(text, cls) { const td = document.createElement('td'); const p = document.createElement('span'); p.className = 'pill ' + cls; p.textContent = text || ''; td.appendChild(p); return td; }
+function failLine(el, msg) { const d = document.createElement('div'); d.className = 'fail'; d.append(msg || 'Failed to load'); el.replaceChildren(d); }
+
+const APP_PILL = { Interview: 'st-ok', Applied: 'st-plain', 'Materials ready': 'st-warn', Rejected: 'st-bad', Networking: 'st-muted', Watching: 'st-muted', Researching: 'st-muted', Offer: 'st-ok' };
+
+/* ---------- charts ---------- */
+function getTip(box) {
+  let t = box.querySelector('.tip');
+  if (!t) { t = document.createElement('div'); t.className = 'tip'; t.hidden = true; box.appendChild(t); }
+  return t;
+}
+function showTip(box, ev, head, body) {
+  const t = getTip(box);
+  const h = document.createElement('div'); h.className = 'tip-head'; h.textContent = head;
+  const b = document.createElement('div'); b.textContent = body;
+  t.replaceChildren(h, b); t.hidden = false;
+  const r = box.getBoundingClientRect();
+  let x = ev.clientX - r.left + 10, y = ev.clientY - r.top - 8;
+  x = Math.min(x, box.clientWidth - t.offsetWidth - 4);
+  y = Math.max(0, Math.min(y, box.clientHeight - t.offsetHeight - 4));
+  t.style.left = x + 'px'; t.style.top = y + 'px';
+}
+function hideTip(box) { const t = box.querySelector('.tip'); if (t) t.hidden = true; }
+
+function drawBars(box, rows, label, colorOf) {
+  if (box.closest('[hidden]')) return;
+  if (!rows) { box.classList.add('skel'); box.replaceChildren(); return; }
+  box.classList.remove('skel');
+  if (!rows.length) { box.replaceChildren(); const d = document.createElement('div'); d.className = 'empty'; d.textContent = 'No data yet.'; box.appendChild(d); return; }
+  const w = Math.max(box.clientWidth || 320, 280);
+  const rowH = 26, mTop = 4;
+  const h = mTop + rows.length * rowH + 6;
+  const svg = d3.create('svg').attr('viewBox', `0 0 ${w} ${h}`).attr('width', '100%');
+  box.replaceChildren(svg.node());
+  box.style.minHeight = h + 'px';
+  const probe = svg.append('text').attr('font-size', 12);
+  let labelW = 0;
+  for (const r of rows) { probe.text(label(r)); labelW = Math.max(labelW, probe.node().getComputedTextLength()); }
+  probe.text(fmtN(d3.max(rows, (r) => r.n)));
+  const valW = probe.node().getComputedTextLength() + 10;
+  probe.remove();
+  labelW = Math.min(labelW + 10, w * 0.42);
+  const x = d3.scaleLinear([0, d3.max(rows, (r) => r.n)], [labelW, w - valW - 4]);
+  const row = svg.selectAll('g.r').data(rows).join('g').attr('transform', (d, i) => `translate(0,${mTop + i * rowH})`);
+  row.append('text').attr('x', labelW - 8).attr('y', rowH / 2).attr('dy', '0.35em').attr('text-anchor', 'end').attr('font-size', 12).attr('fill', 'var(--fg)').text(label);
+  row.append('rect').attr('x', labelW).attr('y', (rowH - 16) / 2).attr('width', (d) => Math.max(x(d.n) - labelW, 2)).attr('height', 16).attr('rx', 4).attr('fill', colorOf);
+  row.append('text').attr('x', (d) => x(d.n) + 6).attr('y', rowH / 2).attr('dy', '0.35em').attr('font-size', 12).attr('fill', 'var(--fg-muted)').style('font-variant-numeric', 'tabular-nums').text((d) => fmtN(d.n));
+}
+
+function drawStatus() {
+  const apps = state.dbReady.applications ? state.applications : null;
+  let rows = null;
+  if (apps) {
+    const order = ['Researching', 'Watching', 'Networking', 'Materials ready', 'Applied', 'Interview', 'Offer', 'Rejected'];
+    const m = new Map();
+    for (const a of apps) m.set(a.status, (m.get(a.status) || 0) + 1);
+    rows = order.filter((s) => m.has(s)).map((status) => ({ status, n: m.get(status) }));
+  }
+  const muted = ['Researching', 'Watching', 'Networking', 'Materials ready'];
+  drawBars($('#chart-status'), rows, (d) => d.status, (d) =>
+    d.status === 'Rejected' ? 'var(--bad)' : muted.includes(d.status) ? 'var(--chart-grid)' : 'var(--chart1)');
+}
+
+function drawCompanies() {
+  const cs = state.dbReady.contacts ? state.contacts : null;
+  let rows = null;
+  if (cs) {
+    const m = new Map();
+    for (const r of cs) { const c = r.company ? canon(r.company) : 'Unlisted'; m.set(c, (m.get(c) || 0) + 1); }
+    rows = [...m.entries()].map(([company, n]) => ({ company, n })).sort((a, b) => b.n - a.n || a.company.localeCompare(b.company));
+  }
+  drawBars($('#chart-companies'), rows, (d) => d.company, () => 'var(--chart1)');
+}
+
+function drawWeeks() {
+  const box = $('#chart-weeks');
+  if (box.closest('[hidden]')) return;
+  const cs = state.dbReady.contacts ? state.contacts : null;
+  if (!cs) { box.classList.add('skel'); box.replaceChildren(); return; }
+  box.classList.remove('skel');
+  const m = new Map();
+  for (const r of cs) {
+    if (!r.last_contact) continue;
+    const d = new Date(r.last_contact + 'T00:00:00Z');
+    d.setUTCDate(d.getUTCDate() - (d.getUTCDay() + 6) % 7);
+    const k = d.toISOString().slice(0, 10);
+    m.set(k, (m.get(k) || 0) + 1);
+  }
+  const rows = [...m.entries()].map(([week, n]) => ({ date: new Date(week + 'T00:00:00Z'), week, n })).sort((a, b) => (a.week < b.week ? -1 : 1));
+  if (!rows.length) { const d = document.createElement('div'); d.className = 'empty'; d.textContent = 'No dated touchpoints yet.'; box.replaceChildren(d); return; }
+  const w = Math.max(box.clientWidth || 320, 280);
+  const h = 230, mL = 6, mR = 6, mTop = 18, mB = 24;
+  const svg = d3.create('svg').attr('viewBox', `0 0 ${w} ${h}`).attr('width', '100%');
+  box.replaceChildren(svg.node());
+  box.style.minHeight = h + 'px';
+  const x = d3.scaleBand(rows.map((r) => r.week), [mL, w - mR]).padding(0.3);
+  const y = d3.scaleLinear([0, d3.max(rows, (r) => r.n)], [h - mB, mTop]);
+  svg.selectAll('line.grid').data(y.ticks(3)).join('line')
+    .attr('x1', mL).attr('x2', w - mR).attr('y1', (d) => y(d)).attr('y2', (d) => y(d))
+    .attr('stroke', 'var(--chart-grid)').attr('stroke-width', 1);
+  svg.append('line').attr('x1', mL).attr('x2', w - mR).attr('y1', h - mB).attr('y2', h - mB).attr('stroke', 'var(--border)').attr('stroke-width', 1);
+  const barW = Math.min(x.bandwidth(), 32);
+  const bx = (d) => x(d.week) + (x.bandwidth() - barW) / 2;
+  svg.selectAll('rect.bar').data(rows).join('rect')
+    .attr('x', bx).attr('y', (d) => y(d.n)).attr('width', barW).attr('height', (d) => h - mB - y(d.n))
+    .attr('rx', 4).attr('fill', 'var(--chart2)')
+    .on('pointermove', (ev, d) => showTip(box, ev, 'Week of ' + fmtDate(d.date), d.n + (d.n === 1 ? ' touchpoint' : ' touchpoints')))
+    .on('pointerleave', () => hideTip(box));
+  svg.selectAll('text.val').data(rows).join('text')
+    .attr('x', (d) => bx(d) + barW / 2).attr('y', (d) => y(d.n) - 5)
+    .attr('text-anchor', 'middle').attr('font-size', 11).attr('fill', 'var(--fg-muted)')
+    .style('font-variant-numeric', 'tabular-nums').text((d) => d.n);
+  const labelEvery = Math.max(1, Math.ceil(rows.length * 46 / (w - mL - mR)));
+  svg.selectAll('text.tick').data(rows.filter((d, i) => i % labelEvery === 0)).join('text')
+    .attr('x', (d) => x(d.week) + x.bandwidth() / 2).attr('y', h - mB + 15)
+    .attr('text-anchor', 'middle').attr('font-size', 11).attr('fill', 'var(--fg-muted)').text((d) => fmtDate(d.date));
+}
+
+/* ---------- tiles + queues ---------- */
+function renderTiles() {
+  const apps = state.dbReady.applications ? state.applications : null;
+  const cs = state.dbReady.contacts ? state.contacts : null;
+  const vals = {
+    total: apps && apps.length,
+    interview: apps && apps.filter((a) => a.status === 'Interview').length,
+    applied: apps && apps.filter((a) => a.status === 'Applied').length,
+    rejected: apps && apps.filter((a) => a.status === 'Rejected').length,
+    contacts: cs && cs.length,
+    flagged: cs && cs.filter((r) => (r.followup || '').toLowerCase() === 'yes' || r.todo).length,
+  };
+  document.querySelectorAll('.tile-num').forEach((el) => {
+    const v = vals[el.dataset.t];
+    if (v === null || v === undefined) { if (state.dbMissing) { el.classList.remove('skel'); el.textContent = '—'; } return; }
+    el.classList.remove('skel');
+    el.textContent = fmtN(v);
+  });
+  const tk = $('#takeaway');
+  if (state.dbMissing) tk.textContent = 'Sign in to claude.ai to load the CRM data.';
+  else if (apps && cs) tk.textContent = `${vals.total} applications in play — ${vals.interview} at interview, ${vals.applied} awaiting a reply, ${vals.rejected} closed. ${vals.contacts} contacts, ${vals.flagged} with open follow-ups.`;
+}
+
+function renderAppQueue() {
+  const tbody = $('#appq-table tbody'), empty = $('#appq-empty');
+  if (!state.dbReady.applications) { tbody.replaceChildren(); empty.hidden = true; return; }
+  const rank = { Interview: 0, Applied: 1, 'Materials ready': 2, Networking: 3, Watching: 4, Researching: 5 };
+  const rows = state.applications.filter((a) => a.next_step)
+    .sort((a, b) => (rank[a.status] ?? 9) - (rank[b.status] ?? 9));
+  empty.hidden = rows.length > 0;
+  tbody.replaceChildren(...rows.map((r) => {
+    const tr = document.createElement('tr');
+    tr.append(textCell(r.company), textCell(r.next_step), pillCell(r.status, APP_PILL[r.status] || 'st-muted'));
+    return tr;
+  }));
+}
+
+function renderQueue() {
+  const tbody = $('#queue-table tbody'), empty = $('#queue-empty');
+  if (!state.dbReady.contacts) { tbody.replaceChildren(); empty.hidden = true; return; }
+  const rows = state.contacts
+    .filter((r) => (r.followup || '').toLowerCase() === 'yes' || r.todo)
+    .sort((a, b) => ((a.last_contact || '0') < (b.last_contact || '0') ? -1 : 1));
+  empty.hidden = rows.length > 0;
+  tbody.replaceChildren(...rows.map((r) => {
+    const tr = document.createElement('tr');
+    tr.append(textCell(r.name), textCell(canon(r.company), 'muted'), textCell(r.todo), dateCell(r.last_contact));
+    return tr;
+  }));
+}
+
+/* ---------- applications table ---------- */
+const appSort = { k: null, dir: 1 };
+function renderApps() {
+  const tbody = $('#apps-table tbody'), count = $('#app-count');
+  if (!state.dbReady.applications) { tbody.replaceChildren(); count.textContent = state.dbMissing ? 'sign in to load' : ''; return; }
+  const q = ($('#app-search').value || '').trim().toLowerCase();
+  let rows = state.applications.slice();
+  if (q) rows = rows.filter((r) => [r.company, r.role, r.status, r.location, r.next_step, r.notes].some((v) => (v || '').toLowerCase().includes(q)));
+  if (appSort.k) {
+    const k = appSort.k;
+    rows.sort((a, b) => {
+      const va = a[k] || '', vb = b[k] || '';
+      if (!va && vb) return 1;
+      if (va && !vb) return -1;
+      return va < vb ? -appSort.dir : va > vb ? appSort.dir : 0;
+    });
+  }
+  count.textContent = q || appSort.k ? `showing ${rows.length} of ${state.applications.length}` : `${state.applications.length} applications`;
+  tbody.replaceChildren(...rows.map((r) => {
+    const tr = document.createElement('tr');
+    const editTd = document.createElement('td');
+    tr.append(
+      editTd,
+      textCell(r.company),
+      textCell(r.role, 'muted'),
+      pillCell(r.status, APP_PILL[r.status] || 'st-muted'),
+      dateCell(r.updated),
+      textCell(r.next_step),
+      textCell(r.location, 'muted'),
+      textCell(r.notes, 'muted'),
+    );
+    return tr;
+  }));
+}
+
+/* ---------- contacts grid (AG Grid) ---------- */
+const ALL_FIELDS = ['name', 'email', 'phone', 'linkedin', 'title', 'company', 'website', 'how_met', 'todo', 'last_contact', 'format', 'followup', 'notes'];
+let gridApi = null;
+let drafts = [];
+let draftSeq = 0;
+let gridPending = false;
+let msgTimer = null;
+
+function gridMsg(text, isErr) {
+  const el = $('#grid-msg');
+  el.textContent = text || '';
+  el.style.color = isErr ? 'var(--bad)' : 'var(--fg-muted)';
+  clearTimeout(msgTimer);
+  if (text) msgTimer = setTimeout(() => { el.textContent = ''; }, 7000);
+}
+function saveErr(e) {
+  if (e && e.code === 'quota_exceeded') return 'Storage is full — remove some entries first.';
+  if (e && e.code === 'invalid_argument') return 'You don’t have edit access to this CRM.';
+  return 'Couldn’t save' + (e && e.message ? ' — ' + e.message : '') + '.';
+}
+function cleanRow(r) {
+  const out = {};
+  for (const k of ALL_FIELDS) { const v = typeof r[k] === 'string' ? r[k].trim() : r[k]; if (v) out[k] = v; }
+  if (r.created) out.created = r.created;
+  return out;
+}
+function nameFromSlugText(slug) {
+  return decodeURIComponent(slug).replace(/-\d+$/, '').split('-')
+    .filter((w) => w && !/^\d+$/.test(w) && !/^[0-9a-f]{6,}$/.test(w))
+    .map((w) => w[0] ? w[0].toUpperCase() + w.slice(1) : w).join(' ');
+}
+const BROWSER_UNAVAILABLE = ['server_not_connected', 'capability_disabled', 'capability_removed', 'not_granted', 'not_in_manifest', 'consent_required'];
+
+/* ---------- screenshot autofill (works in any browser tab) ---------- */
+function shotErr(e) {
+  switch (e && e.code) {
+    case 'not_granted': return 'Claude isn’t allowed for this page — allow it when asked, or from the page’s permissions menu.';
+    case 'images_unavailable': return 'This view can’t send images to Claude.';
+    case 'image_rejected': return 'That file can’t be read — use a PNG or JPG screenshot under 20 MB.';
+    case 'rate_limited': return 'Too many requests just now — wait a moment, then try again.';
+    case 'cancelled': return 'Stopped.';
+    default: return 'Couldn’t read the screenshot' + (e && e.message ? ' — ' + e.message : '') + '.';
+  }
+}
+function askScreenshot(url, nameGuess) {
+  return new Promise((resolve) => {
+    if (!state.sample || !state.sampleImages) { resolve(null); return; }
+    let blob = null, busy = false, ctl = null;
+    const wrap = document.createElement('div');
+    wrap.className = 'confirm-wrap';
+    const card = document.createElement('div');
+    card.className = 'confirm shot';
+    card.setAttribute('role', 'dialog');
+    card.setAttribute('aria-modal', 'true');
+    card.setAttribute('aria-labelledby', 'shot-h');
+    const h = document.createElement('h3');
+    h.id = 'shot-h';
+    h.textContent = 'Fill from a profile screenshot';
+    const p = document.createElement('p');
+    p.textContent = 'This browser tab can’t open LinkedIn for you. Open the profile, screenshot the top of it (name, headline and current job), then paste it here, drop it, or choose the file.';
+    const open = document.createElement('a');
+    open.className = 'btn-quiet shot-open';
+    open.href = url.startsWith('http') ? url : 'https://' + url;
+    open.target = '_blank';
+    open.rel = 'noopener';
+    open.textContent = 'Open profile ↗';
+    const drop = document.createElement('label');
+    drop.className = 'shot-drop';
+    const hint = document.createElement('span');
+    hint.textContent = 'Paste (Ctrl+V / ⌘V), drop, or click to choose a screenshot';
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/png,image/jpeg,image/webp,image/gif';
+    const img = document.createElement('img');
+    img.alt = 'Screenshot preview';
+    img.hidden = true;
+    drop.append(input, img, hint);
+    const status = document.createElement('p');
+    status.className = 'shot-status';
+    status.setAttribute('aria-live', 'polite');
+    const foot = document.createElement('div');
+    foot.className = 'confirm-foot';
+    const skip = document.createElement('button');
+    skip.className = 'btn-quiet';
+    skip.textContent = 'Skip';
+    const read = document.createElement('button');
+    read.className = 'btn';
+    read.textContent = 'Read screenshot';
+    read.disabled = true;
+    foot.append(skip, read);
+    card.append(h, p, open, drop, status, foot);
+    wrap.appendChild(card);
+    document.body.appendChild(wrap);
+
+    const say = (t, err) => { status.textContent = t || ''; status.classList.toggle('err', !!err); };
+    const take = (file) => {
+      if (!file || !/^image\//.test(file.type)) { say('That isn’t an image — use a screenshot (PNG or JPG).', true); return; }
+      blob = file;
+      if (img.src) URL.revokeObjectURL(img.src);
+      img.src = URL.createObjectURL(file);
+      img.hidden = false;
+      hint.textContent = 'Paste or drop another to replace it';
+      read.disabled = false;
+      say('');
+      read.focus();
+    };
+    const onPaste = (ev) => {
+      const files = [...((ev.clipboardData && ev.clipboardData.files) || [])].filter((f) => /^image\//.test(f.type));
+      if (files.length) { ev.preventDefault(); take(files[0]); }
+    };
+    const onKey = (ev) => { if (ev.key === 'Escape' && !busy) finish(null); };
+    const finish = (val) => {
+      if (ctl) ctl.abort();
+      document.removeEventListener('paste', onPaste);
+      document.removeEventListener('keydown', onKey);
+      if (img.src) URL.revokeObjectURL(img.src);
+      wrap.remove();
+      resolve(val);
+    };
+    document.addEventListener('paste', onPaste);
+    document.addEventListener('keydown', onKey);
+    input.addEventListener('change', () => take(input.files && input.files[0]));
+    drop.addEventListener('dragover', (ev) => { ev.preventDefault(); drop.classList.add('over'); });
+    drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+    drop.addEventListener('drop', (ev) => { ev.preventDefault(); drop.classList.remove('over'); take(ev.dataTransfer.files && ev.dataTransfer.files[0]); });
+    wrap.addEventListener('click', (ev) => { if (ev.target === wrap && !busy) finish(null); });
+    skip.addEventListener('click', () => finish(null));
+    read.addEventListener('click', async () => {
+      if (!blob || busy) return;
+      busy = true; read.disabled = true;
+      say('Reading the screenshot…');
+      ctl = new AbortController();
+      const prompt = 'The image is a screenshot of a LinkedIn profile page. Read the person\'s details exactly as shown and reply with JSON only, in this shape: {"name": "", "title": "", "company": ""}.\n' +
+        '- name: their full name as displayed, without pronouns, connection degree, or credentials after a comma.\n' +
+        '- title: their current job title, from the headline or the top entry under Experience.\n' +
+        '- company: their current employer.\n' +
+        'Use "" for anything not visible. The profile URL suggests the name is roughly "' + String(nameGuess || '').replace(/"/g, '') + '". If the image is not a LinkedIn profile, return all three as "".';
+      try {
+        const res = await state.sample.json(prompt, { images: [blob], modelTier: 'quick', signal: ctl.signal });
+        const pick = (k) => (res && typeof res[k] === 'string' ? res[k].trim().slice(0, 140) : '');
+        const got = { name: pick('name'), title: pick('title'), company: pick('company') };
+        if (!got.name && !got.title && !got.company) {
+          say('Couldn’t find a name, title or company in that image — try a screenshot of the top of the profile.', true);
+          busy = false; read.disabled = false; ctl = null;
+          return;
+        }
+        ctl = null;
+        finish(got);
+      } catch (e) {
+        busy = false; ctl = null; read.disabled = false;
+        say(shotErr(e), true);
+      }
+    });
+    drop.focus();
+    input.focus();
+  });
+}
+
+/* ---------- Crustdata lookup (any browser tab; 1 Crustdata credit per found profile) ---------- */
+function parseCrust(res) {
+  const pl = res && res.payload;
+  if (Array.isArray(pl)) return pl;
+  if (pl && typeof pl === 'object') return Array.isArray(pl.result) ? pl.result : [pl];
+  let text = typeof pl === 'string' ? pl : '';
+  if (!text && res && Array.isArray(res.content)) text = res.content.map((c) => (c && c.text) || '').join('\n');
+  const i = text.indexOf('['), j = text.lastIndexOf(']');
+  if (i >= 0 && j > i) { try { const a = JSON.parse(text.slice(i, j + 1)); if (Array.isArray(a)) return a; } catch (e) { /* fall through */ } }
+  return extractJsonObjects(text);
+}
+async function crustLookup(url) {
+  const full = url.startsWith('http') ? url : 'https://' + url;
+  const res = await state.mcp.callTool('Crustdata', 'crustdata_people_enrich_v2', {
+    params: { professional_network_profile_urls: [full], fields: ['basic_profile', 'experience.employment_details.current'] },
+  }, { cache: false });
+  const hit = parseCrust(res).find((e) => e && Array.isArray(e.matches) && e.matches.length);
+  if (!hit) return null;
+  const pd = hit.matches[0].person_data || {};
+  const bp = pd.basic_profile || {};
+  const cur = ((pd.experience || {}).employment_details || {}).current || [];
+  const job = cur.find((j) => j && j.is_default) || cur[0] || {};
+  const clip = (v) => (typeof v === 'string' ? v.trim().slice(0, 160) : '');
+  return { name: clip(bp.name), title: clip(bp.current_title || job.title), company: clip(job.name) };
+}
+
+async function liLookup(url) {
+  const m = url.match(/linkedin\.com\/in\/([^/?#]+)/i);
+  if (!m) throw { msgText: 'Put a linkedin.com/in/… URL in the LinkedIn cell first.' };
+  const out = { name: nameFromSlugText(m[1]) };
+  if (!state.mcp) { out.needsShot = true; return out; }
+  // 1) Crustdata: works in any tab once the viewer has the Crustdata connector.
+  try {
+    const c = await crustLookup(url);
+    if (c && (c.name || c.title || c.company)) return { ...c, source: 'Crustdata' };
+  } catch (e) {
+    console.warn('Crustdata lookup unavailable:', e && e.code, e && e.message);
+  }
+  // 2) The Claude desktop app's browser, then 3) a screenshot.
+  try {
+    await state.mcp.callTool('host:claude_browser', 'navigate', { url: url.startsWith('http') ? url : 'https://' + url });
+  } catch (e) {
+    // Outside the Claude desktop app (or with the browser not allowed) the page can't open
+    // LinkedIn itself, so the viewer gives it a screenshot of the profile instead.
+    if (e && BROWSER_UNAVAILABLE.includes(e.code)) { out.needsShot = true; return out; }
+    throw e;
+  }
+  await new Promise((r) => setTimeout(r, 4000));
+  const res = await state.mcp.callTool('host:claude_browser', 'get_page_text', { max_chars: 20000 }, { cache: false });
+  const text = typeof res.payload === 'string' ? res.payload : ((res.content || []).map((c) => c.text || '').join('\n'));
+  const lines = text.split('\n').map((s) => s.trim()).filter(Boolean);
+  const first = out.name.toLowerCase().split(' ')[0];
+  const ni = lines.findIndex((l) => l.length < 60 && l.toLowerCase().includes(first) && !/linkedin|sign in|join now/i.test(l));
+  if (ni >= 0) {
+    out.name = lines[ni].replace(/\s*\(.*?\)\s*$/, '').replace(/\s*[,·|].*$/, '').trim() || out.name;
+    const headline = lines.slice(ni + 1, ni + 4).find((l) => l.length > 5 && l.length < 140 && !/followers|connections|contact info|degree/i.test(l)) || '';
+    if (headline) {
+      const parts = headline.split(/\s+(?:at|@)\s+/i);
+      out.title = parts[0].trim();
+      if (parts[1]) out.company = parts[1].split(/[|,·]/)[0].trim();
+    }
+  } else {
+    out.partial = 'Opened the profile but couldn’t parse it (maybe a login wall) — name guessed from the URL.';
+  }
+  return out;
+}
+function liErrMsg(e) {
+  if (e && e.msgText) return e.msgText;
+  const code = (e && e.code) || 'unknown';
+  if (code === 'server_not_connected' || code === 'capability_disabled') return 'This tab can’t open LinkedIn directly — use the screenshot option, or open the CRM in the Claude desktop app.';
+  if (code === 'not_in_manifest' || code === 'consent_required') return 'The browser connector isn’t allowed for this page — allow it when asked, or re-enable it in the page’s permissions menu. [' + code + ']';
+  if (code === 'cancelled') return 'Autofill cancelled — the app’s confirmation was declined.';
+  return 'Couldn’t read the profile — are you signed in to LinkedIn in the app’s browser pane? [' + code + ']';
+}
+async function saveRowAg(data, revert) {
+  if (!state.db) { gridMsg('Data store unavailable in this view.', true); if (revert) revert(); return; }
+  try {
+    await state.db.collection('contacts').doc(data._id).set(cleanRow({ ...data }));
+    gridMsg('Saved.');
+  } catch (e) { gridMsg(saveErr(e), true); if (revert) revert(); }
+}
+
+async function createFromDraft(data) {
+  const row = cleanRow({ ...data });
+  if (!row.name) return;
+  const dup = state.contacts.find((c) => (c.name || '').toLowerCase() === row.name.toLowerCase());
+  if (dup) { gridMsg(`“${dup.name}” is already in the CRM — edit that row instead.`, true); return; }
+  if (!state.db) { gridMsg('Data store unavailable in this view.', true); return; }
+  if (!row.last_contact) row.last_contact = new Date().toLocaleDateString('en-CA');
+  row.created = new Date().toISOString();
+  try {
+    await state.db.collection('contacts').doc(slugify(row.name)).set(row);
+    drafts = drafts.filter((d) => d !== data);
+    if (gridApi) gridApi.applyTransaction({ remove: [data] });
+    gridMsg('Added ' + row.name + '.');
+  } catch (e) { gridMsg(saveErr(e), true); }
+}
+
+async function autofillRowAg(p, btn) {
+  const data = p.data;
+  const url = (data.linkedin || '').trim();
+  btn.disabled = true;
+  gridMsg('Reading the profile…');
+  try {
+    const got = await liLookup(url);
+    if (got.needsShot) {
+      gridMsg('');
+      const shot = await askScreenshot(url, (data.name || '').trim() || got.name);
+      if (shot) {
+        for (const k of ['name', 'title', 'company']) if (shot[k]) got[k] = shot[k];
+      } else {
+        got.partial = state.sample && state.sampleImages
+          ? 'Name guessed from the URL — add a profile screenshot to fill title and company.'
+          : 'Name guessed from the URL — reading title and company needs Claude access for this page or the Claude desktop app.';
+      }
+    }
+    const fills = {};
+    for (const k of ['name', 'title', 'company']) if (got[k] && !(data[k] || '').trim()) fills[k] = got[k];
+    // a name that was only guessed from the URL earlier gets replaced by the real one
+    const slug = (url.match(/linkedin\.com\/in\/([^/?#]+)/i) || [])[1];
+    if (got.source && got.name && slug && (data.name || '').trim().toLowerCase() === nameFromSlugText(slug).toLowerCase() && data.name !== got.name) fills.name = got.name;
+    if (data._draft && !(data.last_contact || '').trim()) fills.last_contact = new Date().toLocaleDateString('en-CA');
+    Object.assign(data, fills);
+    p.api.applyTransaction({ update: [data] });
+    if (data._draft) {
+      if (data.name) await createFromDraft(data);
+      else gridMsg(got.partial || 'Filled what was found — add a name to save the row.');
+    } else if (Object.keys(fills).length) {
+      await saveRowAg(data);
+      gridMsg('Filled ' + Object.keys(fills).sort((a, b) => ((['name', 'title', 'company'].indexOf(a) + 1) || 9) - ((['name', 'title', 'company'].indexOf(b) + 1) || 9)).join(', ') + (got.source ? ' from ' + got.source : '') + ' — check the row.' + (got.partial ? ' ' + got.partial : ''));
+    } else {
+      gridMsg(got.partial || 'Nothing to fill — name, title and company are already set.');
+    }
+  } catch (e) { gridMsg(liErrMsg(e), true); }
+  btn.disabled = false;
+}
+
+function liCellRenderer(p) {
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'display:flex;gap:6px;align-items:center;height:100%;';
+  const span = document.createElement('span');
+  span.style.cssText = 'flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;';
+  span.textContent = p.value || '';
+  wrap.appendChild(span);
+  if ((p.value || '').startsWith('http')) {
+    const a = document.createElement('a');
+    a.href = p.value;
+    a.textContent = '↗';
+    a.setAttribute('aria-label', 'Open LinkedIn profile');
+    a.addEventListener('click', (ev) => ev.stopPropagation());
+    wrap.appendChild(a);
+  }
+  if (state.canWrite !== false) {
+    const b = document.createElement('button');
+    b.className = 'iconbtn';
+    b.textContent = 'Autofill';
+    b.setAttribute('aria-label', 'Autofill this row from its LinkedIn profile');
+    b.addEventListener('click', (ev) => { ev.stopPropagation(); autofillRowAg(p, b); });
+    wrap.appendChild(b);
+  }
+  return wrap;
+}
+
+function confirmRemove(name, onConfirm) {
+  const wrap = document.createElement('div');
+  wrap.className = 'confirm-wrap';
+  const card = document.createElement('div');
+  card.className = 'confirm';
+  card.setAttribute('role', 'dialog');
+  card.setAttribute('aria-label', 'Confirm removal');
+  const h = document.createElement('h3');
+  h.textContent = 'Remove ' + name + '?';
+  const p = document.createElement('p');
+  p.textContent = 'This removes the contact from the CRM everywhere. There’s no undo on the page — Claude can re-add them if needed.';
+  const foot = document.createElement('div');
+  foot.className = 'confirm-foot';
+  const cancel = document.createElement('button');
+  cancel.className = 'btn-quiet';
+  cancel.textContent = 'Cancel';
+  const yes = document.createElement('button');
+  yes.className = 'btn-remove';
+  yes.textContent = 'Remove';
+  const onKey = (ev) => { if (ev.key === 'Escape') close(); };
+  const close = () => { wrap.remove(); document.removeEventListener('keydown', onKey); };
+  cancel.addEventListener('click', close);
+  wrap.addEventListener('click', (ev) => { if (ev.target === wrap) close(); });
+  document.addEventListener('keydown', onKey);
+  yes.addEventListener('click', () => { close(); onConfirm(); });
+  foot.append(cancel, yes);
+  card.append(h, p, foot);
+  wrap.appendChild(card);
+  document.body.appendChild(wrap);
+  cancel.focus();
+}
+
+function actionsRenderer(p) {
+  const data = p.data;
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'display:flex;gap:4px;align-items:center;height:100%;';
+  if (state.canWrite === false) return wrap;
+  if (data._draft) {
+    const drop = document.createElement('button');
+    drop.className = 'rowdel';
+    drop.textContent = '✕';
+    drop.setAttribute('aria-label', 'Discard new contact');
+    drop.addEventListener('click', () => { drafts = drafts.filter((d) => d !== data); p.api.applyTransaction({ remove: [data] }); });
+    wrap.appendChild(drop);
+  } else {
+    const del = document.createElement('button');
+    del.className = 'btn-remove';
+    del.textContent = 'Remove';
+    del.setAttribute('aria-label', 'Remove ' + (data.name || 'contact'));
+    del.addEventListener('click', () => {
+      confirmRemove(data.name || 'this contact', async () => {
+        try { await state.db.collection('contacts').doc(data._id).delete(); gridMsg('Removed ' + (data.name || 'contact') + '.'); }
+        catch (e) { gridMsg(saveErr(e), true); }
+      });
+    });
+    wrap.appendChild(del);
+  }
+  return wrap;
+}
+
+function isDarkTheme() {
+  const explicit = document.documentElement.getAttribute('data-theme');
+  if (explicit) return explicit === 'dark';
+  return window.matchMedia ? matchMedia('(prefers-color-scheme: dark)').matches : false;
+}
+function buildGridTheme() {
+  const dark = isDarkTheme();
+  let theme = agGrid.themeQuartz;
+  if (dark && agGrid.colorSchemeDark) theme = theme.withPart(agGrid.colorSchemeDark);
+  return theme.withParams(dark ? {
+    accentColor: '#5bbd97',
+    backgroundColor: '#1d211d',
+    foregroundColor: '#e8eae4',
+    borderColor: '#313630',
+    fontFamily: '"IBM Plex Sans", system-ui, sans-serif',
+    fontSize: 13,
+    headerFontSize: 12,
+  } : {
+    accentColor: '#1f6f54',
+    backgroundColor: '#ffffff',
+    foregroundColor: '#20241f',
+    borderColor: '#e2e0d8',
+    fontFamily: '"IBM Plex Sans", system-ui, sans-serif',
+    fontSize: 13,
+    headerFontSize: 12,
+  });
+}
+function watchGridTheme() {
+  const apply = () => { if (gridApi) gridApi.setGridOption('theme', buildGridTheme()); };
+  if (window.matchMedia) matchMedia('(prefers-color-scheme: dark)').addEventListener('change', apply);
+  new MutationObserver(apply).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+}
+
+function initGrid() {
+  if (gridApi || typeof agGrid === 'undefined') return;
+  const el = document.getElementById('contacts-grid');
+  if (!el) return;
+  if (agGrid.ModuleRegistry && agGrid.AllCommunityModule) agGrid.ModuleRegistry.registerModules([agGrid.AllCommunityModule]);
+  const theme = buildGridTheme();
+  const col = (field, headerName, width, extra) => Object.assign({ field, headerName, width }, extra || {});
+  gridApi = agGrid.createGrid(el, {
+    theme,
+    getRowId: (p) => p.data._id || p.data._tmp,
+    columnDefs: [
+      col('name', 'Name', 170, { pinned: 'left' }),
+      { headerName: '', colId: 'actions', width: 104, editable: false, sortable: false, resizable: false, pinned: 'left', cellRenderer: actionsRenderer },
+      col('email', 'Email', 190),
+      col('phone', 'Phone', 110),
+      col('linkedin', 'LinkedIn', 250, { cellRenderer: liCellRenderer }),
+      col('title', 'Job Title', 230),
+      col('company', 'Company', 140),
+      col('website', 'Website', 160),
+      col('how_met', 'How We Met', 210),
+      col('todo', 'To-Do', 230),
+      col('last_contact', 'Last Contact', 125),
+      col('format', 'Format', 110),
+      col('followup', 'Follow-up?', 110, { cellEditor: 'agSelectCellEditor', cellEditorParams: { values: ['', 'Yes', 'No'] } }),
+      col('notes', 'Notes', 280),
+    ],
+    defaultColDef: { editable: state.canWrite !== false, resizable: true, sortable: true },
+    rowData: [],
+    enterNavigatesVertically: true,
+    enterNavigatesVerticallyAfterEdit: true,
+    stopEditingWhenCellsLoseFocus: true,
+    onCellValueChanged: (e) => {
+      const data = e.data;
+      const field = e.colDef.field;
+      if (!field) return;
+      const v = typeof e.newValue === 'string' ? e.newValue.trim() : (e.newValue || '');
+      if (field === 'last_contact' && v && !/^\d{4}-\d{2}-\d{2}$/.test(v)) {
+        gridMsg('Dates are YYYY-MM-DD.', true);
+        data[field] = e.oldValue || '';
+        e.api.applyTransaction({ update: [data] });
+        return;
+      }
+      data[field] = v || '';
+      if (data._draft) {
+        if (field === 'name' && v) createFromDraft(data);
+        return;
+      }
+      if (field === 'name' && !v) {
+        gridMsg('Name can’t be empty.', true);
+        data.name = e.oldValue;
+        e.api.applyTransaction({ update: [data] });
+        return;
+      }
+      saveRowAg(data, () => { data[field] = e.oldValue || ''; e.api.applyTransaction({ update: [data] }); });
+    },
+    onCellEditingStopped: () => { if (gridPending) renderContacts(); },
+    onModelUpdated: () => {
+      if (!gridApi) return;
+      const shown = gridApi.getDisplayedRowCount();
+      const total = state.contacts.length + drafts.length;
+      $('#contact-count').textContent = shown === total ? `${state.contacts.length} contacts` : `showing ${shown} of ${state.contacts.length}`;
+    },
+  });
+  watchGridTheme();
+}
+
+function renderContacts() {
+  initGrid();
+  if (!gridApi) {
+    if (typeof agGrid === 'undefined') $('#contact-count').textContent = 'grid library didn’t load';
+    return;
+  }
+  if (gridApi.getEditingCells && gridApi.getEditingCells().length) { gridPending = true; return; }
+  gridPending = false;
+  if (!state.dbReady.contacts) {
+    if (state.dbMissing) $('#contact-count').textContent = 'sign in to load';
+    return;
+  }
+  const rows = state.contacts.slice()
+    .sort((a, b) => (a.created || '') < (b.created || '') ? -1 : 1)
+    .map((r) => ({ ...r }));
+  gridApi.setGridOption('rowData', drafts.concat(rows));
+}
+
+/* ---------- live feeds ---------- */
+function feedFixCopy(err, server) {
+  if (!err) return '';
+  const s = server || 'Gmail';
+  switch (err.code) {
+    case 'needs_reauth': return s + ' needs reconnecting — claude.ai Settings → Connectors.';
+    case 'server_not_connected': return 'Add the ' + s + ' connector in claude.ai Settings → Connectors to light this up.';
+    case 'selection_required': return 'Choose which ' + s + ' connector this page should use (prompt from claude.ai).';
+    case 'not_in_manifest': case 'consent_required': return s + ' isn’t allowed for this page in this view. Allow it from the page’s permissions to light this up.';
+    case 'blocked_by_policy': return 'Your organization’s policy blocks ' + s + ' here.';
+    case 'approval_required': return 'This call needs per-use approval, which artifacts don’t support yet.';
+    case 'not_granted': case 'capability_disabled': case 'capability_removed': return 'Live email feeds aren’t available in this view.';
+    default: return 'Couldn’t reach ' + s + ' just now' + (err.message ? ' — ' + err.message : '') + '.';
+  }
+}
+function renderFeed(wrapSel, tableSel, metaSel, feed, build, server) {
+  const wrap = $(wrapSel), meta = $(metaSel);
+  const tbody = $(tableSel + ' tbody');
+  if (feed.rows) {
+    const box = wrap.querySelector('.table-box');
+    if (box) box.hidden = false;
+    const old = wrap.querySelector('.fail'); if (old) old.remove();
+    tbody.replaceChildren(...feed.rows.map(build));
+    meta.textContent = (feed.rows.length ? feed.rows.length + ' items' : 'Nothing in this window') +
+      (feed.at ? ' · as of ' + new Date(feed.at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : '');
+    if (feed.err) meta.textContent += ' · ' + feedFixCopy(feed.err, server);
+    return;
+  }
+  tbody.replaceChildren();
+  const box = wrap.querySelector('.table-box');
+  if (feed.err) {
+    if (box) box.hidden = true;
+    let f = wrap.querySelector('.fail');
+    if (!f) { f = document.createElement('div'); f.className = 'fail'; wrap.appendChild(f); }
+    f.textContent = feedFixCopy(feed.err, server);
+    meta.textContent = '';
+  } else {
+    if (box) box.hidden = false;
+    meta.textContent = 'Loading from Gmail…';
+  }
+}
+function renderActivity() {
+  const companies = [...new Set(state.applications.map((a) => a.company))];
+  renderFeed('#act-wrap', '#act-table', '#act-meta', state.appMail, (u) => {
+    const hay = (u.sender + ' ' + u.subject + ' ' + u.snippet).toLowerCase();
+    const company = companies.find((n) => hay.includes(n.toLowerCase())) || '';
+    const tr = document.createElement('tr');
+    tr.append(dateCell(u.date), textCell(company, 'muted'), linkCell(u.subject, u.link), textCell(u.snippet, 'muted'));
+    return tr;
+  }, 'Gmail');
+}
+function extractJsonObjects(text) {
+  const out = [];
+  let depth = 0, start = -1, inStr = false, esc = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inStr) {
+      if (esc) esc = false;
+      else if (c === '\\') esc = true;
+      else if (c === '"') inStr = false;
+      continue;
+    }
+    if (c === '"') { if (depth > 0) inStr = true; continue; }
+    if (c === '{') { if (depth === 0) start = i; depth++; }
+    else if (c === '}') {
+      depth--;
+      if (depth === 0 && start >= 0) {
+        try { out.push(JSON.parse(text.slice(start, i + 1))); } catch (e) { /* skip */ }
+        start = -1;
+      }
+    }
+  }
+  return out;
+}
+
+function parseOutlook(result) {
+  let objs = [];
+  const pl = result.payload;
+  if (Array.isArray(pl)) objs = pl.slice();
+  else if (pl && typeof pl === 'object') objs = [pl];
+  else if (typeof pl === 'string') objs = extractJsonObjects(pl);
+  if (result.content) {
+    for (const b of result.content) {
+      if (b && b.type === 'text' && typeof b.text === 'string') objs = objs.concat(extractJsonObjects(b.text));
+    }
+  }
+  const SKIP = ['joinhandshake.com', 'econnect.utexas.edu', '@mccombs.utexas.edu', 'noreply@utexas.edu', 'reply@utexas.edu'];
+  const seen = new Set();
+  const rows = [];
+  for (const o of objs) {
+    if (!o || !o.subject || !o.receivedDateTime) continue;
+    const key = o.id || o.internetMessageId || (o.subject + o.receivedDateTime);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const sender = String(o.sender || '').toLowerCase();
+    if (SKIP.some((s) => sender.includes(s))) continue;
+    rows.push({
+      date: String(o.receivedDateTime).slice(0, 10),
+      sender: String(o.sender || ''),
+      senderName: cleanTxt(o.senderName || ''),
+      subject: cleanTxt(o.subject),
+      snippet: cleanTxt(o.summary || ''),
+      link: o.webLink || '',
+    });
+  }
+  rows.sort((a, b) => (a.date < b.date ? 1 : -1));
+  return rows;
+}
+
+function renderUtFeed() {
+  const companies = [...new Set(
+    state.applications.map((a) => a.company)
+      .concat(state.contacts.map((c) => c.company))
+      .filter(Boolean)
+  )];
+  renderFeed('#ut-wrap', '#ut-table', '#ut-meta', state.utMail, (u) => {
+    const hay = (u.sender + ' ' + u.senderName + ' ' + u.subject + ' ' + u.snippet).toLowerCase();
+    const company = companies.find((n) => hay.includes(n.toLowerCase())) || '';
+    const tr = document.createElement('tr');
+    tr.append(dateCell(u.date), textCell(company ? canon(company) : '', 'muted'), linkCell(u.subject, u.link), textCell(u.snippet, 'muted'));
+    return tr;
+  }, 'Microsoft 365');
+}
+
+function renderLinkedInFeed() {
+  renderFeed('#li-wrap', '#li-table', '#li-meta', state.liMail, (u) => {
+    const subj = u.subject || '';
+    let kind = 'Notification', who = '';
+    let m;
+    if ((m = subj.match(/^(.+?) accepted your invitation/))) { kind = 'Connection accepted'; who = m[1]; }
+    else if ((m = subj.match(/^(.+?) just messaged you/))) { kind = 'New message'; who = m[1]; }
+    else if (/^Message replied/.test(subj)) kind = 'InMail reply';
+    else if (/want to connect|invitation is waiting/i.test(subj)) { kind = 'Invitation received'; who = (u.snippet || '').split(',')[0].trim(); }
+    const match = who ? ((state.contacts.find((c) => (c.name || '').toLowerCase().startsWith(who.toLowerCase() + ' ')) || state.contacts.find((c) => (c.name || '').toLowerCase() === who.toLowerCase()) || {}).name || '') : '';
+    const tr = document.createElement('tr');
+    tr.append(dateCell(u.date), textCell(kind), textCell(who, 'muted'), textCell(match), linkCell(subj, u.link, 'muted'));
+    return tr;
+  }, 'Gmail');
+}
+
+function cleanTxt(s) {
+  return String(s || '')
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n)))
+    .replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+    .replace(/[͏﻿​]/g, '').replace(/\s+/g, ' ').trim();
+}
+function parseThreads(payload) {
+  let a = payload;
+  if (typeof a === 'string') { try { a = JSON.parse(a); } catch { a = {}; } }
+  a = a || {};
+  return (a.threads || []).map((t) => {
+    const ms = t.messages || [];
+    const m = ms[ms.length - 1] || {};
+    return { date: String(m.date || '').slice(0, 10), sender: cleanTxt(m.sender), subject: cleanTxt(m.subject), snippet: cleanTxt(m.snippet), link: t.viewUrl || '' };
+  });
+}
+
+/* ---------- render root ---------- */
+function renderAll() {
+  renderTiles();
+  renderAppQueue();
+  renderQueue();
+  drawStatus();
+  renderApps();
+  drawCompanies();
+  drawWeeks();
+  renderContacts();
+  renderActivity();
+  renderLinkedInFeed();
+  renderUtFeed();
+}
+
+/* ---------- tabs ---------- */
+const PAGES = ['overview', 'pipeline', 'network', 'activity'];
+const navBtns = document.querySelectorAll('.crm-nav button[data-go]');
+function openTab(id) {
+  if (!PAGES.includes(id)) id = 'overview';
+  PAGES.forEach((p) => { document.getElementById(p).hidden = p !== id; });
+  navBtns.forEach((b) => b.classList.toggle('on', b.dataset.go === id));
+  renderAll();
+}
+navBtns.forEach((btn) => btn.addEventListener('click', () => { openTab(btn.dataset.go); history.replaceState(null, '', '#' + btn.dataset.go); }));
+openTab(location.hash.slice(1) || 'overview');
+
+$('#contact-search').addEventListener('input', () => { if (gridApi) gridApi.setGridOption('quickFilterText', $('#contact-search').value); });
+$('#app-search').addEventListener('input', renderApps);
+function bindSort(tableSel, sortState, render) {
+  document.querySelectorAll(tableSel + ' th .sort[data-k]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const k = btn.dataset.k;
+      if (sortState.k === k) { if (sortState.dir === 1) sortState.dir = -1; else { sortState.k = null; sortState.dir = 1; } }
+      else { sortState.k = k; sortState.dir = 1; }
+      document.querySelectorAll(tableSel + ' th').forEach((th) => th.removeAttribute('aria-sort'));
+      if (sortState.k) btn.closest('th').setAttribute('aria-sort', sortState.dir === 1 ? 'ascending' : 'descending');
+      render();
+    });
+  });
+}
+bindSort('#apps-table', appSort, renderApps);
+window.addEventListener('resize', () => { drawStatus(); drawCompanies(); drawWeeks(); });
+
+/* ---------- add contact (draft row) ---------- */
+$('#add-contact-btn').addEventListener('click', () => {
+  if (document.getElementById('network').hidden) openTab('network');
+  const d = { _draft: true, _tmp: 'draft-' + (++draftSeq) };
+  drafts.unshift(d);
+  if (gridApi) {
+    gridApi.applyTransaction({ add: [d], addIndex: 0 });
+    gridApi.ensureIndexVisible(0);
+    gridApi.startEditingCell({ rowIndex: 0, colKey: 'name' });
+  }
+});
+
+/* ---------- capabilities boot ---------- */
+(async () => {
+  const db = await (window.__demoClaude || window.claude).use('db');
+  if (!db) { state.dbMissing = true; renderAll(); return; }
+  state.db = db;
+  db.collection('contacts').onSnapshot((snap) => {
+    state.contacts = snap.docs.map((d) => ({ _id: d.id, ...d.data() }));
+    state.dbReady.contacts = true;
+    renderAll();
+  }, () => { state.dbMissing = true; renderAll(); });
+  db.collection('applications').onSnapshot((snap) => {
+    state.applications = snap.docs.map((d) => ({ _id: d.id, ...d.data() }));
+    state.dbReady.applications = true;
+    renderAll();
+  }, () => { renderAll(); });
+})();
+
+(async () => {
+  const sample = await (window.__demoClaude || window.claude).use('sample');
+  if (!sample) return;
+  state.sample = sample;
+  try { const lim = await sample.limits(); state.sampleImages = !!(lim && lim.images); } catch (e) { state.sampleImages = false; }
+})();
+
+(async () => {
+  const user = await (window.__demoClaude || window.claude).use('user');
+  state.canWrite = user ? await user.can('data.write') : null;
+  if (state.canWrite === false) { $('#add-contact-btn').hidden = true; }
+  renderAll();
+})();
+
+(async () => {
+  const mcp = await (window.__demoClaude || window.claude).use('mcp');
+  if (!mcp) {
+    state.mcpMissing = true;
+    state.appMail.err = { code: 'capability_disabled' };
+    state.liMail.err = { code: 'capability_disabled' };
+    state.utMail.err = { code: 'capability_disabled' };
+    renderAll();
+    return;
+  }
+  state.mcp = mcp;
+  const watch = (server, tool, args, slot, parse) => {
+    mcp.watchTool(server, tool, args, (ev) => {
+      if (ev.type === 'data') {
+        slot.rows = parse(ev.result);
+        slot.err = null;
+        slot.at = (ev.result.cache && ev.result.cache.storedAt) || Date.now();
+      } else {
+        const denial = ['needs_reauth', 'server_not_connected', 'selection_required', 'blocked_by_policy', 'approval_required', 'not_in_manifest', 'not_granted', 'capability_disabled', 'capability_removed', 'consent_required'].includes(ev.error.code);
+        if (denial) { slot.rows = null; slot.at = null; slot.err = ev.error; }
+        else slot.err = ev.error; // transient: keep last-good rows, note the hiccup
+      }
+      renderActivity();
+      renderLinkedInFeed();
+      renderUtFeed();
+    }, { cache: { staleTime: 60000 } });
+  };
+  watch('Gmail', 'search_threads', { query: APP_QUERY, pageSize: 50, view: 'THREAD_VIEW_MINIMAL' }, state.appMail, (r) => parseThreads(r.payload));
+  watch('Gmail', 'search_threads', { query: LI_QUERY, pageSize: 50, view: 'THREAD_VIEW_MINIMAL' }, state.liMail, (r) => parseThreads(r.payload));
+  watch('Microsoft 365', 'outlook_email_search', { query: UT_QUERY, afterDateTime: '60 days ago', limit: 25 }, state.utMail, parseOutlook);
+})();
+</script>
+
+</body></html>

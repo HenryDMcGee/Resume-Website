@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Internship Watch — demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.demo-bar{position:sticky;top:0;z-index:50;display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;padding:8px 16px;background:#0e1626;border-bottom:1px solid rgba(255,255,255,.12);color:#dbe6ff;font:600 13px/1.4 "Atkinson Hyperlegible",system-ui,sans-serif}
+.demo-bar b{color:#ffd36e;letter-spacing:.12em}
+#searchNowBtn[disabled]{opacity:.55;cursor:not-allowed}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="top-primary">
+      <div class="brand">Internship Watch</div>
+      <button class="ghost accent" id="searchNowBtn" type="button" aria-busy="false">
+        <span class="spinner" id="searchNowSpinner" hidden aria-hidden="true"></span>
+        <span id="searchNowLabel">Search now</span>
+      </button>
+    </div>
+    <div class="tools">
+      <button class="ghost" id="openTitles" type="button">Titles</button>
+      <button class="ghost" id="openCompanies" type="button">Companies</button>
+      <button class="ghost" id="openLocations" type="button">Locations</button>
+      <button class="ghost" id="openBudgets" type="button">Budgets</button>
+    </div>
+  </div>
+  <p class="search-status" id="searchStatus" role="status" aria-live="polite"></p>
+
+  <header class="hero">
+    <h1><span class="dim" id="dateLine"></span><span id="headline">Loading postings</span></h1>
+    <p id="subline"></p>
+  </header>
+
+  <div class="tabs" role="tablist" aria-label="Postings">
+    <button class="tab" role="tab" id="tabToday" aria-selected="true" type="button">New today<span class="n" id="nToday"></span></button>
+    <button class="tab" role="tab" id="tabEarlier" aria-selected="false" type="button">Earlier<span class="n" id="nEarlier"></span></button>
+    <button class="tab" role="tab" id="tabArchived" aria-selected="false" type="button">Archived<span class="n" id="nArchived"></span></button>
+    <div class="tab-more">
+      <button class="tab" id="tabMore" type="button" aria-haspopup="menu" aria-expanded="false">More</button>
+      <div class="more-menu" id="moreMenu" role="menu" aria-label="More views" hidden>
+        <button class="more-item" role="menuitem" id="moreSources" type="button">Sources<span class="n" id="nSources"></span></button>
+        <button class="more-item" role="menuitem" id="moreAnalytics" type="button">Analytics</button>
+        <button class="more-item" role="menuitem" id="moreProposals" type="button">Proposals</button>
+        <button class="more-item" role="menuitem" id="moreFeedback" type="button">Feedback<span class="n" id="nFeedback"></span></button>
+      </div>
+    </div>
+  </div>
+  <input class="filter" id="filter" type="search" placeholder="Filter by company, title, or location" aria-label="Filter postings">
+
+  <ul class="list" id="list" aria-live="polite"></ul>
+
+  <section id="sourcesView" hidden>
+    <div class="panel" id="careersPagesPanel" hidden>
+      <h2>Careers pages</h2>
+      <p class="sub" style="margin:0 0 10px;color:var(--muted);font-size:14px">Companies read through their own careers page instead of a job feed. Flagged after 3 failed checks in a row -- see Proposals for a replacement page to approve.</p>
+      <ul id="careersPagesList"></ul>
+    </div>
+    <div id="srcGroups"></div>
+    <div class="panel">
+      <h2>Add a site</h2>
+      <p class="sub" style="margin:0 0 10px;color:var(--muted);font-size:14px">It's included in the next search.</p>
+      <div class="addform">
+        <input id="addName" type="text" placeholder="Site name" aria-label="Site name">
+        <input id="addUrl" type="url" placeholder="https://" aria-label="Site address">
+        <button class="btn primary" id="addBtn" type="button">Add site</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="analyticsView" hidden>
+    <div id="analyticsEmpty" class="empty" hidden>
+      <strong>Nothing to show yet</strong>
+      <span>Analytics fill in once the daily search has run.</span>
+    </div>
+    <div id="analyticsBody" hidden>
+      <div class="panel">
+        <h2>Usage against budget</h2>
+        <p class="sub" id="usageSummary"></p>
+        <ul id="usageByStep"></ul>
+      </div>
+      <div class="panel">
+        <h2>Coverage per company</h2>
+        <ul id="coverageList"></ul>
+      </div>
+      <div class="panel">
+        <h2>Source quality</h2>
+        <ul id="sourceQualityList"></ul>
+      </div>
+      <div class="panel">
+        <h2>First to find</h2>
+        <ul id="firstToFindList"></ul>
+      </div>
+      <div class="panel">
+        <h2>Postings per title</h2>
+        <ul id="perTitleList"></ul>
+      </div>
+      <div class="panel">
+        <h2>Verification methods</h2>
+        <p class="sub" id="unconfirmedSummary"></p>
+        <ul id="verificationList"></ul>
+      </div>
+      <div class="panel">
+        <h2>Pruned postings</h2>
+        <ul id="prunedList"></ul>
+      </div>
+      <div class="panel">
+        <h2>Alert history</h2>
+        <ul id="alertHistoryList"></ul>
+      </div>
+      <div class="panel">
+        <h2>Postings per source</h2>
+        <ul id="postingsPerSourceList"></ul>
+      </div>
+      <div class="panel">
+        <h2>Careers pages per run</h2>
+        <ul id="careersPagesPerRunList"></ul>
+      </div>
+      <div class="panel">
+        <h2>Discovery searches per run</h2>
+        <ul id="discoverySearchesPerRunList"></ul>
+      </div>
+      <div class="panel">
+        <h2>Recent runs</h2>
+        <ul id="recentRunsList"></ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="proposalsView" hidden>
+    <div id="proposalsEmpty" class="empty" hidden>
+      <strong>Nothing pending</strong>
+      <span>Company and source changes Claude suggests will show up here for you to approve or reject.</span>
+    </div>
+    <div id="proposalsList"></div>
+  </section>
+
+  <section id="feedbackView" hidden>
+    <div id="feedbackEmpty" class="empty" hidden>
+      <strong>No feedback yet</strong>
+      <span>Reports from the public job board show up here.</span>
+    </div>
+    <div id="feedbackList"></div>
+  </section>
+
+  <div class="status" id="status"></div>
+
+  <div class="foot">
+    <p>Postings stay here until you delete them. Deleted postings move to Archived and can be restored. Closed postings are hidden, not deleted.</p>
+  </div>
+</div>
+
+<dialog id="titlesDialog" aria-labelledby="titlesTitle">
+  <div class="sheet titles-sheet">
+    <h2 id="titlesTitle">Titles</h2>
+    <p>Editing opens or updates a pull request that changes only <code>config/titles.json</code>. Nothing changes until you review and merge it.</p>
+    <p id="titlesPending" class="pending-link" hidden><a id="titlesPendingLink" target="_blank" rel="noopener noreferrer">Pending change: see the open pull request</a></p>
+
+    <h3>Add a title</h3>
+    <div class="addform">
+      <input id="titlesNewTitle" type="text" placeholder="New title" aria-label="New title" maxlength="120">
+      <select id="titlesNewGroup" aria-label="Group for the new title"></select>
+      <button class="btn primary" id="titlesAddBtn" type="button">Add</button>
+    </div>
+    <input id="titlesNewGroupName" type="text" placeholder="New group name" aria-label="New group name" hidden>
+    <div class="msg" id="titlesAddMsg"></div>
+
+    <input class="filter" id="titlesFilter" type="search" placeholder="Filter titles" aria-label="Filter titles">
+
+    <div class="titles-scroll">
+      <div id="titlesBody"></div>
+
+      <details id="titlesJsonDetails">
+        <summary>Edit as JSON</summary>
+        <textarea id="titlesJson" spellcheck="false" style="min-height:28vh" aria-label="Titles as JSON"></textarea>
+        <div class="row">
+          <button class="btn" id="titlesJsonApply" type="button">Apply JSON</button>
+        </div>
+      </details>
+    </div>
+
+    <div class="row titles-footer">
+      <span class="msg" id="titlesUnsaved"></span>
+      <span class="spacer"></span>
+      <button class="btn primary" id="titlesSave" type="button">Save (opens a pull request)</button>
+      <button class="btn" id="titlesClose" type="button">Close</button>
+    </div>
+    <div class="msg" id="titlesMsg"></div>
+  </div>
+</dialog>
+
+<dialog id="companiesDialog" aria-labelledby="companiesTitle">
+  <div class="sheet">
+    <h2 id="companiesTitle">Companies</h2>
+    <p>The top 100 tech companies worldwide by market value, plus anything you've pinned.</p>
+
+    <div id="reviewSection" hidden>
+      <h3>Needs a decision</h3>
+      <p style="margin-top:-4px">Not in the current ranking. Pin to keep watching, or remove.</p>
+      <div id="reviewList"></div>
+    </div>
+
+    <h3>On the list</h3>
+    <p class="sub" style="margin-top:-4px">Check now runs a search for just that company, up to 5 times a day total.</p>
+    <div id="activeList"></div>
+
+    <div id="removedSection" hidden>
+      <button class="btn" id="toggleRemoved" type="button">Show removed companies</button>
+      <div id="removedList" hidden></div>
+    </div>
+
+    <h3>Add a company</h3>
+    <div class="addform">
+      <input id="companyName" type="text" placeholder="Company name" aria-label="Company name">
+      <input id="companyUrl" type="url" placeholder="Careers link (optional)" aria-label="Careers link">
+      <button class="btn primary" id="companyAddBtn" type="button">Add</button>
+    </div>
+
+    <h3>Paste a list</h3>
+    <p style="margin-top:-4px">One company per line. Add a careers link after a comma to detect its feed.</p>
+    <textarea id="pasteText" spellcheck="false" style="min-height:16vh"></textarea>
+    <div class="row">
+      <button class="btn" id="pastePreviewBtn" type="button">Preview</button>
+    </div>
+    <div id="pastePreviewResult"></div>
+
+    <div class="row">
+      <span class="spacer"></span>
+      <button class="btn" id="companiesClose" type="button">Close</button>
+    </div>
+    <div class="msg" id="companiesMsg"></div>
+  </div>
+</dialog>
+
+<dialog id="budgetsDialog" aria-labelledby="budgetsTitle">
+  <div class="sheet">
+    <h2 id="budgetsTitle">Budgets</h2>
+    <p>Dollar and search limits for Claude calls, and how each day's budget splits across steps. Step shares must add up to 100%.</p>
+
+    <h3>Limits</h3>
+    <div class="addform budget-limits" id="budgetsLimits">
+      <label>Daily $ <input id="bDailyUsd" type="number" min="0" step="0.01" inputmode="decimal"><span class="field-error" data-for="bDailyUsd"></span></label>
+      <label>Monthly $ <input id="bMonthlyUsd" type="number" min="0" step="0.01" inputmode="decimal"><span class="field-error" data-for="bMonthlyUsd"></span></label>
+      <label>Daily searches <input id="bDailySearches" type="number" min="0" step="1" inputmode="numeric"><span class="field-error" data-for="bDailySearches"></span></label>
+    </div>
+
+    <h3>Step shares and models</h3>
+    <div class="share-rows" id="shareRows">
+      <div class="share-row">
+        <span class="share-name">Discovery</span>
+        <label class="share-pct"><input id="bShareDiscovery" type="number" min="0" max="100" step="1" inputmode="numeric" aria-label="Discovery share, percent"><span>%</span></label>
+        <select id="bModelDiscovery" aria-label="Discovery model"><option value="sonnet">Sonnet</option><option value="haiku">Haiku</option></select>
+        <span class="field-error" data-for="bShareDiscovery"></span>
+      </div>
+      <div class="share-row">
+        <span class="share-name">Scout</span>
+        <label class="share-pct"><input id="bShareScout" type="number" min="0" max="100" step="1" inputmode="numeric" aria-label="Scout share, percent"><span>%</span></label>
+        <select id="bModelScout" aria-label="Scout model"><option value="sonnet">Sonnet</option><option value="haiku">Haiku</option></select>
+        <span class="field-error" data-for="bShareScout"></span>
+      </div>
+      <div class="share-row">
+        <span class="share-name">Classification</span>
+        <label class="share-pct"><input id="bShareClassification" type="number" min="0" max="100" step="1" inputmode="numeric" aria-label="Classification share, percent"><span>%</span></label>
+        <select id="bModelClassification" aria-label="Classification model"><option value="sonnet">Sonnet</option><option value="haiku">Haiku</option></select>
+        <span class="field-error" data-for="bShareClassification"></span>
+      </div>
+      <div class="share-row">
+        <span class="share-name">Improvement</span>
+        <label class="share-pct"><input id="bShareImprovement" type="number" min="0" max="100" step="1" inputmode="numeric" aria-label="Improvement share, percent"><span>%</span></label>
+        <select id="bModelImprovement" aria-label="Improvement model"><option value="sonnet">Sonnet</option><option value="haiku">Haiku</option></select>
+        <span class="field-error" data-for="bShareImprovement"></span>
+      </div>
+    </div>
+    <div class="row share-total-row">
+      <span class="total-pill" id="sharesTotal" role="status"></span>
+      <button class="btn" id="sharesEvenSplit" type="button">Even split</button>
+    </div>
+
+    <details id="budgetsAdvanced">
+      <summary>Advanced limits</summary>
+      <div class="addform">
+        <label>Searches per run <input id="bSearchPerRun" type="number" min="0" step="1" inputmode="numeric"><span class="field-error" data-for="bSearchPerRun"></span></label>
+        <label>Searches per company <input id="bSearchPerCompany" type="number" min="0" step="1" inputmode="numeric"><span class="field-error" data-for="bSearchPerCompany"></span></label>
+        <label>Browser checks per run <input id="bBrowserChecks" type="number" min="0" step="1" inputmode="numeric"><span class="field-error" data-for="bBrowserChecks"></span></label>
+      </div>
+    </details>
+
+    <h3>Forecast</h3>
+    <p id="budgetsForecast" class="sub"></p>
+
+    <h3>Usage and resets</h3>
+    <p id="budgetsUsage" class="sub"></p>
+    <p id="budgetsLastReset" class="sub"></p>
+    <div class="row">
+      <button class="btn" id="resetDailyBudget" type="button">Reset today's usage</button>
+      <button class="btn" id="resetWeeklyBudget" type="button">Reset this week's usage</button>
+    </div>
+
+    <h3>Change history</h3>
+    <ul id="budgetsHistory"></ul>
+
+    <h3>Public site</h3>
+    <div class="checkrow">
+      <input type="checkbox" id="locPublic">
+      <label for="locPublic">Public site (jobs.mcgeehenry.com)</label>
+    </div>
+    <div class="addform" style="grid-template-columns:1fr">
+      <label>Feedback a day, all visitors <input id="bFeedbackCap" type="number" min="0" step="1" inputmode="numeric"><span class="field-error" data-for="bFeedbackCap"></span></label>
+    </div>
+    <p id="publicSiteStatus" class="sub"></p>
+    <p class="sub" style="margin-top:-4px">Off by default. Turn it on after the DNS record is in place. The public page updates within 5 minutes of a change.</p>
+
+    <h3>Browser Run</h3>
+    <p id="browserRunPlan" class="sub"></p>
+    <p id="browserRunToday" class="sub"></p>
+    <p id="browserRunCloudflareFree" class="sub" style="margin-top:-8px"></p>
+    <p id="browserRunMonth" class="sub" hidden></p>
+    <p id="browserRunBackupToday" class="sub"></p>
+    <div class="br-table-wrap">
+      <table class="br-table" id="browserRunRunsTable">
+        <thead>
+          <tr><th>Run</th><th>Browser Run</th><th>Minutes</th><th>Backup</th><th>Failures</th></tr>
+        </thead>
+        <tbody id="browserRunRunsBody"></tbody>
+      </table>
+    </div>
+    <p class="sub" style="font-size:12px">These figures are measured by the daily job and may differ slightly from Cloudflare's own dashboard. See <a href="https://dash.cloudflare.com/" target="_blank" rel="noopener noreferrer">Cloudflare's dashboard</a> (Workers &amp; Pages &gt; your account &gt; Browser Rendering) for its own usage page.</p>
+
+    <div class="row">
+      <button class="btn primary" id="budgetsSave" type="button">Save</button>
+      <span class="spacer"></span>
+      <button class="btn" id="budgetsClose" type="button">Close</button>
+    </div>
+    <div class="msg" id="budgetsMsg"></div>
+  </div>
+</dialog>
+
+<dialog id="locationsDialog" aria-labelledby="locationsTitle">
+  <div class="sheet">
+    <h2 id="locationsTitle">Locations</h2>
+    <p>Postings outside these locations are saved but hidden.</p>
+    <div class="checkrow locked">
+      <input type="checkbox" id="locUS" checked disabled>
+      <label for="locUS">United States (always on)</label>
+    </div>
+    <div class="checkrow">
+      <input type="checkbox" id="locJP">
+      <label for="locJP">Japan</label>
+    </div>
+    <div class="checkrow">
+      <input type="checkbox" id="locRemote">
+      <label for="locRemote">Include remote postings</label>
+    </div>
+    <div class="row">
+      <button class="btn primary" id="locationsSave" type="button">Save</button>
+      <span class="spacer"></span>
+      <button class="btn" id="locationsClose" type="button">Close</button>
+    </div>
+    <div class="msg" id="locationsMsg"></div>
+  </div>
+</dialog>
+
+<script src="public/city-background.js" defer></script>
+<script src="demo-api.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

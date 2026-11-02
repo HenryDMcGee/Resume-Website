@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Internship Watch board · read-only demo</title>
+<style>
+:root{--bg:#f4f5f7;--panel:#ffffff;--col:#ebedf0;--ink:#1d2430;--ink2:#4b5565;--ink3:#7a8494;--line:#dde1e7;--accent:#2f7d72;--accent-soft:#e3f2ef;--amber:#f2b33d}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:var(--bg);display:flex;flex-direction:column;overflow:hidden}
+button{font:inherit;color:inherit}
+.demo-bar{flex:none;display:flex;align-items:center;gap:10px;padding:7px 16px;background:#16213a;color:#ffe9a8;font-size:12.5px;font-weight:600;letter-spacing:.02em}
+.demo-bar i{width:8px;height:8px;border-radius:50%;background:var(--amber);flex:none}
+.demo-bar span{opacity:.8;font-weight:500}
+header{flex:none;padding:18px 24px 0;background:var(--panel);border-bottom:1px solid var(--line)}
+.crumbs{font-size:12.5px;color:var(--ink3);margin-bottom:4px}
+.title-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.space-mark{width:32px;height:32px;border-radius:7px;background:linear-gradient(135deg,#1f4e79,#2f7d72);color:#fff;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;letter-spacing:.03em}
+h1{font-size:22px;margin:0;font-weight:700}
+.ro{margin-left:auto;font-size:12px;color:var(--ink2);background:#fff6df;border:1px solid #f0d98f;border-radius:999px;padding:3px 10px;display:flex;align-items:center;gap:6px}
+.ro svg{width:13px;height:13px}
+.tabs{display:flex;gap:4px;margin-top:14px}
+.tabs button{border:0;background:none;padding:9px 12px 10px;font-weight:600;color:var(--ink2);border-bottom:2px solid transparent;cursor:pointer}
+.tabs button[aria-selected=true]{color:var(--accent);border-bottom-color:var(--accent)}
+.tabs button:hover{color:var(--ink)}
+.toolbar[hidden]{display:none}
+.toolbar{flex:none;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 24px;background:var(--bg)}
+.search{display:flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--line);border-radius:6px;padding:0 10px;height:34px;width:230px}
+.search svg{width:15px;height:15px;color:var(--ink3);flex:none}
+.search input{border:0;outline:0;font:inherit;width:100%;background:none}
+.search:focus-within{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+select{font:inherit;height:34px;border:1px solid var(--line);border-radius:6px;background:#fff;padding:0 8px;color:var(--ink)}
+.chip{height:34px;border:1px solid var(--line);border-radius:6px;background:#fff;padding:0 12px;cursor:pointer;font-weight:500;color:var(--ink2)}
+.chip[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.count-note{margin-left:auto;font-size:12.5px;color:var(--ink3)}
+main{flex:1;min-height:0;overflow:auto;padding:0 24px 24px}
+#viewEpics{padding-top:16px}
+#viewBoard{height:100%}
+.board{display:grid;grid-template-columns:repeat(3,minmax(260px,1fr));gap:14px;align-items:start;min-width:820px;height:100%}
+.column{background:var(--col);border-radius:8px;display:flex;flex-direction:column;max-height:100%;min-height:200px}
+.col-head{display:flex;align-items:center;gap:8px;padding:12px 12px 8px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2)}
+.col-head .n{background:#d5d9e0;color:var(--ink2);border-radius:999px;padding:0 7px;font-size:11.5px;letter-spacing:0}
+.col-head .done-tick{color:#2e8a57;margin-left:auto}
+.cards{display:flex;flex-direction:column;gap:8px;padding:2px 8px 10px;overflow-y:auto;min-height:0}
+.empty{font-size:13px;color:var(--ink3);text-align:center;padding:26px 10px;border:1.5px dashed #cdd2da;border-radius:6px;margin:2px 0 4px}
+.card{background:#fff;border-radius:6px;box-shadow:0 1px 1px rgba(16,24,40,.12),0 0 1px rgba(16,24,40,.2);padding:10px 12px 9px;text-align:left;border:0;cursor:pointer;width:100%;display:block}
+.card:hover{background:#f8fafb}
+.card:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.card .sum{font-size:14px;margin-bottom:8px;color:var(--ink)}
+.lozenge{display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;border-radius:3px;padding:1px 6px;margin-bottom:8px}
+.meta{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink2)}
+.meta .key{font-weight:600}
+.meta .key.done{text-decoration:line-through;text-decoration-color:var(--ink3)}
+.meta .sp{margin-left:auto;display:flex;align-items:center;gap:8px}
+.st-count{display:flex;align-items:center;gap:3px;color:var(--ink3)}
+.st-count svg{width:13px;height:13px}
+.ti{width:16px;height:16px;border-radius:3px;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.ti svg{width:10px;height:10px;fill:#fff}
+.ti.story{background:#36a26b}.ti.task{background:#3b82c4}.ti.epic{background:#7b5cc4}.ti.sub{background:#5aa6c8}
+.prio{width:16px;height:16px;flex:none}
+.prio.high{color:#d4543a}.prio.medium{color:#e09a25}.prio.low{color:#3b82c4}
+/* epics view */
+.epics{max-width:980px;display:flex;flex-direction:column;gap:10px}
+.epic-row{background:#fff;border-radius:8px;box-shadow:0 1px 1px rgba(16,24,40,.12),0 0 1px rgba(16,24,40,.2);padding:14px 16px;display:grid;grid-template-columns:auto minmax(0,1fr) 190px;gap:14px;align-items:center;border:0;text-align:left;cursor:pointer;width:100%}
+.epic-row:hover{background:#f8fafb}
+.epic-row h3{margin:0 0 3px;font-size:15px}
+.epic-row p{margin:0;color:var(--ink2);font-size:13px}
+.epic-row .swatch{width:10px;align-self:stretch;border-radius:4px}
+.prog{font-size:12px;color:var(--ink2)}
+.bar{height:8px;border-radius:999px;background:#e3e6eb;overflow:hidden;margin:5px 0 4px}
+.bar i{display:block;height:100%;background:#36a26b}
+.rel{display:inline-block;font-size:11.5px;background:#eef0f4;border-radius:4px;padding:1px 6px;color:var(--ink2);margin-left:6px}
+/* detail drawer */
+.scrim{position:fixed;inset:0;background:rgba(16,24,40,.35);opacity:0;pointer-events:none;transition:opacity .2s}
+.scrim.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(560px,100%);background:#fff;box-shadow:-12px 0 40px rgba(16,24,40,.18);transform:translateX(100%);transition:transform .25s ease;display:flex;flex-direction:column}
+.drawer.on{transform:none}
+.d-head{display:flex;align-items:center;gap:8px;padding:14px 18px;border-bottom:1px solid var(--line);font-size:13px;color:var(--ink2)}
+.d-head .x{margin-left:auto;border:0;background:none;width:32px;height:32px;border-radius:6px;cursor:pointer;font-size:20px;line-height:1;color:var(--ink2)}
+.d-head .x:hover{background:#eef0f4}
+.d-body{overflow-y:auto;padding:18px 22px 30px}
+.d-body h2{font-size:21px;margin:0 0 14px;line-height:1.25}
+.status-pill{display:inline-block;font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;border-radius:4px;padding:3px 8px}
+.status-pill.done{background:#dcf3e4;color:#1f6b42}.status-pill.todo{background:#e6e9ee;color:#45505f}.status-pill.prog{background:#dbeafb;color:#1f5a99}
+.fields{display:grid;grid-template-columns:120px 1fr;gap:8px 12px;font-size:13px;margin:16px 0 20px;padding:14px;border:1px solid var(--line);border-radius:8px}
+.fields dt{color:var(--ink3)}.fields dd{margin:0;text-align:left}
+.fields .child-link{text-align:left}
+.d-body h4{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3);margin:22px 0 8px}
+.d-body p{margin:0 0 10px}
+.d-body ul.ac{margin:0;padding-left:20px}.d-body ul.ac li{margin-bottom:7px}
+.d-body code{font:12.5px ui-monospace,Menlo,Consolas,monospace;background:#f0f2f5;border-radius:3px;padding:1px 4px}
+.subs{list-style:none;margin:0;padding:0;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.subs li{display:flex;align-items:center;gap:8px;padding:8px 12px;font-size:13px;border-top:1px solid var(--line)}
+.subs li:first-child{border-top:0}
+.subs .k{color:var(--ink2);font-weight:600;white-space:nowrap}
+.subs .s{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.child-link{border:0;background:none;padding:0;color:var(--accent);cursor:pointer;font-weight:600}
+.toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,20px);background:#16213a;color:#fff;font-size:13px;padding:9px 16px;border-radius:8px;opacity:0;transition:.2s;pointer-events:none}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+@media (max-width:760px){
+  header{padding:14px 14px 0}.toolbar{padding:10px 14px}main{padding:0 14px 18px}
+  .ro{margin-left:0}.search{width:100%}.count-note{display:none}
+  .board{grid-template-columns:repeat(3,minmax(250px,82vw));min-width:0;height:auto}
+  #viewBoard{height:auto}.column{max-height:none}.cards{overflow:visible}
+  .epic-row{grid-template-columns:auto minmax(0,1fr)}.epic-row .prog{grid-column:2}
+}
+@media (prefers-reduced-motion:reduce){.drawer,.scrim,.toast{transition:none}}
+</style>
+</head>
+<body>
+<div class="demo-bar" role="note"><i></i>DEMO <span>· read-only copy of Henry&rsquo;s internship-watch board, snapshot taken Nov 1, 2026</span></div>
+<header>
+  <div class="crumbs">Spaces / Watch Space</div>
+  <div class="title-row">
+    <div class="space-mark" aria-hidden="true">IW</div>
+    <h1>Internship Watch board</h1>
+    <div class="ro"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Read-only</div>
+  </div>
+  <div class="tabs" role="tablist">
+    <button role="tab" id="tabEpics" aria-selected="true" aria-controls="viewEpics">Epics</button>
+    <button role="tab" id="tabBoard" aria-selected="false" aria-controls="viewBoard">Board</button>
+  </div>
+</header>
+<div class="toolbar" hidden>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input id="q" type="search" placeholder="Search this board" aria-label="Search this board"></label>
+  <select id="epicSel" aria-label="Filter by epic"><option value="">All epics</option></select>
+  <button class="chip" id="typeTasks" aria-pressed="false" type="button">Tasks only</button>
+  <span class="count-note" id="countNote"></span>
+</div>
+<main>
+  <section id="viewBoard" role="tabpanel" aria-labelledby="tabBoard" hidden><div class="board" id="board"></div></section>
+  <section id="viewEpics" role="tabpanel" aria-labelledby="tabEpics"><div class="epics" id="epics"></div></section>
+</main>
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="dTitle" inert>
+  <div class="d-head"><span id="dCrumb"></span><button class="x" id="dClose" type="button" aria-label="Close">&times;</button></div>
+  <div class="d-body" id="dBody"></div>
+</aside>
+<div class="toast" id="toast" role="status"></div>
+<script src="data.js"></script>
+<script>
+(function () {
+  var D = window.IW_BOARD, $ = function (s) { return document.querySelector(s); };
+  var COLORS = ['#c7e6d6/#1f6b42','#cfe0f7/#1f5a99','#e6dcf8/#5b3ea8','#fde2c8/#9a4f0e','#f8d5dc/#9b2c44','#d2eef3/#1d6b7c','#f3e7b6/#7a5d00','#dfe3ea/#3b4656','#e2f0c8/#4d6b10'];
+  var EPIC = {}; D.epics.forEach(function (e, i) { var c = COLORS[i % COLORS.length].split('/'); e.bg = c[0]; e.fg = c[1]; EPIC[e.key] = e; });
+  var SUBS = {}; D.subtasks.forEach(function (s) { (SUBS[s[1]] = SUBS[s[1]] || []).push({ key: s[0], summary: s[2] }); });
+  var ISSUE = {}; D.issues.forEach(function (it) { ISSUE[it.key] = it; });
+  var COLS = [['To Do', 'To Do'], ['In Progress', 'In Progress'], ['Done', 'Done']];
+  var state = { q: '', epic: '', tasks: false };
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function inline(s) { return esc(s).replace(/`([^`]+)`/g, '<code>$1</code>'); }
+  var ICON = {
+    story: '<span class="ti story" title="Story"><svg viewBox="0 0 10 10"><path d="M2 1h6v8L5 7 2 9z"/></svg></span>',
+    task: '<span class="ti task" title="Task"><svg viewBox="0 0 10 10"><path d="M4 7.2 1.6 4.8l1-1L4 5.2l3.4-3.4 1 1z"/></svg></span>',
+    epic: '<span class="ti epic" title="Epic"><svg viewBox="0 0 10 10"><path d="M6 0 2 6h3l-1 4 4-6H5z"/></svg></span>',
+    sub: '<span class="ti sub" title="Sub-task"><svg viewBox="0 0 10 10"><rect x="1.5" y="1.5" width="4" height="4" rx=".5"/><rect x="4.5" y="4.5" width="4" height="4" rx=".5"/></svg></span>'
+  };
+  function prio(p) {
+    p = (p || 'Medium').toLowerCase();
+    var d = p === 'high' ? 'M4 11l4-4 4 4' : p === 'low' ? 'M4 6l4 4 4-4' : 'M4 7h8M4 10h8';
+    return '<svg class="prio ' + p + '" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="' + p + ' priority" role="img"><path d="' + d + '"/></svg>';
+  }
+  function matches(it) {
+    if (state.epic && it.epic !== state.epic) return false;
+    if (state.tasks && it.type !== 'Task') return false;
+    if (state.q) {
+      var hay = (it.key + ' ' + it.summary + ' ' + (it.description || '') + ' ' + (it.ac || []).join(' ') + ' ' + (SUBS[it.key] || []).map(function (s) { return s.summary; }).join(' ')).toLowerCase();
+      if (hay.indexOf(state.q) < 0) return false;
+    }
+    return true;
+  }
+  function card(it) {
+    var e = it.epic && EPIC[it.epic], subs = SUBS[it.key] || [];
+    return '<button class="card" type="button" data-key="' + it.key + '">' +
+      '<div class="sum">' + esc(it.summary) + '</div>' +
+      (e ? '<span class="lozenge" style="background:' + e.bg + ';color:' + e.fg + '">' + esc(e.summary.replace(/^Phase \d+: /, '')) + '</span>' : '') +
+      '<div class="meta">' + ICON[it.type.toLowerCase()] + '<span class="key' + (it.status === 'Done' ? ' done' : '') + '">' + it.key + '</span>' +
+      '<span class="sp">' + (subs.length ? '<span class="st-count" title="' + subs.length + ' of ' + subs.length + ' sub-tasks done"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5l3 3 7-7"/></svg>' + subs.length + '/' + subs.length + '</span>' : '') + prio(it.priority) + '</span></div></button>';
+  }
+  function renderBoard() {
+    var shown = D.issues.filter(matches), total = 0;
+    $('#board').innerHTML = COLS.map(function (c) {
+      var items = shown.filter(function (it) { return it.status === c[0]; }); total += items.length;
+      return '<div class="column" aria-label="' + c[1] + ', ' + items.length + ' issues"><div class="col-head">' + c[1] + ' <span class="n">' + items.length + '</span>' + (c[0] === 'Done' ? '<span class="done-tick" aria-hidden="true">✓</span>' : '') + '</div>' +
+        '<div class="cards">' + (items.length ? items.map(card).join('') : '<div class="empty">' + (c[0] === 'In Progress' ? 'Nothing in progress right now' : 'No matching issues') + '</div>') + '</div></div>';
+    }).join('');
+    $('#countNote').textContent = total + ' of ' + D.issues.length + ' issues · ' + D.subtasks.length + ' sub-tasks · ' + D.epics.length + ' epics';
+  }
+  function renderEpics() {
+    $('#epics').innerHTML = D.epics.map(function (e) {
+      var kids = D.issues.filter(function (it) { return it.epic === e.key; }), done = kids.filter(function (it) { return it.status === 'Done'; }).length;
+      var subs = kids.reduce(function (n, it) { return n + (SUBS[it.key] || []).length; }, 0);
+      return '<button class="epic-row" type="button" data-epic="' + e.key + '"><span class="swatch" style="background:' + e.fg + '"></span>' +
+        '<div><h3>' + esc(e.summary) + (e.release ? '<span class="rel">release ' + esc(e.release) + '</span>' : '') + '</h3><p>' + esc(e.description) + '</p></div>' +
+        '<div class="prog"><b>' + e.key + '</b> · ' + done + ' of ' + kids.length + ' stories done<div class="bar"><i style="width:' + (kids.length ? done / kids.length * 100 : 0) + '%"></i></div>' + subs + ' sub-tasks merged</div></button>';
+    }).join('');
+  }
+  var opener = null;
+  function openIssue(key) {
+    var it = ISSUE[key] || EPIC[key]; if (!it) return;
+    var isEpic = !!EPIC[key], e = it.epic && EPIC[it.epic], subs = SUBS[key] || [];
+    var stCls = it.status === 'Done' ? 'done' : it.status === 'In Progress' ? 'prog' : 'todo';
+    var kids = isEpic ? D.issues.filter(function (x) { return x.epic === key; }) : [];
+    $('#dCrumb').innerHTML = (e ? ICON.epic + ' <span>' + e.key + '</span> / ' : '') + ICON[isEpic ? 'epic' : it.type.toLowerCase()] + ' <b>' + key + '</b>';
+    $('#dBody').innerHTML = '<h2 id="dTitle">' + esc(it.summary) + '</h2><span class="status-pill ' + stCls + '">' + esc(it.status) + '</span>' +
+      '<dl class="fields"><dt>Type</dt><dd>' + (isEpic ? 'Epic' : it.type) + '</dd><dt>Priority</dt><dd>' + esc(it.priority || 'Medium') + '</dd>' +
+      (e ? '<dt>Epic</dt><dd><button class="child-link" data-key="' + e.key + '">' + esc(e.summary) + '</button></dd>' : '') +
+      (isEpic && it.release ? '<dt>Release</dt><dd>' + esc(it.release) + '</dd>' : '') +
+      '<dt>Assignee</dt><dd>Henry McGee</dd></dl>' +
+      '<h4>Description</h4><p>' + inline(it.description || '') + '</p>' +
+      (it.ac ? '<h4>Acceptance criteria</h4><ul class="ac">' + it.ac.map(function (a) { return '<li>' + inline(a) + '</li>'; }).join('') + '</ul>' : '') +
+      (kids.length ? '<h4>Stories in this epic (' + kids.length + ')</h4><ul class="subs">' + kids.map(function (k) { return '<li>' + ICON.story + '<button class="child-link k" data-key="' + k.key + '">' + k.key + '</button><span class="s">' + esc(k.summary) + '</span><span class="status-pill done">Done</span></li>'; }).join('') + '</ul>' : '') +
+      (subs.length ? '<h4>Sub-tasks (' + subs.length + ')</h4><ul class="subs">' + subs.map(function (s) { return '<li>' + ICON.sub + '<span class="k">' + s.key + '</span><span class="s" title="' + esc(s.summary) + '">' + esc(s.summary) + '</span><span class="status-pill done">Done</span></li>'; }).join('') + '</ul>' : '');
+    if (!$('#drawer').classList.contains('on')) opener = document.activeElement;
+    $('#drawer').inert = false; $('#drawer').classList.add('on'); $('#scrim').classList.add('on');
+    $('#dBody').scrollTop = 0; $('#dClose').focus();
+  }
+  function closeIssue() {
+    if (!$('#drawer').classList.contains('on')) return;
+    $('#drawer').classList.remove('on'); $('#scrim').classList.remove('on'); $('#drawer').inert = true;
+    if (opener && document.body.contains(opener)) opener.focus(); opener = null;
+  }
+  var toastT = 0;
+  function toast(msg) { var t = $('#toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(function () { t.classList.remove('on'); }, 1800); }
+  function view(which) {
+    var b = which === 'board';
+    $('#tabBoard').setAttribute('aria-selected', b); $('#tabEpics').setAttribute('aria-selected', !b);
+    $('#viewBoard').hidden = !b; $('#viewEpics').hidden = b;
+    document.querySelector('.toolbar').hidden = !b; document.querySelector('main').scrollTop = 0;
+  }
+  D.epics.forEach(function (e) { var o = document.createElement('option'); o.value = e.key; o.textContent = e.summary; $('#epicSel').appendChild(o); });
+  $('#q').addEventListener('input', function () { state.q = this.value.trim().toLowerCase(); renderBoard(); });
+  $('#epicSel').addEventListener('change', function () { state.epic = this.value; renderBoard(); });
+  $('#typeTasks').addEventListener('click', function () { state.tasks = !state.tasks; this.setAttribute('aria-pressed', state.tasks); renderBoard(); });
+  $('#tabBoard').addEventListener('click', function () { view('board'); });
+  $('#tabEpics').addEventListener('click', function () { view('epics'); });
+  var dragged = false;
+  document.addEventListener('click', function (ev) {
+    if (dragged) { dragged = false; return; }
+    var c = ev.target.closest('[data-key]'); if (c) { openIssue(c.dataset.key); return; }
+    var er = ev.target.closest('[data-epic]'); if (er) { state.epic = er.dataset.epic; $('#epicSel').value = state.epic; view('board'); renderBoard(); }
+  });
+  $('#scrim').addEventListener('click', closeIssue); $('#dClose').addEventListener('click', closeIssue);
+  document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') closeIssue(); });
+  /* read-only: dragging a card does nothing except say so */
+  document.addEventListener('dragstart', function (ev) { ev.preventDefault(); });
+  var down = null;
+  document.addEventListener('pointerdown', function (ev) { dragged = false; var c = ev.target.closest('.card'); down = c ? { x: ev.clientX, y: ev.clientY } : null; });
+  document.addEventListener('pointermove', function (ev) { if (down && Math.abs(ev.clientX - down.x) + Math.abs(ev.clientY - down.y) > 24 && ev.pointerType === 'mouse') { down = null; dragged = true; toast('Read-only demo · cards can’t be moved'); } });
+  document.addEventListener('pointerup', function () { down = null; });
+  renderBoard(); renderEpics(); view('epics');   /* opens on the Epics view */
+})();
+</script>
+</body>
+</html>

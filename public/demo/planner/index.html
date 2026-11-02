@@ -1,0 +1,1251 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body><div style="position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:10px;margin:-10px -16px 8px;padding:7px 16px;background:#16213a;color:#ffe9a8;font:600 12.5px/1.4 system-ui,sans-serif" role="note"><i style="width:8px;height:8px;border-radius:50%;background:#f2b33d;flex:none"></i>DEMO <span style="opacity:.8;font-weight:500">· sample data: professor names, ratings, bid results and the plan are made up, and nothing is saved</span></div>
+<title>McCombs Course Planner · demo</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: one full-width filter bar over a single dense registrar-style table; burnt-orange UT accent on warm paper */
+:root{
+  --wood:#413327; --wood2:#2E2317; --parch:#F8F1DE; --parch-hi:#FBF7EA; --parch-lo:#F0E5C8;
+  --bg:#F8F1DE; --surface:#FFFEF9; --fg:#2A2117; --muted:#6B5637; --ink:#5A4226;
+  --line:#E2D5B4; --hairline:#EFE7D2;
+  --accent:#A8352C; --accent-ink:#F7EBD4; --accent-soft:rgba(168,53,44,.08); --danger:#8C2B23; --head:#F7F0DD;
+  --roller:linear-gradient(180deg,#7A4E27,#4A2D14 55%,#6B4423);
+  --font-body:"Libre Franklin",-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+  --font-display:"Libre Franklin",-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+  --font-fell:"Libre Franklin",-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+  --font-black:"Cinzel",serif;
+  --font-mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+/* Light-only by design: the parchment look is one committed visual world.
+   Every color is set explicitly from the tokens above, so the page renders
+   identically whatever the viewer's OS or app theme. */
+body{
+  background:linear-gradient(180deg,var(--wood),var(--wood2)) fixed; color:var(--fg); font-family:var(--font-body);
+  font-size:15px; line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:10px 24px;
+}
+.roller{height:16px; border-radius:8px; background:var(--roller); max-width:1232px; margin:0 auto; box-shadow:0 2px 6px rgba(0,0,0,.4)}
+.sheet{max-width:1200px; margin:6px auto; background:radial-gradient(ellipse at 20% 10%,var(--parch-hi),var(--parch) 55%,var(--parch-lo)); box-shadow:0 8px 20px rgba(0,0,0,.4), inset 0 0 50px rgba(122,78,39,.12); padding:14px 16px}
+@keyframes unroll{from{clip-path:inset(0 0 100% 0)}to{clip-path:inset(0 0 -40px 0)}}
+.sheet{animation:unroll .5s ease-out both}
+@media (prefers-reduced-motion: reduce){.sheet{animation:none}}
+#legend{margin:6px 0 0; font-size:11.5px; color:var(--muted)}
+header.bar{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+header h1{font-family:var(--font-black); font-size:17px; font-weight:700; letter-spacing:.03em; margin:0; white-space:nowrap}
+.term{font-size:11px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-right:2px}
+.tabs{display:flex; gap:8px; align-items:center}
+.tabs button{all:unset; cursor:pointer; font-family:var(--font-display); font-weight:700; font-size:12.5px; letter-spacing:.02em; padding:5px 12px; border:1.5px solid var(--ink); border-radius:6px; color:var(--ink); background:transparent; font-variant-numeric:tabular-nums}
+.tabs button:hover{color:var(--accent); border-color:var(--accent)}
+.tabs button:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
+.tabs button[aria-selected="true"]{background:var(--accent); border-color:var(--accent); color:var(--accent-ink)}
+th.plan{font-family:var(--font-display); font-weight:700; font-size:12px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink)}
+td.plan,th.plan{text-align:center}
+td.plan input{width:16px; height:16px; accent-color:var(--accent); cursor:pointer}
+td.pts input{width:64px; font:inherit; font-size:12.5px; font-variant-numeric:tabular-nums; color:var(--fg); background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:4px 6px; text-align:right}
+td.pts input:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
+a.rmp{display:inline-block; font-size:11.5px; font-weight:700; font-variant-numeric:tabular-nums; color:var(--accent); text-decoration:none; border:1px solid var(--accent); border-radius:999px; padding:1px 8px; white-space:nowrap; background:var(--accent-soft)}
+a.rmp:hover{text-decoration:underline}
+a.rmp .n{font-weight:400; color:var(--muted)}
+td.rmpc{white-space:nowrap}
+.budget{margin-left:auto; font-size:13px; font-weight:800; font-variant-numeric:tabular-nums; color:var(--accent-ink); background:var(--accent); border-radius:999px; padding:6px 14px; white-space:nowrap; box-shadow:0 2px 6px rgba(0,0,0,.25)}
+.budget.over{background:var(--danger); color:#FFFFFF}
+#notesview{display:flex; flex-direction:column; gap:6px; margin-top:12px}
+#notesview[hidden]{display:none}
+#notes{min-height:440px; font:15px/1.7 var(--font-body); color:var(--fg); background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:18px 20px; resize:vertical; box-shadow:0 2px 10px rgba(59,42,23,.12); min-width:0}
+#notes:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
+#notestate{margin:0; font-family:var(--font-fell); font-size:12.5px; color:var(--muted); text-align:right}
+#concview,#roadview,#srcview{display:flex; flex-direction:column; gap:12px; margin-top:14px}
+#concview[hidden],#roadview[hidden],#srcview[hidden]{display:none}
+.srctable{width:100%; min-width:0; border-collapse:collapse; background:var(--surface); border:1px solid var(--line); border-radius:6px; font-size:13px}
+.srctable th,.srctable td{padding:7px 10px; border-bottom:1px solid var(--hairline); vertical-align:top; text-align:left}
+.srctable th{background:var(--head); font-size:11.5px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink)}
+.srctable td:first-child{font-weight:600; white-space:nowrap}
+.srctable a{color:var(--accent)}
+#srcview h2,#roadview h2{font-family:var(--font-display); font-weight:800; font-size:20px; letter-spacing:.01em; margin:0; color:var(--ink)}
+.sems{display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:10px}
+.typegrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px}
+.type{background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:10px 12px; box-shadow:0 2px 8px rgba(59,42,23,.1); min-width:0}
+.tn{font-family:var(--font-display); font-weight:700; font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:var(--accent)}
+.tv{font-size:16px; font-weight:800; font-variant-numeric:tabular-nums; margin:2px 0}
+.td2{font-size:12px; color:var(--muted)}
+.sem{background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:12px 14px; box-shadow:0 2px 8px rgba(59,42,23,.1); font-size:13.5px; min-width:0}
+.semname{font-family:var(--font-display); font-weight:700; font-size:12px; letter-spacing:.04em; text-transform:uppercase; color:var(--accent); margin-bottom:6px; display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+.sem ul{margin:0; padding-left:18px; display:flex; flex-direction:column; gap:5px}
+.hb{display:inline-block; font-family:var(--font-display); font-weight:700; font-size:10.5px; letter-spacing:.04em; text-transform:uppercase; padding:2px 8px; border-radius:4px; margin:8px 0 4px; background:#F9E8E0; color:#8C1D14}
+.hb.s2{background:#E9EFFC; color:#1D4ED8}
+.hb.both{background:var(--head); color:var(--muted)}
+#roadprog{margin:8px 0 0; font-size:13px; background:rgba(168,53,44,.06); border:1px solid var(--line); border-radius:6px; padding:8px 10px}
+#concview h2{font-family:var(--font-display); font-weight:800; font-size:20px; letter-spacing:.01em; margin:0; color:var(--ink)}
+#concview h3{font-family:var(--font-display); font-size:13px; letter-spacing:.04em; text-transform:uppercase; margin:6px 0 0; color:var(--ink)}
+#concview p{margin:0; max-width:85ch}
+.concintro,.concnote{font-family:var(--font-fell); color:var(--muted); font-size:14px}
+#concprog{font-size:14.5px; background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:12px 14px; box-shadow:0 2px 10px rgba(59,42,23,.12)}
+.opts{display:flex; gap:10px; flex-wrap:wrap}
+.opt{flex:1 1 220px; background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:12px 14px; box-shadow:0 2px 10px rgba(59,42,23,.12); font-size:13.5px}
+.optname{font-family:var(--font-display); font-weight:700; font-size:11.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--accent); margin-bottom:4px}
+.conclist{margin:4px 0 0; padding-left:20px; display:flex; flex-direction:column; gap:6px; max-width:95ch; font-size:13.5px}
+.toolbar{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:10px 0 6px}
+.toolbar input[type=search],.toolbar select{
+  font:inherit; color:var(--fg); background:var(--surface); border:1px solid var(--line);
+  border-radius:6px; padding:7px 10px; min-width:0;
+}
+.toolbar input[type=search]{flex:1 1 220px}
+.toolbar select{flex:0 1 auto}
+.toolbar label.toggle{display:flex; gap:6px; align-items:center; color:var(--muted); cursor:pointer; white-space:nowrap}
+.toolbar input[type=search]:focus-visible,.toolbar select:focus-visible,th button:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
+#count{color:var(--muted); font-size:13px; margin:0 0 8px; font-variant-numeric:tabular-nums; font-family:var(--font-fell)}
+.tablewrap{overflow-x:auto; border:1px solid var(--line); border-radius:6px; background:var(--surface); box-shadow:0 2px 10px rgba(59,42,23,.12)}
+table{border-collapse:collapse; width:100%; min-width:980px; font-size:13.5px; line-height:1.35}
+th,td{text-align:left; padding:5px 8px; border-bottom:1px solid var(--hairline); vertical-align:top}
+tbody tr:last-child td{border-bottom:none}
+thead th{position:sticky; top:env(safe-area-inset-top,0px); background:var(--head); z-index:2; border-bottom:2px solid var(--line)}
+th button{
+  all:unset; cursor:pointer; font-family:var(--font-display); font-weight:700; font-size:12px; text-transform:uppercase;
+  letter-spacing:.04em; color:var(--ink); display:inline-flex; gap:4px; align-items:center;
+}
+th button:hover,th button[data-dir]{color:var(--accent)}
+th button[data-dir]::after{content:"↑"; font-size:10px}
+th button[data-dir="desc"]::after{content:"↓"}
+td.num,td.time{font-family:var(--font-mono); font-size:12.5px; font-variant-numeric:tabular-nums; white-space:nowrap}
+td.code{white-space:nowrap; font-weight:600}
+td.title .t{font-weight:600}
+td.days,td.room{white-space:nowrap}
+td.notes{color:var(--muted); font-size:12.5px; max-width:34ch}
+.chips{display:flex; flex-wrap:wrap; gap:4px; margin-top:3px}
+.chip{
+  font-size:10.5px; font-weight:600; letter-spacing:.04em; text-transform:uppercase;
+  border:1px solid var(--line); border-radius:999px; padding:1px 7px; color:var(--muted); white-space:nowrap;
+}
+.chip.core{border-color:var(--accent); color:var(--accent); background:var(--accent-soft)}
+.chip.cancel{border-color:var(--danger); color:var(--danger)}
+.chip.req{border-color:currentColor}
+tr.dim td{opacity:.55}
+tr.cancel td .t{text-decoration:line-through}
+tr.group td{background:var(--head); color:var(--ink); font-family:var(--font-display); font-weight:700; font-size:11.5px; text-transform:uppercase; letter-spacing:.05em; padding:5px 10px; text-align:center}
+tr.group.half td{background:#F9E8E0; color:#8C1D14; font-size:12px; letter-spacing:.05em; padding:6px 10px; border-top:2px solid var(--line)}
+tr.group.half.s2 td{background:#E9EFFC; color:#1D4ED8}
+tr.group.half.plain td{background:var(--head); color:var(--muted)}
+tr.group.sub td{background:var(--surface); color:var(--muted); font-size:10.5px; letter-spacing:.04em; text-align:left; padding:3px 10px; border-left:3px solid transparent}
+tr.group.sub.core td{color:#8C1D14; border-left-color:#A8352C; background:rgba(168,53,44,.05)}
+tr.group.sub.cust td{color:#4338CA; border-left-color:#4338CA; background:rgba(67,56,202,.05)}
+tr.group.sub.elec td{color:#0F766E; border-left-color:#0F766E; background:rgba(15,118,110,.05)}
+tr.group.sub.abr td{color:#1D4ED8; border-left-color:#1D4ED8; background:rgba(29,78,216,.05)}
+tr.group.sub.jpn td{color:#9D174D; border-left-color:#BE185D; background:rgba(190,24,93,.05)}
+tr.alt td{background:#FAF5E9}
+.bid{background:#FBEAC8; color:#7A4E12; border-radius:4px; padding:0 5px; font-weight:600; font-variant-numeric:tabular-nums}
+.bid.hot{background:#F6D9D5; color:#8C1D14}
+a.rmp.hi{color:#166534; border-color:#166534; background:rgba(22,101,52,.07)}
+a.rmp.mid{color:#92610C; border-color:#92610C; background:rgba(146,97,12,.07)}
+a.rmp.lo{color:#B3261E; border-color:#B3261E; background:rgba(179,38,30,.07)}
+td.pts input.on{background:rgba(168,53,44,.08); border-color:var(--accent); color:#7A1E18; font-weight:700}
+.parttabs{display:flex; flex-wrap:wrap; gap:6px; margin:0 0 6px}
+.parttabs[hidden]{display:none}
+.parttabs button{all:unset; cursor:pointer; font-size:12.5px; font-weight:700; padding:5px 12px; border-radius:6px; border:1px solid var(--line); background:var(--surface); color:var(--ink); font-variant-numeric:tabular-nums}
+.parttabs button .n{font-weight:400; color:var(--muted); margin-left:2px}
+.parttabs button:hover{border-color:var(--accent)}
+.parttabs button:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
+.parttabs button.p1[aria-selected="true"]{background:#F9E8E0; border-color:#A8352C; color:#8C1D14}
+.parttabs button.p2[aria-selected="true"]{background:#E9EFFC; border-color:#1D4ED8; color:#1D4ED8}
+.parttabs button[aria-selected="true"] .n{color:inherit}
+select.plan-sel{font:inherit; font-size:12px; color:var(--fg); background:var(--surface); border:1px solid var(--line); border-radius:4px; padding:1px 2px; max-width:100px}
+select.plan-sel.on{background:rgba(168,53,44,.08); border-color:var(--accent); color:#7A1E18; font-weight:700}
+select.plan-sel:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
+tr.group.semh td{background:var(--head); color:var(--ink); font-size:13px; letter-spacing:.06em; padding:8px 10px; border-top:3px double var(--line)}
+.stsrc{font-family:var(--font-body); font-size:10px; color:var(--muted); letter-spacing:.02em}
+.stsrc.fa{color:#9A5B12; font-weight:600}
+.chip.gb{border-color:#1D4ED8; color:#1D4ED8; background:rgba(29,78,216,.06)}
+td.num .more{color:var(--accent); font-weight:700}
+/* Planned tab: weekly schedule */
+.weekview{margin:0 0 12px; background:var(--surface); border:1px solid var(--line); border-radius:6px; box-shadow:0 2px 10px rgba(59,42,23,.12); padding:10px 12px 12px}
+.weekview[hidden]{display:none}
+.wk-head{display:flex; align-items:baseline; gap:6px 12px; flex-wrap:wrap; margin:0 0 8px}
+.wk-title{font-family:var(--font-display); font-weight:700; font-size:12.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink)}
+.wk-sum{font-size:12.5px; color:var(--muted); font-variant-numeric:tabular-nums}
+.wk-scroll{overflow-x:auto}
+.wk-grid{display:grid; font-size:11.5px}
+.wk-dayh{font-family:var(--font-display); font-weight:700; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink); text-align:center; padding:2px 0 5px; border-bottom:1px solid var(--line)}
+.wk-gutter{position:relative}
+.wk-hr{position:absolute; right:6px; transform:translateY(-50%); font-size:10.5px; color:var(--muted); font-variant-numeric:tabular-nums; white-space:nowrap}
+.wk-col{position:relative; border-left:1px solid var(--hairline)}
+.wk-col:last-child{border-right:1px solid var(--hairline)}
+.wk-ev{position:absolute; box-sizing:border-box; border-radius:4px; padding:3px 5px; line-height:1.25; overflow:hidden; color:var(--fg); background:#F7F0DD; border:1px solid var(--line); border-left:3px solid var(--muted)}
+.wk-ev b{display:block; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.wk-ev .wt{display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.wk-ev .wm{display:block; color:var(--muted); font-variant-numeric:tabular-nums; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.wk-ev.core{border-left-color:#A8352C}
+.wk-ev.cust{border-left-color:#4338CA; background:#EFEEFB}
+.wk-ev.elec{border-left-color:#0F766E; background:#E8F3F1}
+.wk-ev.jpn{border-left-color:#BE185D; background:#F9EAF1}
+.wk-ev.abr{border-left-color:#1D4ED8; background:#E9EFFC}
+.wk-ev.clash{background:#B3261E; border-color:#7F1D1D; border-left-color:#7F1D1D; color:#fff; z-index:1}
+.wk-ev.clash .wm{color:#FDE2E0}
+.wk-flag{display:inline-block; font-size:9.5px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; background:#fff; color:#B3261E; border-radius:3px; padding:0 4px; margin-bottom:1px}
+.wk-notes{margin:8px 0 0; font-size:12.5px; display:flex; flex-direction:column; gap:3px}
+.wk-notes .bad{color:#B3261E; font-weight:600}
+.wk-notes .ok,.wk-notes .off{color:var(--muted)}
+@media (max-width:640px){ header h1{font-size:19px} }
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Libre+Franklin:wght@400;600;700;800&display=swap">
+
+<div class="roller" aria-hidden="true"></div>
+<div class="sheet">
+<header class="bar">
+  <h1>The Codex of Courses</h1>
+  <span class="term">Spring 2027</span>
+  <div class="tabs" role="tablist" aria-label="View">
+    <button role="tab" id="tab-all" aria-selected="true">All sections</button>
+    <button role="tab" id="tab-plan" aria-selected="false">Planned (0)</button>
+    <button role="tab" id="tab-notes" aria-selected="false">Notes</button>
+    <button role="tab" id="tab-conc" aria-selected="false">Concentration</button>
+    <button role="tab" id="tab-road" aria-selected="false">Roadmap</button>
+    <button role="tab" id="tab-src" aria-selected="false">Sources</button>
+  </div>
+  <span class="budget" id="budget">0 / 1000 pts</span>
+</header>
+
+<div id="notesview" hidden>
+  <p id="notestate">saved on this device</p>
+  <textarea id="notes" placeholder="Course planning notes — bid strategy, backup sections, questions for your advisor…" aria-label="Planning notes"></textarea>
+</div>
+
+<div id="roadview" hidden>
+  <h2>MBA Roadmap — required classes by semester</h2>
+  <p class="concintro">Texas Full-Time MBA structure per the published curriculum — core is front-loaded in year one, year two is electives plus the two program requirements. Confirm hour totals and custom-core menus with your academic advisor.</p>
+  <div class="typegrid">
+    <div class="type"><div class="tn">Required core</div><div class="tv">8 classes · ≈16 hrs</div><div class="td2">7 in fall plus Strategic Management in spring — core classes run 2 hrs each (course numbers 28x)</div></div>
+    <div class="type"><div class="tn">Custom core</div><div class="tv">4 classes · 8 hrs</div><div class="td2">2 hrs each, chosen from the core menu: #1 in fall, #2–#4 in spring</div></div>
+    <div class="type"><div class="tn">Electives || Japanese language</div><div class="tv">≈12 classes · ≈36 hrs</div><div class="td2">Typically 3 hrs each (38x/39x numbers); a Japanese language course can fill an elective slot (JPN 601D–611D run 6 hrs). The Worldview and R&amp;I requirement courses count within these</div></div>
+    <div class="type"><div class="tn">Concentration — Global Business</div><div class="tv">within electives</div><div class="td2">12 hrs incl. one I B course (Option A) · 9 hrs + STEP (Option B) · 6 hrs + semester abroad (Option C)</div></div>
+  </div>
+  <p class="concnote">Class counts assume the commonly cited 60-hour full-time MBA; the public curriculum page doesn't publish per-type hour totals, so treat the ≈ figures as planning estimates and confirm the exact split with your advisor.</p>
+  <div class="sems">
+    <div class="sem">
+      <div class="semname">Fall 2026 · Semester 1 <span class="chip">in progress</span></div>
+      <div class="hb s1">Fall 1 · Aug – Oct</div>
+      <ul>
+        <li><b>Required core</b> — typically 3–4 classes · 2 hrs each: Financial Accounting, Statistics, Microeconomics, Marketing Management</li>
+      </ul>
+      <div class="hb s2">Fall 2 · Oct – Dec</div>
+      <ul>
+        <li><b>Required core</b> — typically 3 classes · 2 hrs each: Financial Management, Operations Management, plus Custom Core #1 (your menu pick)</li>
+      </ul>
+      <div class="hb both">Both halves · full term</div>
+      <ul>
+        <li><b>Strategic Career Planning</b> — 1 class, spans the semester</li>
+        <li><b>Semester total</b> — 8 classes · ≈16 hrs, all required</li>
+      </ul>
+    </div>
+    <div class="sem">
+      <div class="semname">Spring 2027 · Semester 2 <span class="chip gb">planning now</span></div>
+      <div class="hb s1">Spring 1 · Jan 12 – Feb 26</div>
+      <ul>
+        <li><b>Strategic Management (B A 288T)</b> — 1 class · 2 hrs, required, cohort-locked</li>
+        <li><b>1 custom core</b> — 2 hrs, from the Spring 1 menu: Valuation I, Performance Mgmt &amp; Control, Leading People &amp; Orgs, AI in Business &amp; Society</li>
+        <li><b>Elective 1 || Japanese language</b> — 3 hrs, full-term (6 hrs for JPN 601D–611D)</li>
+        <li><b>Elective 2 || Japanese language</b> — 3 hrs, full-term</li>
+        <li><b>In session: 4 classes · 10 hrs</b></li>
+      </ul>
+      <div class="hb s2">Spring 2 · Mar 1 – Apr 30</div>
+      <ul>
+        <li><b>Custom core class 1</b> — 2 hrs, from the Spring 2 menu: Managerial Macro, Managing Human Capital, Corporate Strategy, Business Analytics, Performance Mgmt &amp; Control</li>
+        <li><b>Custom core class 2</b> — 2 hrs, a second pick from the same menu</li>
+        <li><b>Electives 1 &amp; 2 || Japanese language continue</b> — full-term</li>
+        <li><b>In session: 4 classes · 10 hrs</b></li>
+      </ul>
+      <div class="hb both">Semester total</div>
+      <ul>
+        <li><b>6 classes · 14 hrs</b></li>
+      </ul>
+      <p id="roadprog"></p>
+    </div>
+    <div class="sem">
+      <div class="semname">Fall 2027 · Semester 3</div>
+      <div class="hb s1">Fall 1 · Aug – Oct</div>
+      <ul>
+        <li><b>0 required classes</b> — electives || Japanese language only; any 28x-numbered elective runs a single half</li>
+        <li>Board Fellows &amp; fellows applications open in September</li>
+      </ul>
+      <div class="hb s2">Fall 2 · Oct – Dec</div>
+      <ul>
+        <li><b>0 required classes</b> — electives || Japanese language only</li>
+      </ul>
+      <div class="hb both">Both halves · full term</div>
+      <ul>
+        <li><b>≈5 electives || Japanese language</b> — 3 hrs each (≈15 hrs); most meet all semester</li>
+        <li><b>Worldview of Business &amp; Society</b> requirement if not yet met; Global Business concentration hours</li>
+      </ul>
+    </div>
+    <div class="sem">
+      <div class="semname">Spring 2028 · Semester 4</div>
+      <div class="hb s1">Spring 1 · Jan – Feb</div>
+      <ul>
+        <li><b>0 required classes</b> — electives || Japanese language only; Global Connections classes meet now ahead of the March trip</li>
+      </ul>
+      <div class="hb s2">Spring 2 · Mar – Apr</div>
+      <ul>
+        <li><b>0 required classes</b> — electives || Japanese language only; Global Connections trips travel Mar 7–16, May STEPs depart after finals</li>
+      </ul>
+      <div class="hb both">Both halves · full term</div>
+      <ul>
+        <li><b>≈5 electives || Japanese language</b> — 3 hrs each (≈15 hrs) to close out hour requirements</li>
+        <li><b>Responsibility &amp; Integrity</b> requirement if not yet met (Investing in Philanthropy, Social/Ethical Resp, Managing Diverse Workforce qualify)</li>
+        <li>Finish Global Business: 12 hrs incl. one I B course (Option A), or 9 hrs + a STEP (Option B)</li>
+      </ul>
+    </div>
+  </div>
+  <p class="concnote">The Worldview and R&amp;I program requirements can be satisfied in any semester their courses are offered — the year-two placement above is just the usual pattern. Fall half-term sequencing is shown as typical; your own section schedule governs which half each core class lands in.</p>
+</div>
+
+<div id="srcview" hidden>
+  <h2>Sources</h2>
+  <p class="concintro">Where each part of this dashboard comes from. Items Nolan supplied are marked "from Nolan"; web sources link out. In this demo the professor names, ratings and bid numbers are made up; estimates are listed separately so they're easy to recheck.</p>
+  <div style="overflow-x:auto">
+  <table class="srctable">
+    <thead><tr><th>Area</th><th>Source</th><th>Used for</th></tr></thead>
+    <tbody>
+      <tr><td>Course schedule</td><td>McCombs MBA Spring 2027 course schedule — from Nolan (Oct 18, 2026)</td><td>Sections, unique numbers, professors, days and times, rooms, session (Spring 1 / Spring 2), section notes, restrictions, core tags</td></tr>
+      <tr><td>Registration list</td><td>Spring 2027 registration list — from Nolan (Oct 27, 2026)</td><td>2027 STEP and Washington Campus sections and seats; MIS 281N moved to Spring 2; the "Not in the Oct 27 registration list" notes</td></tr>
+      <tr><td>Fall bid history</td><td>20249 (Fall 2024) bid stats sheet — from Nolan (Oct 29, 2026)</td><td>Fall '24 Round 1 / Round 2 clears; Fall '27 availability; the 29 fall-only rows (no rooms or seat counts on the sheet)</td></tr>
+      <tr><td>Bid history</td><td>20242 (Spring 2024) and 20252 (Spring 2025) bid stats sheets — from Nolan</td><td>'25 seats awarded and the Round 1 / Round 2 clearing-bid averages; prior-year abroad programs</td></tr>
+      <tr><td>Bid budgets</td><td>From Nolan</td><td>1,000 pts Spring 2027; 1,500 pts each for Fall 2027 and Spring 2028</td></tr>
+      <tr><td>Professor ratings</td><td><a href="https://www.ratemyprofessors.com/school/1255" target="_blank" rel="noopener">RateMyProfessors, UT Austin</a> — read Oct 21 (MBA faculty) and Oct 27 (Japanese faculty), 2026</td><td>RMP column: rating, number of ratings, profile link</td></tr>
+      <tr><td>Concentration</td><td>Global Business — Texas Full-Time MBA Concentrations sheet, 2024–25 — from Nolan</td><td>Options A/B/C, approved course list, GB column, Concentration progress</td></tr>
+      <tr><td>Curriculum</td><td><a href="https://www.mccombs.utexas.edu/graduate/mba/full-time-mba/academics/curriculum" target="_blank" rel="noopener">McCombs Full-Time MBA curriculum</a></td><td>Year-one required core, custom core slots, electives (Roadmap)</td></tr>
+      <tr><td>Credit hours</td><td><a href="https://catalog.utexas.edu/archive/2019-20/general-information/academic-policies-and-procedures/credit-value-and-course-numbers/" target="_blank" rel="noopener">UT catalog — Credit Value and Course Numbers</a></td><td>Hours from the first digit of the course number; lower/upper-division/graduate rank</td></tr>
+      <tr><td>Course descriptions</td><td><a href="https://catalog.utexas.edu/archive/2020-21/graduate/fields-of-study/business/management/graduate-courses/" target="_blank" rel="noopener">UT graduate catalog — Management courses</a></td><td>MAN 283 format and topic descriptions</td></tr>
+      <tr><td>Japanese courses</td><td>Spring 2027 Japanese course list — from Nolan (Oct 27, 2026); <a href="https://catalog.utexas.edu/courses/jpn/" target="_blank" rel="noopener">UT catalog — JPN courses</a>; <a href="https://laits.utexas.edu/japanese/program/major.php" target="_blank" rel="noopener">UT Japanese program pages</a></td><td>JPN sections and times, prerequisites, First-/Second-Year equivalences, 330 as fourth-year</td></tr>
+      <tr><td>Locations</td><td>Room fields from the schedule and Oct 27 list; Japanese classes in the Will C. Hogg Building (from Nolan); building addresses from <a href="https://mccombs.utexas.edu/graduate/specialized-masters/ms-technology-commercialization/connect-with-us" target="_blank" rel="noopener">McCombs</a>, <a href="https://tarlton.law.utexas.edu/visiting-the-library/location-and-parking" target="_blank" rel="noopener">Texas Law</a> and <a href="https://cockrell.utexas.edu/contact" target="_blank" rel="noopener">Cockrell School</a> pages; coordinates from Google Places</td><td>Location column and walk time from Rowling Hall</td></tr>
+      <tr><td>Class year (611D)</td><td>From Nolan</td><td>JPN 611D = Sophomore, the anchor for the other Japanese years</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <h3>Estimates and inferences</h3>
+  <ul class="conclist">
+    <li><b>60-hour degree total</b> and the ≈12 electives / ≈36 hrs on the Roadmap — commonly cited, not published by type; confirm with your advisor</li>
+    <li><b>Fall 2026 half-term sequencing</b> on the Roadmap — shown as typical; your section schedule governs</li>
+    <li><b>Fall 2027 availability</b> — assumed from Fall 2024: courses on the 20249 sheet, or whose notes say "fall and spring", offer Fa '27; others may still run in fall. Fall '24-only courses offer Fa '27 only</li>
+    <li><b>Fall '24 ↔ Spring '27 matches</b> — by course number and title; Opportunity Ident And Analysis → MAN 385.73, Behav/Game Thry → FIN 397.17, and Merger/Acq Advisory → ACC 380K.34 had no topic number on the fall sheet. Fall '24 professors sometimes differ from Spring '27 (e.g. Investment Theory: Vance in fall, Bell in spring)</li>
+    <li><b>Spring 2028 availability</b> — assumed from this spring's schedule and past springs' bid sheets</li>
+    <li><b>Walk times from Rowling Hall</b> — estimated from building coordinates by street-grid distance at ~80 m/min (≈8 min to the McCombs CBA/GSB complex, ≈10 min to Will C. Hogg, ≈17 min to ECJ, ≈22 min to the law school); Japanese room numbers are TBD; off-campus and arranged courses (STEP, Washington Campus, independent studies, the web section) show where they happen instead of a walk time</li>
+    <li><b>Japanese years marked "?"</b> — inferred one step per prerequisite from 611D</li>
+    <li><b>Fuzzy matches in bid history</b> — e.g. Envir/Social/Gov Investing → Sustainable Finance, BGS 381M → 381N, Behaviorl Science for Business → Psych of Persuasion/Influence, Copenhagen history split March → AI for Social Ent, May → ESG</li>
+    <li><b>RMP matches</b> — some ratings come mostly from undergraduate sections; a few matches are probable rather than certain (e.g. Eaton for Negotiation)</li>
+  </ul>
+</div>
+
+<div id="concview" hidden>
+  <h2>Global Business Concentration</h2>
+  <p class="concintro">From the Texas Full-Time MBA concentration sheet (2024–25) — fulfill one of the three options below. Rules may have shifted since that sheet; confirm with your academic advisor.</p>
+  <div class="opts">
+    <div class="opt"><div class="optname">Option A</div><div>12 credit hours of approved courses, at least one carrying the I B prefix</div></div>
+    <div class="opt"><div class="optname">Option B</div><div>9 credit hours plus one Short-Term Exchange Program (STEP)</div></div>
+    <div class="opt"><div class="optname">Option C</div><div>6 credit hours plus one long semester abroad (3+ UT courses while abroad)</div></div>
+  </div>
+  <p id="concprog"></p>
+  <h3>Approved courses — and what the Spring 2027 schedule offers</h3>
+  <ul class="conclist">
+    <li><b>I B — any graduate course</b> — offered: the five Global Connections trips (Portugal, New Zealand, Italy, S Korea, Mexico), Busn/Geopolitics/Diplomacy, Global Net Zero Strategy, and the web-based Studies in Global Mgmt</li>
+    <li><b>BGS 380E Global Political Economy</b> — offered, MW 9:30–11:00a (Dalton)</li>
+    <li><b>MAN — Global Management</b> — offered as MAN 385.51, T 3:30–6:30p (Penn)</li>
+    <li><b>BGS 380 Global Regulatory Policy</b> — not on the Spring 2027 schedule; Fall 2024 ran a BGS 380 "Global Regulatory Strategy" (Zeller), possibly the same course — confirm before counting it</li>
+    <li><b>MAN 385 Management &amp; Marketing in the Global Arena</b> — not on the Spring 2027 schedule; ran Fall 2024 as MAN 385.33, W 3:30–6:30p (Penn)</li>
+    <li><b>MKT 382 Invisible Global Marketing</b> — not on the Spring 2027 schedule</li>
+    <li><b>RM 395 / PA 388K Managing International Risk</b> — not on the Spring 2027 schedule; ran Fall 2024 as R M 395.7, TTH 9:30–11:00a (Salas)</li>
+    <li><b>UT Foreign Language</b> — any UT foreign-language course counts; Spring 2027 Japanese sections (JPN 601D–330) are in the table under the Japanese language category</li>
+  </ul>
+  <p class="concnote">Courses marked <span class="chip gb">GB</span> in the table count toward the concentration; STEP rows satisfy Option B's program leg.</p>
+</div>
+
+<div class="toolbar">
+  <input type="search" id="q" placeholder="Search title, professor, number, notes…" aria-label="Search courses">
+  <select id="dept" aria-label="Department"><option value="">All depts</option></select>
+  <select id="days" aria-label="Days">
+    <option value="">Any days</option><option>MW</option><option>TTH</option>
+    <option>M</option><option>T</option><option>W</option><option>TH</option>
+  </select>
+  <select id="sess" aria-label="Session">
+    <option value="">Any session</option>
+    <option value="S1">Meets in Spring 1</option>
+    <option value="S2">Meets in Spring 2</option>
+    <option value="full">Full semester only</option>
+    <option value="f24">Fall '24 listings</option>
+  </select>
+  <select id="cat" aria-label="Category">
+    <option value="">Any category</option>
+    <option>Required core</option>
+    <option>Custom core</option>
+    <option>Electives</option>
+    <option>Japanese language</option>
+    <option>Abroad</option>
+  </select>
+  <label class="toggle"><input type="checkbox" id="hide"> Hide restricted &amp; canceled</label>
+  <label class="toggle"><input type="checkbox" id="dedupe"> One row per course</label>
+</div>
+<p id="count"></p>
+<p id="legend">★ green ≥4.0 · amber 3.0–3.9 · red below 3.0 — bid pills: amber = cleared above 0, red = 500+ — hover any row for section number, room, '25 seats, and notes</p>
+
+<div id="parttabs" class="parttabs" role="tablist" aria-label="Semester part" hidden></div>
+<section id="weekview" class="weekview" aria-label="Weekly schedule" hidden></section>
+<div class="tablewrap">
+<table>
+  <thead><tr>
+    <th class="plan" title="Pick the semester plan to add the course to; — removes it">Plan</th>
+    <th class="plan">Pts</th>
+    <th><button data-k="code">Course</button></th>
+    <th><button data-k="title">Title</button></th>
+    <th class="plan"><button data-k="gb">Conc</button></th>
+    <th><button data-k="prof">Professor</button></th>
+    <th><button data-k="rmp">RMP</button></th>
+    <th><button data-k="start">Days · Time</button></th>
+    <th title="Building and room; minutes is the estimated walk from Rowling Hall"><button data-k="walk">Location · walk</button></th>
+    <th style="text-align:right" title="Market-clearing bid per course for the semester you're planning: spring rows average Spring 2024 and 2025; Fall '27 plans show Fall 2024. 0 = seats still open at close, n/a = no data. Hover a row for section number, room, '25 seats, and notes."><button data-k="r1">Rd 1</button> · <button data-k="r2">Rd 2</button></th>
+  </tr></thead>
+  <tbody id="tb"></tbody>
+</table>
+</div>
+</div>
+<div class="roller" aria-hidden="true"></div>
+
+<script>
+/* DEMO: in-memory storage, seeded with a sample plan; nothing is saved */
+const DEMO_STORE=(()=>{const m=new Map(Object.entries({"plan2027": "[\"04385\", \"03520\", \"04510\", \"03040\", \"03685\"]", "plan2027pts": "{\"04385\": 120, \"03520\": 60, \"04510\": 250, \"03040\": 300, \"03685\": 200}", "plan2027sems": "{\"04385\": \"SP27\", \"03520\": \"SP27\", \"04510\": \"SP27\", \"03040\": \"SP27\", \"03685\": \"SP27\"}", "plan2027notes": "Sample notes (demo):\n- Valuation I in Spring 1 clears near 0 in round 1, so bid low.\n- Fintech is the one to protect, so put the most points there.\n- Backup for Global Connections: the S Korea section."}));return {getItem:k=>m.has(k)?m.get(k):null,setItem:(k,v)=>m.set(k,String(v)),removeItem:k=>m.delete(k)};})();
+// u, dept, code, title, prof, days, time, start(min, 9999=TBA), room, sess(""|S1|S2|short), tags[], note
+const C=[
+{u:"03040",d:"ACC",c:"ACC 380K.7",t:"Financial Statement Analysis",p:"Vail, J",dy:"MW",tm:"11:00a–12:30p",s:660,r:"RRH 3.414",se:"",tg:[],n:"MBA + MPA. Fall & spring. 20 MBA seats."},
+{u:"03045",d:"ACC",c:"ACC 380K.7",t:"Financial Statement Analysis",p:"Vail, J",dy:"MW",tm:"12:30–2:00p",s:750,r:"RRH 3.414",se:"",tg:[],n:"MBA + MPA. Fall & spring. 20 MBA seats."},
+{u:"03050",d:"ACC",c:"ACC 380K.7",t:"Financial Statement Analysis",p:"Vail, J",dy:"MW",tm:"2:00–3:30p",s:840,r:"RRH 3.414",se:"",tg:[],n:"MBA + MPA. Fall & spring. 20 MBA seats."},
+{u:"03105",d:"ACC",c:"ACC 380K.24",t:"Fin Planning & Wealth Mgmt",p:"Dunn, P",dy:"TTH",tm:"11:00a–12:30p",s:660,r:"GSB 5.142",se:"",tg:[],n:"MBA + MPA. Spring only. 5 MBA seats."},
+{u:"03110",d:"ACC",c:"ACC 380K.24",t:"Fin Planning & Wealth Mgmt",p:"Dunn, P",dy:"TTH",tm:"3:30–5:00p",s:930,r:"GSB 5.142",se:"",tg:[],n:"MBA + MPA. Spring only. 5 MBA seats."},
+{u:"03115",d:"ACC",c:"ACC 380K.24",t:"Fin Planning & Wealth Mgmt",p:"Dunn, P",dy:"TTH",tm:"12:30–2:00p",s:750,r:"GSB 5.142",se:"",tg:[],n:"MBA + MPA. Spring only. 5 MBA seats."},
+{u:"03120",d:"ACC",c:"ACC 380K.24",t:"Fin Planning & Wealth Mgmt",p:"Dunn, P",dy:"TTH",tm:"2:00–3:30p",s:840,r:"GSB 5.142",se:"",tg:[],n:"MBA + MPA. Spring only. 5 MBA seats."},
+{u:"03125",d:"ACC",c:"ACC 380K.26",t:"Govt / Not-For-Profit Acct",p:"Pruitt, F",dy:"TTH",tm:"8:00–9:30a",s:480,r:"CBA 4.328",se:"",tg:[],n:"MBA + MPA. 5 MBA seats."},
+{u:"03135",d:"ACC",c:"ACC 380K.33",t:"Healthcare Acctg / Finance",p:"Delgado, D",dy:"MW",tm:"9:30–11:00a",s:570,r:"GSB 5.142",se:"",tg:[],n:"MBA + MPA. Spring only. 15 MBA seats."},
+{u:"03140",d:"ACC",c:"ACC 380K.34",t:"Merger / Acq Advisory Servcs",p:"Ames, P",dy:"MW",tm:"2:00–3:30p",s:840,r:"RRH 3.310",se:"",tg:[],n:"MBA + MPA. Fall & spring. 5 MBA seats."},
+{u:"03178",d:"ACC",c:"ACC 284.9",t:"Oil And Gas Taxation",p:"Sato, P",dy:"T",tm:"3:45–5:45p",s:945,r:"JON 5.257",se:"",tg:[],n:"Primarily MPA. 1 MBA seat to start."},
+{u:"03245",d:"ACC",c:"ACC 287.5",t:"Performance Mgmt And Control",p:"Cortez, L",dy:"MW",tm:"10:30a–12:30p",s:630,r:"RRH 4.314",se:"S1",tg:["Custom core"],n:"Jan 11–Feb 24 (MLK make-up Fri Jan 22). Final exam Feb 26."},
+{u:"03250",d:"ACC",c:"ACC 287.5",t:"Performance Mgmt And Control",p:"Cortez, L",dy:"MW",tm:"1:00–3:00p",s:780,r:"RRH 4.314",se:"S1",tg:["Custom core"],n:"Jan 11–Feb 24 (MLK make-up Fri Jan 22). Final exam Feb 26."},
+{u:"03255",d:"ACC",c:"ACC 287.5",t:"Performance Mgmt And Control",p:"Cortez, L",dy:"MW",tm:"10:30a–12:30p",s:630,r:"RRH 4.314",se:"S2",tg:["Custom core"],n:"Mar 1–Apr 26. Exam week of Apr 27–30."},
+{u:"03260",d:"ACC",c:"ACC 287.5",t:"Performance Mgmt And Control",p:"Cortez, L",dy:"MW",tm:"1:00–3:00p",s:780,r:"RRH 4.314",se:"S2",tg:["Custom core"],n:"Mar 1–Apr 26. Exam week of Apr 27–30."},
+{u:"03285",d:"ACC",c:"ACC 391S",t:"Independent Study",p:"—",dy:"—",tm:"—",s:9999,r:"—",se:"",tg:["Restricted"],n:"Contact an academic advisor. Not in the Oct 27 registration list."},
+{u:"02425",d:"B A",c:"B A 284S.2",t:"Managerial Macroeconomics",p:"Wolfe, M",dy:"TTH",tm:"8:30–10:30a",s:510,r:"RRH 4.408",se:"S2",tg:["Custom core"],n:"Mar 2–Apr 22. Exam week of Apr 27–30."},
+{u:"02430",d:"B A",c:"B A 284S.2",t:"Managerial Macroeconomics",p:"Wolfe, M",dy:"TTH",tm:"10:30a–12:30p",s:630,r:"RRH 4.408",se:"S2",tg:["Custom core"],n:"Mar 2–Apr 22. Exam week of Apr 27–30."},
+{u:"02435",d:"B A",c:"B A 284S.2",t:"Managerial Macroeconomics",p:"Wolfe, M",dy:"TTH",tm:"1:00–3:00p",s:780,r:"RRH 4.408",se:"S2",tg:["Custom core"],n:"Mar 2–Apr 22. Exam week of Apr 27–30."},
+{u:"02460",d:"B A",c:"B A 288T",t:"Strategic Management",p:"Ford, T",dy:"TTH",tm:"8:30–10:30a",s:510,r:"RRH 4.408",se:"S1",tg:["MBA core"],n:"Cohort I only. Jan 12–Feb 25. Not in the Oct 27 registration list."},
+{u:"02465",d:"B A",c:"B A 288T",t:"Strategic Management",p:"Ford, T",dy:"TTH",tm:"10:30a–12:30p",s:630,r:"RRH 4.408",se:"S1",tg:["MBA core"],n:"Cohort II only. Jan 12–Feb 25. Not in the Oct 27 registration list."},
+{u:"02470",d:"B A",c:"B A 288T",t:"Strategic Management",p:"Ford, T",dy:"TTH",tm:"1:00–3:00p",s:780,r:"RRH 4.408",se:"S1",tg:["MBA core"],n:"Cohort III only. Jan 12–Feb 25. Not in the Oct 27 registration list."},
+{u:"02475",d:"B A",c:"B A 288T",t:"Strategic Management",p:"Ford, T",dy:"TTH",tm:"3:00–5:00p",s:900,r:"RRH 4.408",se:"S1",tg:["MBA core"],n:"Cohort IV only. Jan 12–Feb 25. Not in the Oct 27 registration list."},
+{u:"03485",d:"BGS",c:"BGS 380",t:"Investing In Philanthropy",p:"Yates, E",dy:"TTH",tm:"9:30–11:00a",s:570,r:"RRH 3.402",se:"",tg:["R&I"],n:"Spring only. Fulfills Responsibility & Integrity requirement."},
+{u:"03490",d:"BGS",c:"BGS 380",t:"Smnr: Business Law Workshop",p:"Gill, H",dy:"T",tm:"3:45–5:45p",s:945,r:"TNH 3.124",se:"",tg:[],n:"Meets with LAW 397S. 5 MBA seats."},
+{u:"03495",d:"BGS",c:"BGS 380",t:"The Meaning / Purpose Of Work",p:"Novak, G",dy:"W",tm:"2:00–5:00p",s:840,r:"RRH 5.382",se:"",tg:[],n:""},
+{u:"03500",d:"BGS",c:"BGS 380",t:"The Psych Of Pers / Influence",p:"Mays, E",dy:"TTH",tm:"12:30–2:00p",s:750,r:"RRH 3.402",se:"",tg:[],n:""},
+{u:"03520",d:"BGS",c:"BGS 380E",t:"Global Political Economy",p:"Dalton, P",dy:"MW",tm:"9:30–11:00a",s:570,r:"RRH 3.310",se:"",tg:["Worldview"],n:"Fulfills Worldview of Business & Society requirement."},
+{u:"03525",d:"BGS",c:"BGS 381N",t:"Socl / Ethical Respnsblt Acct",p:"Gallo, A",dy:"TTH",tm:"2:00–3:30p",s:840,r:"RRH 4.308",se:"",tg:["R&I"],n:"Fulfills R&I requirement. 5 MBA seats."},
+{u:"03535",d:"BGS",c:"BGS 391S",t:"Independent Study",p:"—",dy:"—",tm:"—",s:9999,r:"—",se:"",tg:["Restricted"],n:"Contact an academic advisor. Not in the Oct 27 registration list."},
+{u:"04385",d:"FIN",c:"FIN 286",t:"Valuation I",p:"Crane, N",dy:"MW",tm:"8:30–10:30a",s:510,r:"RRH 5.408",se:"S1",tg:["Custom core"],n:"Jan 11–Feb 24 (MLK make-up Fri Jan 22). Final exam Feb 26."},
+{u:"04390",d:"FIN",c:"FIN 286",t:"Valuation I",p:"Crane, N",dy:"MW",tm:"10:30a–12:30p",s:630,r:"RRH 5.408",se:"S1",tg:["Custom core"],n:"Jan 11–Feb 24 (MLK make-up Fri Jan 22). Final exam Feb 26."},
+{u:"04435",d:"FIN",c:"FIN 391S",t:"Independent Study",p:"—",dy:"—",tm:"—",s:9999,r:"—",se:"",tg:["Restricted"],n:"Contact an academic advisor. Not in the Oct 27 registration list."},
+{u:"04490",d:"FIN",c:"FIN 394",t:"International Finance",p:"Maddox, S",dy:"TTH",tm:"3:30–5:00p",s:930,r:"GSB 3.104",se:"",tg:[],n:"Meets with FIN 376 (BBA). 5 MBA seats."},
+{u:"04495",d:"FIN",c:"FIN 394",t:"Priv Eqty II: Oprtn / Val Crtn",p:"Upton, H",dy:"TTH",tm:"2:00–3:30p",s:840,r:"RRH 3.310",se:"",tg:[],n:"Prereq: Private Equity I. Spring only."},
+{u:"04500",d:"FIN",c:"FIN 394.1",t:"Advanced Corporate Finance",p:"Wade, P",dy:"TTH",tm:"9:30–11:00a",s:570,r:"RRH 3.310",se:"",tg:[],n:"Prereq: credit or registration for FIN 286 Valuation. Fall & spring."},
+{u:"04505",d:"FIN",c:"FIN 394.1",t:"Advanced Corporate Finance",p:"Wade, P",dy:"TTH",tm:"2:00–3:30p",s:840,r:"RRH 3.402",se:"",tg:[],n:"Prereq: credit or registration for FIN 286 Valuation. Fall & spring."},
+{u:"04510",d:"FIN",c:"FIN 394.5",t:"Financial Technology",p:"Ross, R",dy:"TTH",tm:"9:30–11:00a",s:570,r:"RRH 5.382",se:"",tg:[],n:""},
+{u:"04520",d:"FIN",c:"FIN 394.10",t:"New Venture Finance",p:"Duarte, E",dy:"MW",tm:"9:30–11:00a",s:570,r:"RRH 2.238",se:"",tg:[],n:"Prereq: credit or registration for FIN 286 Valuation. Fall & spring."},
+{u:"04525",d:"FIN",c:"FIN 394.14",t:"Venture Captl Fellows Prog",p:"Marlow, F",dy:"W",tm:"6:30–9:30p",s:1110,r:"RRH 5.408",se:"",tg:["Restricted"],n:"Venture Fellows students only. Not in the Oct 27 registration list."},
+{u:"04530",d:"FIN",c:"FIN 394.17",t:"Adv Valuatn & Fincl Modlng",p:"Royce, N",dy:"TTH",tm:"12:30–2:00p",s:750,r:"RRH 4.314",se:"",tg:[],n:"Prereq: FIN 286. ITP and Adv Corp Fin recommended first; access per instructor."},
+{u:"04535",d:"FIN",c:"FIN 394.26",t:"Mergers And Acquisitions",p:"Hunt, J",dy:"MW",tm:"9:30–11:00a",s:570,r:"RRH 5.382",se:"",tg:[],n:""},
+{u:"04540",d:"FIN",c:"FIN 394.27",t:"Investment Bank Pract",p:"Cruz, S",dy:"W F",tm:"W 6:00–8:00p, F 1:00–2:30p",s:1080,r:"GSB 2.126 / 2.124",se:"",tg:["Restricted"],n:"WSFM students only. Not in the Oct 27 registration list."},
+{u:"04575",d:"FIN",c:"FIN 297.4",t:"Financial Risk Manage (MBA)",p:"Foster, G",dy:"TTH",tm:"3:30–5:30p",s:930,r:"RRH 5.420",se:"S2",tg:[],n:"Prereqs: FIN 286, FIN 397 ITP, and credit/registration for Adv Corp Fin. Mar 9–Apr 22."},
+{u:"04600",d:"FIN",c:"FIN 397",t:"AI Powered Investments",p:"Kendrick, G",dy:"TTH",tm:"2:00–3:30p",s:840,r:"CBA 4.348",se:"",tg:[],n:"Meets with FIN 372T."},
+{u:"04605",d:"FIN",c:"FIN 397.1",t:"Investment Theory & Practice",p:"Bell, K",dy:"MW",tm:"8:00–9:30a",s:480,r:"RRH 3.414",se:"",tg:[],n:"Prereq: credit or registration for FIN 286 Valuation. Fall & spring."},
+{u:"04610",d:"FIN",c:"FIN 397.1",t:"Investment Theory & Practice",p:"Bell, K",dy:"MW",tm:"9:30–11:00a",s:570,r:"RRH 3.414",se:"",tg:[],n:"Prereq: credit or registration for FIN 286 Valuation. Fall & spring."},
+{u:"04615",d:"FIN",c:"FIN 397.2",t:"Portfolio Mgmt & Secur Anly",p:"Vance, L",dy:"T",tm:"4:00–7:00p",s:960,r:"RRH 5.382",se:"",tg:["Restricted"],n:"Investment Fund students only. Not in the Oct 27 registration list."},
+{u:"04620",d:"FIN",c:"FIN 397.6",t:"Spec Tpcs In Investment: REIT",p:"Juarez, N",dy:"T",tm:"12:30–3:30p",s:750,r:"RRH 4.304",se:"",tg:["Restricted"],n:"REIT Fund students only. Not in the Oct 27 registration list."},
+{u:"04625",d:"FIN",c:"FIN 397.14",t:"Sustainable Finance",p:"Farrow, B",dy:"MW",tm:"9:30–11:00a",s:570,r:"RRH 4.408",se:"",tg:[],n:""},
+{u:"04630",d:"FIN",c:"FIN 397.16",t:"Titans Of Investing",p:"Archer, F",dy:"W",tm:"4:00–6:30p",s:960,r:"RRH 5.408",se:"",tg:["Restricted"],n:"Application based. Contact Finance dept or an advisor. Not in the Oct 27 registration list."},
+{u:"04635",d:"FIN",c:"FIN 397.17",t:"Behav / Game Thry / Team Mgmt",p:"Maddox, S",dy:"TTH",tm:"11:00a–12:30p",s:660,r:"RRH 4.308",se:"",tg:[],n:""},
+{u:"04640",d:"FIN",c:"FIN 397P",t:"Investments Practicum",p:"Iverson, G",dy:"MW",tm:"3:30–6:00p",s:930,r:"RRH 4.304",se:"",tg:["Restricted"],n:"Contact Finance dept for registration. Not in the Oct 27 registration list."},
+{u:"03670",d:"I B",c:"I B 185E",t:"Studies Glbl Mgmt / Busn Prac (Web)",p:"Hale, R",dy:"—",tm:"Web-based",s:9999,r:"—",se:"",tg:[],n:"Not in the Oct 27 registration list."},
+{u:"03675",d:"I B",c:"I B 385E",t:"Global Connections: Portugal",p:"Hollis, G",dy:"M",tm:"2:00–5:00p",s:840,r:"RRH 5.382",se:"",tg:["Worldview","Abroad"],n:"Mandatory trip Mar 7–16, Portugal & Morocco."},
+{u:"03680",d:"I B",c:"I B 385E",t:"Global Connections: New Zealand",p:"Zeller, F",dy:"T",tm:"3:30–6:30p",s:930,r:"RRH 3.414",se:"",tg:["Worldview","Abroad"],n:"Mandatory trip Mar 7–16, Auckland & Wellington."},
+{u:"03685",d:"I B",c:"I B 385E",t:"Global Connections: Italy",p:"Stone, B",dy:"TTH",tm:"2:00–3:30p",s:840,r:"RRH 3.414",se:"",tg:["Worldview","Abroad"],n:"Mandatory trip Mar 7–16, Italy."},
+{u:"03690",d:"I B",c:"I B 385E",t:"Global Connections: S Korea",p:"Crane, N",dy:"MW",tm:"12:30–2:00p",s:750,r:"RRH 5.408",se:"",tg:["Worldview","Abroad"],n:"Mandatory trip Mar 7–16, Taipei & Seoul."},
+{u:"03695",d:"I B",c:"I B 385E",t:"Global Connections: Mexico",p:"Hale, R",dy:"MW",tm:"12:30–2:00p",s:750,r:"RRH 5.382",se:"",tg:["Worldview","Abroad"],n:"Mandatory trip Mar 7–16, Mexico City."},
+{u:"03700",d:"I B",c:"I B 395",t:"Busn / Geopolitics / Diplomacy",p:"Drake, R",dy:"TTH",tm:"9:30–11:00a",s:570,r:"RRH 4.314",se:"",tg:["Worldview"],n:"Fulfills Worldview requirement."},
+{u:"03705",d:"I B",c:"I B 395",t:"Global Net Zero Strategy",p:"Pace, T",dy:"TTH",tm:"2:00–3:30p",s:840,r:"RRH 5.408",se:"",tg:["Worldview"],n:"Fulfills Worldview requirement."},
+{u:"03830",d:"LEB",c:"LEB 380",t:"Name Image And Likeness",p:"Irwin, C",dy:"TTH",tm:"11:00a–12:30p",s:660,r:"GSB 3.104",se:"",tg:[],n:""},
+{u:"03835",d:"LEB",c:"LEB 380.26",t:"Law For Entrepreneurs",p:"Blake, E",dy:"TTH",tm:"9:30–11:00a",s:570,r:"RRH 4.304",se:"",tg:[],n:""},
+{u:"03840",d:"LEB",c:"LEB 380.39",t:"Energy Law: Reg Energy Mkts",p:"Mercer, N",dy:"MW",tm:"9:00–10:30a",s:540,r:"TNH 3.126",se:"",tg:[],n:"Meets with LAW, P A."},
+{u:"06460",d:"MAN",c:"MAN 283.16",t:"Leading People And Orgs",p:"Winslow, K",dy:"MW",tm:"8:30–10:30a",s:510,r:"RRH 4.416",se:"S1",tg:["Custom core"],n:"Jan 11–Feb 24 (MLK make-up Fri Jan 22). Final exam Feb 26."},
+{u:"06465",d:"MAN",c:"MAN 283.16",t:"Leading People And Orgs",p:"Winslow, K",dy:"MW",tm:"10:30a–12:30p",s:630,r:"RRH 4.416",se:"S1",tg:["Custom core"],n:"Jan 11–Feb 24 (MLK make-up Fri Jan 22). Final exam Feb 26."},
+{u:"06470",d:"MAN",c:"MAN 283.16",t:"Leading People And Orgs",p:"Winslow, K",dy:"MW",tm:"1:00–3:00p",s:780,r:"RRH 4.416",se:"S1",tg:["Custom core"],n:"Jan 11–Feb 24 (MLK make-up Fri Jan 22). Final exam Feb 26."},
+{u:"06475",d:"MAN",c:"MAN 283.16",t:"Leading People And Orgs",p:"Winslow, K",dy:"MW",tm:"3:00–5:00p",s:900,r:"RRH 4.416",se:"S1",tg:["Custom core"],n:"Jan 11–Feb 24 (MLK make-up Fri Jan 22). Final exam Feb 26."},
+{u:"06480",d:"MAN",c:"MAN 283.24",t:"Managing Human Capital",p:"Winslow, K",dy:"MW",tm:"10:30a–12:30p",s:630,r:"RRH 4.416",se:"S2",tg:["Custom core"],n:"Mar 1–Apr 26. Exam week of Apr 27–30."},
+{u:"06485",d:"MAN",c:"MAN 283.24",t:"Managing Human Capital",p:"Winslow, K",dy:"MW",tm:"8:30–10:30a",s:510,r:"RRH 4.416",se:"S2",tg:["Custom core"],n:"Mar 1–Apr 26. Exam week of Apr 27–30."},
+{u:"06540",d:"MAN",c:"MAN 383.20",t:"Art And Sci Of Negotiation",p:"Harlow, N",dy:"MW",tm:"11:00a–12:30p",s:660,r:"RRH 4.408",se:"",tg:[],n:"Fall & spring."},
+{u:"06545",d:"MAN",c:"MAN 383.20",t:"Art And Sci Of Negotiation",p:"Harlow, N",dy:"MW",tm:"12:30–2:00p",s:750,r:"RRH 4.408",se:"",tg:[],n:"Fall & spring."},
+{u:"06550",d:"MAN",c:"MAN 383.20",t:"Art And Sci Of Negotiation",p:"Eaton, A",dy:"TTH",tm:"12:30–2:00p",s:750,r:"RRH 3.310",se:"",tg:[],n:"Fall & spring."},
+{u:"06555",d:"MAN",c:"MAN 285",t:"Corporate Strat / Firm Growth",p:"Zhou, C",dy:"TTH",tm:"10:30a–12:30p",s:630,r:"RRH 5.408",se:"S2",tg:["Custom core"],n:"Mar 1–Apr 26. Exam week of Apr 27–30."},
+{u:"06560",d:"MAN",c:"MAN 285",t:"Corporate Strat / Firm Growth",p:"Zhou, C",dy:"TTH",tm:"8:30–10:30a",s:510,r:"RRH 5.408",se:"S2",tg:["Custom core"],n:"Mar 2–Apr 22. Exam week of Apr 27–30."},
+{u:"06600",d:"MAN",c:"MAN 385",t:"Energy Ventures Practicum",p:"Voss, C",dy:"W",tm:"3:30–6:30p",s:930,r:"RRH 3.304",se:"",tg:["Restricted"],n:"Application based. Contact pancho.gomez@mccombs.utexas.edu. Not in the Oct 27 registration list."},
+{u:"06605",d:"MAN",c:"MAN 385",t:"ETA And Srch Fund Practicum",p:"Ellis, W",dy:"M",tm:"3:00–6:00p",s:900,r:"RRH 4.314",se:"",tg:["Restricted"],n:"Application based. Contact pancho.gomez@mccombs.utexas.edu. Not in the Oct 27 registration list."},
+{u:"06614",d:"MAN",c:"MAN 385",t:"Forty Acres Founders Pract",p:"Abbott, G",dy:"TH",tm:"2:00–5:00p",s:840,r:"RRH 4.304",se:"",tg:[],n:"Not in the Oct 27 registration list."},
+{u:"06615",d:"MAN",c:"MAN 385.22",t:"New Venture Creation",p:"Hollis, G",dy:"MW",tm:"11:00a–12:30p",s:660,r:"RRH 2.238",se:"",tg:[],n:""},
+{u:"06620",d:"MAN",c:"MAN 385.24",t:"Entrepreneurial Growth",p:"Penn, D",dy:"MW",tm:"11:00a–12:30p",s:660,r:"RRH 3.304",se:"",tg:[],n:""},
+{u:"06625",d:"MAN",c:"MAN 385.27",t:"Leading Innovatn And Change",p:"Sutton, J",dy:"TH",tm:"3:30–6:30p",s:930,r:"RRH 5.408",se:"",tg:["Canceled"],n:"Canceled for spring 2027. Not in the Oct 27 registration list."},
+{u:"06630",d:"MAN",c:"MAN 385.38",t:"Managing Diverse Workforce",p:"Nash, D",dy:"TTH",tm:"2:00–3:30p",s:840,r:"RRH 2.238",se:"",tg:["R&I"],n:"Fulfills R&I requirement."},
+{u:"06635",d:"MAN",c:"MAN 385.51",t:"Global Management",p:"Penn, D",dy:"T",tm:"3:30–6:30p",s:930,r:"RRH 3.304",se:"",tg:["Worldview"],n:"Fulfills Worldview requirement."},
+{u:"06640",d:"MAN",c:"MAN 385.56",t:"Healthcare Busn Ecosystem",p:"Bowen, C",dy:"TTH",tm:"5:00–6:30p",s:1020,r:"RRH 3.402",se:"",tg:[],n:""},
+{u:"06650",d:"MAN",c:"MAN 385.62",t:"Corporate Governance",p:"Whitaker, N",dy:"TH",tm:"3:30–6:30p",s:930,r:"RRH 4.416",se:"",tg:[],n:""},
+{u:"06655",d:"MAN",c:"MAN 385.68",t:"Performance / Sports Anlytcs",p:"Quinlan, A",dy:"TH",tm:"3:30–6:30p",s:930,r:"RRH 3.414",se:"",tg:[],n:""},
+{u:"06665",d:"MAN",c:"MAN 385.73",t:"Opportnty Identity / Analysis",p:"Penn, D",dy:"MW",tm:"2:00–3:30p",s:840,r:"RRH 3.304",se:"",tg:[],n:""},
+{u:"06670",d:"MAN",c:"MAN 385.74",t:"Technology Strategy",p:"Park, H",dy:"TTH",tm:"2:00–3:30p",s:840,r:"RRH 5.382",se:"",tg:[],n:""},
+{u:"06675",d:"MAN",c:"MAN 385.75",t:"Energy Technology / Policy",p:"Walsh, T",dy:"TTH",tm:"8:00–9:30a",s:480,r:"ECJ",se:"",tg:[],n:"Building per Oct 27 registration list (schedule had ACS 0.104)."},
+{u:"06900",d:"MAN",c:"MAN 391S",t:"Independent Study",p:"—",dy:"—",tm:"—",s:9999,r:"—",se:"",tg:["Restricted"],n:"Contact an academic advisor. Not in the Oct 27 registration list."},
+{u:"05400",d:"MIS",c:"MIS 281N",t:"AI For Digital Transformatn",p:"Rhodes, M",dy:"TTH",tm:"11:00a–12:30p",s:660,r:"RRH 3.304",se:"S2",tg:[],n:"Spring 2 (per Oct 27 registration list; 2-credit half-term)."},
+{u:"05440",d:"MIS",c:"MIS 281N.33",t:"AI In Business And Society",p:"Knox, F",dy:"TTH",tm:"8:30–10:30a",s:510,r:"RRH 5.408",se:"S1",tg:["Custom core"],n:"Jan 12–Feb 25. Final exam Feb 26."},
+{u:"05445",d:"MIS",c:"MIS 281N.33",t:"AI In Business And Society",p:"Knox, F",dy:"TTH",tm:"10:30a–12:30p",s:630,r:"RRH 5.408",se:"S1",tg:["Custom core"],n:"Jan 12–Feb 25. Final exam Feb 26."},
+{u:"05450",d:"MIS",c:"MIS 281N.33",t:"AI In Business And Society",p:"Knox, F",dy:"TTH",tm:"2:00–4:00p",s:840,r:"RRH 4.314",se:"S1",tg:["Custom core"],n:"Jan 12–Feb 25. Final exam Feb 26."},
+{u:"05465",d:"MIS",c:"MIS 382N",t:"AI / Digital Hlth Innovation",p:"Rhodes, M",dy:"TTH",tm:"2:00–3:30p",s:840,r:"RRH 3.304",se:"",tg:[],n:""},
+{u:"05470",d:"MIS",c:"MIS 382N.13",t:"Pred Anly And Data Mining",p:"Jarvis, K",dy:"TTH",tm:"12:30–2:00p",s:750,r:"RRH 5.382",se:"",tg:[],n:""},
+{u:"05615",d:"MIS",c:"MIS 391S",t:"Independent Study",p:"—",dy:"—",tm:"—",s:9999,r:"—",se:"",tg:["Restricted"],n:"Contact an academic advisor. Not in the Oct 27 registration list."},
+{u:"07404",d:"MKT",c:"MKT 282.46",t:"AI For Busn Leaders (EMBA)",p:"Doyle, T",dy:"—",tm:"—",s:9999,r:"—",se:"",tg:[],n:"Not in the Oct 27 registration list."},
+{u:"07405",d:"MKT",c:"MKT 382",t:"Advncd AI Apps In Marketing",p:"Gage, D",dy:"TTH",tm:"12:30–2:00p",s:750,r:"RRH 4.416",se:"",tg:[],n:""},
+{u:"07415",d:"MKT",c:"MKT 382",t:"AI For Competitive Advntge",p:"Doyle, T",dy:"TTH",tm:"9:30–11:00a",s:570,r:"RRH 3.414",se:"",tg:[],n:""},
+{u:"07420",d:"MKT",c:"MKT 382",t:"CRM / Database Marketing",p:"Gage, D",dy:"TTH",tm:"2:00–3:30p",s:840,r:"RRH 4.416",se:"",tg:[],n:""},
+{u:"07425",d:"MKT",c:"MKT 382.4",t:"Strategic Marketing",p:"Doyle, T",dy:"TTH",tm:"11:00a–12:30p",s:660,r:"RRH 3.414",se:"",tg:[],n:""},
+{u:"07430",d:"MKT",c:"MKT 382.12",t:"Customer Strategy",p:"Sloan, J",dy:"T",tm:"3:30–6:30p",s:930,r:"RRH 5.408",se:"",tg:["Restricted"],n:"Marketing Fellows students only. Not in the Oct 27 registration list."},
+{u:"07435",d:"MKT",c:"MKT 382.29",t:"Consumer Behav Digital Wrld",p:"Kirby, T",dy:"TTH",tm:"9:30–11:00a",s:570,r:"RRH 3.304",se:"",tg:[],n:""},
+{u:"07445",d:"MKT",c:"MKT 382.32",t:"Creativity And Leadership",p:"Caldwell, L",dy:"TTH",tm:"12:30–2:00p",s:750,r:"RRH 3.304",se:"",tg:[],n:""},
+{u:"07450",d:"MKT",c:"MKT 382.37",t:"Strategic Branding",p:"Reyes, G",dy:"MW",tm:"9:30–11:00a",s:570,r:"RRH 3.304",se:"",tg:[],n:""},
+{u:"07470",d:"MKT",c:"MKT 382.44",t:"Digital Marketing",p:"Soto, R",dy:"TTH",tm:"12:30–2:00p",s:750,r:"RRH 4.308",se:"",tg:[],n:""},
+{u:"07475",d:"MKT",c:"MKT 382.49",t:"Sales Mgmt And Strategy",p:"Bishop, K",dy:"MW",tm:"11:00a–12:30p",s:660,r:"RRH 3.310",se:"",tg:[],n:""},
+{u:"07480",d:"MKT",c:"MKT 382.58",t:"Product Management",p:"Brandt, G",dy:"MW",tm:"12:30–2:00p",s:750,r:"RRH 3.304",se:"",tg:[],n:""},
+{u:"07490",d:"MKT",c:"MKT 188",t:"AI In Marketing",p:"Sawyer, B",dy:"W",tm:"5:00–8:00p",s:1020,r:"RRH 3.402",se:"short",tg:[],n:"1-credit. Feb 3–Mar 3."},
+{u:"07494",d:"MKT",c:"MKT 188",t:"AI Ethics In Media And Mktg",p:"Rios, R",dy:"M",tm:"5:00–8:00p",s:1020,r:"RRH 3.402",se:"S2",tg:[],n:"1-credit. Mar 29–Apr 26."},
+{u:"07500",d:"MKT",c:"MKT 188.4",t:"SQL For Busn And Mktg",p:"Rao, E",dy:"M",tm:"5:00–8:00p",s:1020,r:"RRH 3.402",se:"S1",tg:[],n:"1-credit. Jan 11–Feb 15."},
+{u:"07505",d:"MKT",c:"MKT 391S",t:"Independent Study",p:"—",dy:"—",tm:"—",s:9999,r:"—",se:"",tg:["Restricted"],n:"Contact an academic advisor. Not in the Oct 27 registration list."},
+{u:"05860",d:"O M",c:"O M 386.10",t:"Sustainable Operations",p:"Lowe, E",dy:"MW",tm:"3:30–5:00p",s:930,r:"RRH 3.402",se:"",tg:[],n:""},
+{u:"05865",d:"O M",c:"O M 386.11",t:"Operations Bootcamp",p:"Grant, W",dy:"M",tm:"5:00–8:00p",s:1020,r:"RRH 3.414",se:"",tg:["Restricted"],n:"1st-year Operations Fellows only. Not in the Oct 27 registration list."},
+{u:"04770",d:"R E",c:"R E 386.2",t:"Real Estate Investment Decis",p:"Kane, S",dy:"W",tm:"5:00–8:00p",s:1020,r:"RRH 4.408",se:"",tg:[],n:""},
+{u:"04775",d:"R E",c:"R E 388",t:"Seminar In Real Estate Finance",p:"Carver, G",dy:"MW",tm:"2:00–3:30p",s:840,r:"RRH 4.304",se:"",tg:[],n:""},
+{u:"06115",d:"STA",c:"STA 380.19",t:"Time Series",p:"Ortega, C",dy:"TTH",tm:"2:00–3:30p",s:840,r:"RRH 4.402",se:"",tg:[],n:""},
+{u:"06120",d:"STA",c:"STA 287",t:"Busn Analytics / Decis Modlng",p:"Hoyt, T",dy:"MW",tm:"10:30a–12:30p",s:630,r:"RRH 5.408",se:"S2",tg:["Custom core"],n:"Mar 1–Apr 26. Exam week of Apr 27–30."},
+{u:"06125",d:"STA",c:"STA 287",t:"Busn Analytics / Decis Modlng",p:"Hoyt, T",dy:"MW",tm:"1:00–3:00p",s:780,r:"RRH 2.238",se:"S2",tg:["Custom core"],n:"Mar 1–Apr 26. Exam week of Apr 27–30."},
+{u:"06130",d:"STA",c:"STA 287",t:"Busn Analytics / Decis Modlng",p:"Hoyt, T",dy:"MW",tm:"8:30–10:30a",s:510,r:"RRH 5.408",se:"S2",tg:["Custom core"],n:"Mar 1–Apr 26. Exam week of Apr 27–30."},
+{u:"AB101",d:"I B",c:"I B 385E",t:"Global Connections: Spain",p:"Lyle, H ('25)",dy:"—",tm:"—",s:9999,r:"—",se:"",tg:["Abroad"],n:"Spring 2025 program (W 3:00–6:00p). Not on the Spring 2027 schedule — bid history only."},
+{u:"AB102",d:"I B",c:"I B 385E",t:"Global Connections: Argentina & Chile",p:"Zeller, F ('25)",dy:"—",tm:"—",s:9999,r:"—",se:"",tg:["Abroad"],n:"Spring 2025 program (T 3:30–6:30p). Not on the Spring 2027 schedule — bid history only."},
+{u:"AB103",d:"I B",c:"I B 385E",t:"Global Connections: Bali",p:"Hollis, G ('25)",dy:"—",tm:"—",s:9999,r:"—",se:"",tg:["Abroad"],n:"Spring 2025 program (M 3:30–6:30p). Not on the Spring 2027 schedule — bid history only."},
+{u:"AB108",d:"I B",c:"I B 385E",t:"Global Connections: Ghana",p:"Hollis, G ('24)",dy:"—",tm:"—",s:9999,r:"—",se:"",tg:["Abroad"],n:"Spring 2024 program (M 3:30–6:30p). Not on the Spring 2027 schedule — bid history only."},
+{u:"AB109",d:"I B",c:"I B 385E",t:"Global Connections: Thailand",p:"Novak, G ('24)",dy:"—",tm:"—",s:9999,r:"—",se:"",tg:["Abroad"],n:"Spring 2024 program (T 3:30–6:30p). Not on the Spring 2027 schedule — bid history only."},
+// UT Department of Asian Studies — Japanese language, Spring 2027. Full-term (Spring 1 + 2). Undergraduate-numbered;
+// "UT Foreign Language" counts toward the Global Business concentration.
+// Year labels, by Japanese-language year (UT catalog equivalences):
+//   confirmed — 601D Freshman (can't count with First-Year Japanese 506/507), 610D Sophomore (can't count with
+//   Second-Year Japanese 412K/412L), 611D Sophomore (Henry; follows 610D), 330 Senior (catalog: "fourth-year Japanese").
+//   "?" — inferred from prerequisites: 317C requires 611D or Second-Year II (412L) → Junior?; 320K, 325K, 326, 327
+//   require 317C → Junior?; 320L follows 320K and precedes fourth-year 330 → Junior?.
+{u:"32965",d:"JPN",c:"JPN 601D",t:"Japanese I (Freshman)",p:"Hayes, C",dy:"MWF",tm:"11:00a–12:00p",s:660,r:"WCH",se:"",tg:["Japanese"],n:"No prior Japanese required; not open to native speakers. Six lecture hours a week."},
+{u:"32970",d:"JPN",c:"JPN 601D",t:"Japanese I (Freshman)",p:"Larkin, J",dy:"MWF",tm:"1:00–2:00p",s:780,r:"WCH",se:"",tg:["Japanese"],n:"No prior Japanese required; not open to native speakers. Six lecture hours a week."},
+{u:"32975",d:"JPN",c:"JPN 601D",t:"Japanese I (Freshman)",p:"Navarro, F",dy:"MWF",tm:"2:00–3:00p",s:840,r:"WCH",se:"",tg:["Japanese"],n:"No prior Japanese required; not open to native speakers. Six lecture hours a week."},
+{u:"32955",d:"JPN",c:"JPN 601D",t:"Japanese I (Freshman)",p:"Oakley, D",dy:"TTH",tm:"9:30–11:00a",s:570,r:"WCH",se:"",tg:["Japanese"],n:"Linked sections 32955–32960. No prior Japanese required; not open to native speakers. Six lecture hours a week."},
+{u:"32995",d:"JPN",c:"JPN 610D",t:"Japanese II (Sophomore)",p:"Nakamura, K",dy:"MWF",tm:"1:00–2:00p",s:780,r:"WCH",se:"",tg:["Japanese"],n:"Prereq: JPN 601D or 506 (C or better). Six lecture hours a week."},
+{u:"32980",d:"JPN",c:"JPN 610D",t:"Japanese II (Sophomore)",p:"Lund, E",dy:"MWF",tm:"9:00–10:00a",s:540,r:"WCH",se:"",tg:["Japanese"],n:"Prereq: JPN 601D or 506 (C or better). Six lecture hours a week."},
+{u:"32985",d:"JPN",c:"JPN 610D",t:"Japanese II (Sophomore)",p:"Thorne, J",dy:"TTH",tm:"9:30–11:00a",s:570,r:"WCH",se:"",tg:["Japanese"],n:"Linked sections 32985–32990. Prereq: JPN 601D or 506 (C or better). Six lecture hours a week."},
+{u:"33000",d:"JPN",c:"JPN 611D",t:"Intermediate Japanese (Sophomore)",p:"Tate, R",dy:"TTH",tm:"11:00a–12:30p",s:660,r:"WCH",se:"",tg:["Japanese"],n:"Linked sections 33000–33005. Prereq: JPN 507 or 610D (C or better). Real-life intermediate competency. Six lecture hours a week."},
+{u:"33015",d:"JPN",c:"JPN 317C",t:"Japanese Gram/Comp/Conversatn (Junior?)",p:"Larkin, J",dy:"MWF",tm:"2:00–3:00p",s:840,r:"WCH",se:"",tg:["Japanese"],n:"Prereq: JPN 611D (C or better). Prepares for advanced Japanese courses."},
+{u:"33010",d:"JPN",c:"JPN 317C",t:"Japanese Gram/Comp/Conversatn (Junior?)",p:"Tate, R",dy:"MWF",tm:"12:00–1:00p",s:720,r:"WCH",se:"",tg:["Japanese"],n:"Prereq: JPN 611D (C or better). Prepares for advanced Japanese courses."},
+{u:"33020",d:"JPN",c:"JPN 320K",t:"Readings In Modern Japanese I (Junior?)",p:"Oakley, D",dy:"MWF",tm:"12:00–1:00p",s:720,r:"WCH",se:"",tg:["Japanese"],n:"Prereq: JPN 412L or 317C (C or better). Intermediate expository prose."},
+{u:"33025",d:"JPN",c:"JPN 320L",t:"Readings In Modern Japanese II (Junior?)",p:"Thorne, J",dy:"MWF",tm:"9:00–10:00a",s:540,r:"WCH",se:"",tg:["Japanese"],n:"Prereq: JPN 320K (C or better)."},
+{u:"33030",d:"JPN",c:"JPN 325K",t:"Advanced Conversation I (Junior?)",p:"Navarro, F",dy:"MWF",tm:"1:00–2:00p",s:780,r:"WCH",se:"",tg:["Japanese"],n:"Prereq: JPN 412L or 317C (C or better). Conversation on more complex situations and topics."},
+{u:"33035",d:"JPN",c:"JPN 326",t:"Business Japanese (Junior?)",p:"Nakamura, K",dy:"MWF",tm:"11:00a–12:00p",s:660,r:"WCH",se:"",tg:["Japanese"],n:"Prereq: JPN 317C (C or better)."},
+{u:"33040",d:"JPN",c:"JPN 327",t:"Adv Rdng/Writ Kanji Characters (Junior?)",p:"Hayes, C",dy:"TTH",tm:"9:30–11:00a",s:570,r:"WCH",se:"",tg:["Japanese"],n:"Prereq: JPN 317C (C or better)."},
+{u:"33045",d:"JPN",c:"JPN 330",t:"Practical Reading In Adv Jpn (Senior)",p:"Lund, E",dy:"TTH",tm:"12:30–2:00p",s:750,r:"WCH",se:"",tg:["Japanese"],n:"Prereq: JPN 320L (C or better). Catalog: fourth-year Japanese readings on special topics."},
+// Oct 27 registration list: 2027 STEP programs (STP 080) and Washington Campus (W C 080). Times TBD.
+{u:"66661",d:"STEP",c:"STP 080",t:"STEP: Copenhagen AI for Social Entrepreneurship (March)",p:"Abe, G",dy:"—",tm:"—",s:9999,r:"—",se:"",tg:["Abroad"],n:"March program · 5 seats. Short-Term Exchange Program; satisfies Global Business Option B."},
+{u:"66662",d:"STEP",c:"STP 080",t:"STEP: Doing Business in Mexico City (March)",p:"Abe, G",dy:"—",tm:"—",s:9999,r:"—",se:"",tg:["Abroad"],n:"March program · 5 seats. Short-Term Exchange Program; satisfies Global Business Option B."},
+{u:"66663",d:"STEP",c:"STP 080",t:"STEP: Germany Mobility/Energy (May)",p:"Abe, G",dy:"—",tm:"—",s:9999,r:"—",se:"",tg:["Abroad"],n:"May program · 5 seats. Short-Term Exchange Program; satisfies Global Business Option B."},
+{u:"66664",d:"STEP",c:"STP 080",t:"STEP: Vienna Innovation Mgmt (May)",p:"Abe, G",dy:"—",tm:"—",s:9999,r:"—",se:"",tg:["Abroad"],n:"May program · 5 seats. Short-Term Exchange Program; satisfies Global Business Option B."},
+{u:"66665",d:"STEP",c:"STP 080",t:"STEP: Copenhagen ESG (May)",p:"Abe, G",dy:"—",tm:"—",s:9999,r:"—",se:"",tg:["Abroad"],n:"May program · 30 seats. Short-Term Exchange Program; satisfies Global Business Option B."},
+{u:"66666",d:"STEP",c:"STP 080",t:"STEP: Sweden Social Innovation (May)",p:"Abe, G",dy:"—",tm:"—",s:9999,r:"—",se:"",tg:["Abroad"],n:"May program · 5 seats. Short-Term Exchange Program; satisfies Global Business Option B."},
+{u:"00001",d:"W C",c:"W C 080",t:"Washington Campus: General (January)",p:"Abe, G",dy:"—",tm:"—",s:9999,r:"—",se:"",tg:[],n:"January program in Washington, D.C. · 30 seats."},
+{u:"00002",d:"W C",c:"W C 080",t:"Washington Campus: Healthcare (January)",p:"Abe, G",dy:"—",tm:"—",s:9999,r:"—",se:"",tg:[],n:"January program in Washington, D.C. · 30 seats."},
+{u:"00003",d:"W C",c:"W C 080",t:"Washington Campus: General (March)",p:"Abe, G",dy:"—",tm:"—",s:9999,r:"—",se:"",tg:[],n:"March program in Washington, D.C. · 30 seats."},
+{u:"00004",d:"W C",c:"W C 080",t:"Washington Campus: Healthcare (March)",p:"Abe, G",dy:"—",tm:"—",s:9999,r:"—",se:"",tg:[],n:"March program in Washington, D.C. · 30 seats."},
+// Fall 2024 sections from the 20249 bid sheet that have no Spring 2027 match (plannable for Fall '27 only).
+{u:"F2401",d:"ACC",c:"ACC 380K",t:"Oil Gas Acct / Sustainability",p:"Collier, G",dy:"TTH",tm:"12:30–2:00p",s:750,r:"—",se:"",tg:["Fall '24"],n:"Fall 2024 section (20249 bid sheet). Not on the Spring 2027 schedule; room not listed.",f24:[0,0]},
+{u:"F2402",d:"ACC",c:"ACC 380K.28",t:"Corporate Sustainability",p:"Fenwick, J",dy:"MW",tm:"11:00a–12:30p",s:660,r:"—",se:"",tg:["Fall '24"],n:"Fall 2024 section (20249 bid sheet). Not on the Spring 2027 schedule; room not listed.",f24:[0,1000]},
+{u:"F2403",d:"ACC",c:"ACC 380K.28",t:"Corporate Sustainability",p:"Collier, G",dy:"TTH",tm:"2:00–3:30p",s:840,r:"—",se:"",tg:["Fall '24"],n:"Fall 2024 section (20249 bid sheet). Not on the Spring 2027 schedule; room not listed.",f24:[0,0]},
+{u:"F2404",d:"ACC",c:"ACC 380K.29",t:"Tax Factors For Fincl Plan",p:"Sinclair, K",dy:"TTH",tm:"2:00–3:30p",s:840,r:"—",se:"",tg:["Fall '24"],n:"Fall 2024 section (20249 bid sheet). Not on the Spring 2027 schedule; room not listed.",f24:[150,0]},
+{u:"F2405",d:"ACC",c:"ACC 380K.29",t:"Tax Factors For Fincl Plan",p:"Sinclair, K",dy:"TTH",tm:"3:30–5:00p",s:930,r:"—",se:"",tg:["Fall '24"],n:"Fall 2024 section (20249 bid sheet). Not on the Spring 2027 schedule; room not listed.",f24:[60,0]},
+{u:"F2406",d:"ACC",c:"ACC 383K.2",t:"Manage Auditing And Control",p:"Xu, N",dy:"M",tm:"11:00a–2:00p",s:660,r:"—",se:"",tg:["Fall '24"],n:"Fall 2024 section (20249 bid sheet). Not on the Spring 2027 schedule; room not listed.",f24:[0,0]},
+{u:"F2407",d:"ACC",c:"ACC 383K.2",t:"Manage Auditing And Control",p:"Xu, N",dy:"M",tm:"3:30–6:30p",s:930,r:"—",se:"",tg:["Fall '24"],n:"Fall 2024 section (20249 bid sheet). Not on the Spring 2027 schedule; room not listed.",f24:[0,0]},
+{u:"F2408",d:"BGS",c:"BGS 380",t:"Cybersecurity Law / Policy",p:"Quill, T",dy:"MTH",tm:"9:00–10:30a",s:540,r:"—",se:"",tg:["Fall '24"],n:"Fall 2024 section (20249 bid sheet). Not on the Spring 2027 schedule; room not listed.",f24:[0,0]},
+{u:"F2409",d:"BGS",c:"BGS 380",t:"Global Regulatory Strategy",p:"Zeller, F",dy:"TTH",tm:"12:30–2:00p",s:750,r:"—",se:"",tg:["Fall '24"],n:"Fall 2024 section (20249 bid sheet). Not on the Spring 2027 schedule; room not listed.",f24:[0,0]},
+{u:"F2410",d:"BGS",c:"BGS 380",t:"Innov Frnt: Tech, Ethcs / Actn",p:"Stone, B",dy:"TTH",tm:"2:00–3:30p",s:840,r:"—",se:"",tg:["Fall '24"],n:"Fall 2024 section (20249 bid sheet). Not on the Spring 2027 schedule; room not listed.",f24:[151,0]},
+{u:"F2411",d:"BGS",c:"BGS 380",t:"Law / Econ Captl Mrkts / Fincl Int",p:"Gill, H",dy:"TTH",tm:"2:00–3:30p",s:840,r:"—",se:"",tg:["Fall '24"],n:"Fall 2024 section (20249 bid sheet). Not on the Spring 2027 schedule; room not listed.",f24:[0,0]},
+{u:"F2412",d:"FIN",c:"FIN 394.11",t:"Private Equity",p:"Upton, H",dy:"MW",tm:"11:00a–12:30p",s:660,r:"—",se:"",tg:["Fall '24"],n:"Fall 2024 section (20249 bid sheet). Not on the Spring 2027 schedule; room not listed.",f24:[1,0]},
+{u:"F2413",d:"FIN",c:"FIN 394.11",t:"Private Equity",p:"Upton, H",dy:"MW",tm:"12:30–2:00p",s:750,r:"—",se:"",tg:["Fall '24"],n:"Fall 2024 section (20249 bid sheet). Not on the Spring 2027 schedule; room not listed.",f24:[0,0]},
+{u:"F2414",d:"FIN",c:"FIN 394.8",t:"Fincl Strat For Energy Firms",p:"Royce, N",dy:"MW",tm:"2:00–3:30p",s:840,r:"—",se:"",tg:["Fall '24"],n:"Fall 2024 section (20249 bid sheet). Not on the Spring 2027 schedule; room not listed.",f24:[0,0]},
+{u:"F2415",d:"LEB",c:"LEB 380.3",t:"Law Of Commrcl R E Fin & Dev",p:"Jensen, R",dy:"MW",tm:"2:00–3:30p",s:840,r:"—",se:"",tg:["Fall '24"],n:"Fall 2024 section (20249 bid sheet). Not on the Spring 2027 schedule; room not listed.",f24:[0,0]},
+{u:"F2416",d:"MAN",c:"MAN 385",t:"Entrepreneurship & Incubation",p:"Orr, L",dy:"MW",tm:"3:30–5:00p",s:930,r:"—",se:"",tg:["Fall '24"],n:"Fall 2024 section (20249 bid sheet). Not on the Spring 2027 schedule; room not listed.",f24:[0,0]},
+{u:"F2417",d:"MAN",c:"MAN 385",t:"Nutrition Entrepreneurship",p:"Ellison, C",dy:"TTH",tm:"2:00–3:30p",s:840,r:"—",se:"",tg:["Fall '24"],n:"Fall 2024 section (20249 bid sheet). Not on the Spring 2027 schedule; room not listed.",f24:[0,0]},
+{u:"F2418",d:"MAN",c:"MAN 385.33",t:"Manag / Mkt In Global Arena",p:"Penn, D",dy:"W",tm:"3:30–6:30p",s:930,r:"—",se:"",tg:["Fall '24"],n:"Fall 2024 section (20249 bid sheet). Not on the Spring 2027 schedule; room not listed.",f24:[0,0]},
+{u:"F2419",d:"MAN",c:"MAN 385.36",t:"Power And Politics",p:"Castillo, G",dy:"TTH",tm:"12:30–2:00p",s:750,r:"—",se:"",tg:["Fall '24"],n:"Fall 2024 section (20249 bid sheet). Not on the Spring 2027 schedule; room not listed.",f24:[1,0]},
+{u:"F2420",d:"MKT",c:"MKT 188",t:"Bus Dev & Mkt Sales Leadrshp",p:"Cho, G",dy:"M",tm:"5:00–8:00p",s:1020,r:"—",se:"",tg:["Fall '24"],n:"Fall 2024 section (20249 bid sheet). Not on the Spring 2027 schedule; room not listed.",f24:[0,0]},
+{u:"F2421",d:"MKT",c:"MKT 188",t:"Data Storytellg / Visualizatn",p:"Monroe, A",dy:"M",tm:"6:00–9:00p",s:1080,r:"—",se:"",tg:["Fall '24"],n:"Fall 2024 section (20249 bid sheet). Not on the Spring 2027 schedule; room not listed.",f24:[0,0]},
+{u:"F2422",d:"MKT",c:"MKT 382",t:"Influence Of Mktg In Society",p:"Yoon, G",dy:"MW",tm:"11:00a–12:30p",s:660,r:"—",se:"",tg:["Fall '24"],n:"Fall 2024 section (20249 bid sheet). Not on the Spring 2027 schedule; room not listed.",f24:[0,0]},
+{u:"F2423",d:"MKT",c:"MKT 382.33",t:"Dsgn Thinking Busn Innovatn",p:"Caldwell, L",dy:"MW",tm:"9:30–11:00a",s:570,r:"—",se:"",tg:["Fall '24"],n:"Fall 2024 section (20249 bid sheet). Not on the Spring 2027 schedule; room not listed.",f24:[0,0]},
+{u:"F2424",d:"MKT",c:"MKT 382.54",t:"Data Driven Marketing",p:"Garner, H",dy:"MW",tm:"3:30–5:00p",s:930,r:"—",se:"",tg:["Fall '24"],n:"Fall 2024 section (20249 bid sheet). Not on the Spring 2027 schedule; room not listed.",f24:[0,0]},
+{u:"F2425",d:"O M",c:"O M 386",t:"Data-Driven Revenue Management",p:"Emery, E",dy:"MW",tm:"3:30–5:00p",s:930,r:"—",se:"",tg:["Fall '24"],n:"Fall 2024 section (20249 bid sheet). Not on the Spring 2027 schedule; room not listed.",f24:[0,0]},
+{u:"F2426",d:"O M",c:"O M 386",t:"Supply Chain Management",p:"Lowe, E",dy:"MW",tm:"12:30–2:00p",s:750,r:"—",se:"",tg:["Fall '24"],n:"Fall 2024 section (20249 bid sheet). Not on the Spring 2027 schedule; room not listed.",f24:[0,200]},
+{u:"F2427",d:"R E",c:"R E 389",t:"Real Estate Practicum",p:"Boyd, C",dy:"TTH",tm:"11:00a–12:30p",s:660,r:"—",se:"",tg:["Fall '24"],n:"Fall 2024 section (20249 bid sheet). Not on the Spring 2027 schedule; room not listed.",f24:[0,0]},
+{u:"F2428",d:"R M",c:"R M 392.1",t:"Modeling / Optmzatn In Fnce",p:"Emery, E",dy:"MW",tm:"2:00–3:30p",s:840,r:"—",se:"",tg:["Fall '24"],n:"Fall 2024 section (20249 bid sheet). Not on the Spring 2027 schedule; room not listed.",f24:[0,0]},
+{u:"F2429",d:"R M",c:"R M 395.7",t:"Managing International Risk",p:"Salas, R",dy:"TTH",tm:"9:30–11:00a",s:570,r:"—",se:"",tg:["Fall '24"],n:"Fall 2024 section (20249 bid sheet). Not on the Spring 2027 schedule; room not listed.",f24:[0,0]},
+];
+
+// Bid history per course: [Spring 2025 avg seats awarded, Rd 1 clear avg, Rd 2 clear avg].
+// Rd 1 / Rd 2 are averaged per course across its sections within each year (20242 = Spring 2024, 20252 = Spring 2025),
+// then across the two years; a year with n/a is left out of that round's average. null = no data at all for that slot.
+// Keyed by one section's unique; spread to all sections of the course below.
+const ST={
+"03245":[15,0.2,140],"03105":[2.0,0,445],"03135":[2.9,0,0],"03140":[2.4,0,0],"03040":[15,160,150],
+"02425":[35,0.1,135],"03485":[25,0,140],"03490":[2.4,700,null],"03500":[30,0,0],"03520":[12.8,0,0],"03525":[5.3,0,0],
+"04385":[20,0,0.3],"04495":[35,0,0],"04500":[13.3,0,0],"04510":[5.7,0,0],"04520":[14.5,0,0],"04530":[20,0,0],
+"04535":[20,0,0],"04605":[20,0.5,0],"04625":[1.5,0,0],"04635":[6.1,0,0],
+"03685":[30,355,0],"03690":[20,1635,0],"03705":[15.7,0,0],
+"03830":[6.2,0,0],"03835":[7.9,0,0],"03840":[5.8,15,0],
+"06460":[45,145,1230],"06480":[20,0,0.2],"06555":[45,0.2,110],"06540":[18.8,0,0],
+"06675":[2.9,0.4,305],"06635":[20,0,0],"06640":[7.7,60,0],"06625":[35,615,0],"06630":[19.1,0,0],
+"06665":[55,0,0],"06655":[50,0,195],"06670":[12.2,0,0],"06615":[7.6,0,0],"06650":[3.6,0,0],
+"05465":[4.8,0,0],"05470":[13.6,0,0],"05440":[10.3,0,3.5],"05400":[30,0,50],
+"07420":[20.6,0,0],"07470":[25,0,285],"07480":[30,0,0],"07475":[25,30,0],"07445":[25,0,0],
+"07450":[20,0,0],"07425":[5.6,0,0],"07435":[null,0,0],"07500":[null,0,0],
+"05860":[19.3,0,0],"04770":[17.7,0,0],"04775":[6.8,0,0],
+"06120":[30,2.6,290],"06115":[14.4,0,0],
+"AB101":[20,0,485],"AB102":[35,580,1480],"AB103":[17.7,0,0],"66661":[6.9,0,1340],"66662":[6.4,0,405],"66663":[4.0,1315,0],"66664":[6.6,990,0],"66665":[20,260,725],"66666":[6.4,0.6,null],
+"AB108":[null,0,0],"AB109":[null,0,0]
+};
+const stKey={};
+C.forEach(x=>{if(ST[x.u])stKey[x.c+'|'+x.t]=ST[x.u]});
+C.forEach(x=>{x.st=stKey[x.c+'|'+x.t]||null});
+// Fall 2024 bid history (20249 sheet) for courses on the Spring 2027 schedule, keyed by one spring section's unique:
+// fall sections as [days time, professor, Rd 1 clear, Rd 2 clear]. Averaged per course like the spring history.
+const F24={"03140": [["MW 12:30–2:00p", "Ames, P", 235, 0]], "03105": [["MW 11:00a–12:30p", "—", 8.9, 0]], "03125": [["MW 2:00–3:30p", "Nolan, W", 0, 0]], "03040": [["MW 12:30–2:00p", "Vail, J", 1355, 0], ["MW 2:00–3:30p", "Vail, J", 1025, 0], ["MW 3:30–5:00p", "Vail, J", 1160, 0]], "03525": [["TTH 12:30–2:00p", "Gallo, A", 0, 195], ["TTH 2:00–3:30p", "Gallo, A", 0, 0]], "04500": [["TTH 2:00–3:30p", "Wade, P", 0, 0]], "04520": [["MW 9:30–11:00a", "Duarte, E", 0, 765]], "04635": [["TTH 11:00a–12:30p", "Maddox, S", 0, 0]], "04605": [["TTH 11:00a–12:30p", "Vance, L", 0, 0]], "03830": [["TTH 11:00a–12:30p", "Irwin, C", 0, 0]], "06540": [["MW 12:30–2:00p", "Hardin, J", 0, 1530], ["MW 8:00–9:30a", "Shah, E", 0, 340], ["MW 9:30–11:00a", "Shah, E", 145, 0]], "06665": [["TTH 9:30–11:00a", "Penn, D", 345, 0]], "06615": [["MW 9:30–11:00a", "Hollis, G", 0, 0]], "06620": [["TTH 11:00a–12:30p", "Penn, D", 0, 0]], "06650": [["TH 3:30–6:30p", "Whitaker, N", 0, 0]], "07470": [["TTH 11:00a–12:30p", "Soto, R", 0, 1730]], "07450": [["MW 2:00–3:30p", "Reyes, G", 0.6, 0]]};
+const avg=a=>{const v=a.filter(n=>n!=null); return v.length?Math.round(v.reduce((t,n)=>t+n,0)/v.length*10)/10:null;};
+const f24Key={};
+for(const [u,secs] of Object.entries(F24)){const x=C.find(c=>c.u===u); if(x)f24Key[x.c+'|'+x.t]={v:[avg(secs.map(z=>z[2])),avg(secs.map(z=>z[3]))],secs};}
+C.forEach(x=>{const f=f24Key[x.c+'|'+x.t]; if(f){x.f24=f.v; x.f24s=f.secs;}});
+// Global Business concentration (2024-25 sheet): any I B graduate course, BGS 380E Global Political Economy,
+// MAN Global Management. STEP programs satisfy Option B's program leg rather than counting as hours.
+// Fall 2024's MAN 385.33 (Mgmt & Mktg in the Global Arena) and R M 395.7 (Managing International Risk) are on the approved list.
+C.forEach(x=>{x.gb = (x.d==='I B'||x.d==='JPN'||x.u==='03520'||x.u==='06635'||x.c==='MAN 385.33'||x.c==='R M 395.7') ? 'course' : x.d==='STEP' ? 'step' : null;});
+function creditsOf(x){const m=x.c.match(/(\d)\d\d/); return m?+m[1]:0;}
+function fmtStat(v){return v==null?'n/a':(Number.isInteger(v)?v:v.toFixed(1))}
+
+// Buildings: name, address, estimated walk from Rowling Hall (minutes). Walks are estimates from map coordinates
+// (Google Places) using street-grid distance at ~80 m/min, rounded up for entry; RRH is "here".
+const BLD={
+  RRH:{n:'Robert B. Rowling Hall',a:'300 W Martin Luther King Jr Blvd',w:0},
+  GSB:{n:'Graduate School of Business (McCombs complex)',a:'2110 Speedway',w:8},
+  CBA:{n:'McCombs School of Business (CBA)',a:'2110 Speedway',w:8},
+  TNH:{n:'Townes Hall (School of Law)',a:'727 E Dean Keeton St',w:22},
+  JON:{n:'Jesse H. Jones Hall (School of Law)',a:'727 E Dean Keeton St',w:22},
+  ECJ:{n:'Ernest Cockrell Jr. Hall',a:'301 E Dean Keeton St',w:17},
+  WCH:{n:'Will C. Hogg Building',a:'120 Inner Campus Dr',w:10}
+};
+function bldOf(x){const code=(x.r||'').split(/[\s/]/)[0]; return BLD[code]?code:null;}
+function locCell(x){
+  if(!x.r||x.r==='—'){
+    // No campus room: say where the course happens instead of a walk time.
+    const off=x.d==='STEP'?['Abroad · travel','Short-Term Exchange Program, traveling abroad']
+      :x.d==='W C'?['Washington, D.C.','Washington Campus program in D.C.']
+      :x.u.startsWith('AB')?['Abroad · past program','Prior-year program, bid history only']
+      :x.u.startsWith('F24')?['Room not listed','Fall 2024 section; the bid sheet lists no room']
+      :/Independent Study/.test(x.t)?['Arranged','Arranged with the supervising instructor']
+      :x.u==='03670'?['Online','Web-based section']
+      :null;
+    return off?`<span style="color:var(--muted)" title="${off[1]}">${off[0]}</span>`:'<span style="color:var(--muted)">TBD</span>';
+  }
+  const b=bldOf(x); if(!b)return esc(x.r);
+  const B=BLD[b], walk=B.w===0?'here':`${B.w} min`, room=x.r.trim()===b?`${b} (room TBD)`:x.r;
+  return `<span title="${esc(B.n)} · ${esc(B.a)} · ${B.w===0?'in Rowling Hall':`≈${B.w} min walk from Rowling Hall`}">${esc(room)} <span style="color:var(--muted)">· ${walk}</span></span>`;
+}
+// RateMyProfessors (UT Austin, school 1255): professor -> [rating /5 (null = profile exists but no ratings yet), # ratings, profile URL].
+// Read live from ratemyprofessors.com in Oct 2026. Professors absent from the map have no UT Austin RMP profile.
+const RM={
+"Vail, J":[4.6,51,""],
+"Dunn, P":[3.9,59,""],
+"Pruitt, F":[4.4,26,""],
+"Delgado, D":[4.1,26,""],
+"Ames, P":[3.1,57,""],
+"Cortez, L":[4.7,36,""],
+"Yates, E":[4.1,39,""],
+"Novak, G":[2.8,4,""],
+"Mays, E":[null,0,""],
+"Dalton, P":[2.8,67,""],
+"Gallo, A":[2.6,21,""],
+"Crane, N":[2.9,63,""],
+"Maddox, S":[4.0,43,""],
+"Upton, H":[4.3,40,""],
+"Ross, R":[4.3,49,""],
+"Duarte, E":[null,0,""],
+"Royce, N":[3.6,58,""],
+"Hunt, J":[null,0,""],
+"Foster, G":[2.8,66,""],
+"Kendrick, G":[4.0,54,""],
+"Bell, K":[3.6,48,""],
+"Vance, L":[2.7,13,""],
+"Farrow, B":[null,0,""],
+"Archer, F":[3.5,59,""],
+"Hollis, G":[null,0,""],
+"Zeller, F":[3.7,63,""],
+"Stone, B":[2.4,11,""],
+"Drake, R":[2.9,36,""],
+"Pace, T":[4.5,41,""],
+"Irwin, C":[3.4,48,""],
+"Blake, E":[4.6,46,""],
+"Winslow, K":[4.8,52,""],
+"Eaton, A":[2.5,18,""],
+"Voss, C":[3.3,13,""],
+"Abbott, G":[3.9,2,""],
+"Nash, D":[3.7,57,""],
+"Quinlan, A":[2.5,14,""],
+"Park, H":[2.8,68,""],
+"Walsh, T":[4.2,17,""],
+"Rhodes, M":[4.5,48,""],
+"Knox, F":[3.4,2,""],
+"Jarvis, K":[2.8,46,""],
+"Lowe, E":[4.5,58,""],
+"Grant, W":[2.7,63,""],
+"Kane, S":[3.7,64,""],
+"Doyle, T":[3.8,57,""],
+"Gage, D":[2.7,5,""],
+"Sloan, J":[3.7,69,""],
+"Kirby, T":[4.8,26,""],
+"Caldwell, L":[4.6,53,""],
+"Reyes, G":[3.7,50,""],
+"Soto, R":[4.9,7,""],
+"Bishop, K":[4.1,69,""],
+"Sawyer, B":[4.6,29,""],
+"Rao, E":[2.5,53,""],
+// Japanese-language instructors (Asian Studies / Languages), read from RMP Oct 27 2026
+"Larkin, J":[4.8,62,""],
+"Tate, R":[3.7,15,""],
+"Oakley, D":[4.0,3,""],
+"Thorne, J":[4.5,27,""],
+"Navarro, F":[3.7,51,""],
+"Nakamura, K":[2.6,15,""],
+"Hayes, C":[3.7,44,""],
+"Lund, E":[4.5,36,""],
+};
+function normP(p){return p.replace(/\s*\('\d\d\)$/,'')}
+function rmpCell(p){ /* demo: made-up ratings, no profile links */
+  const m0=RM[normP(p)]; if(m0){const tier=m0[0]==null?'':m0[0]>=4?' hi':m0[0]>=3?' mid':' lo'; return `<span class="rmp${tier}" title="Sample rating (demo)">★ ${m0[0]==null?'—':m0[0].toFixed(1)} <span class="n">(${m0[1]})</span></span>`;}
+  const m=RM[normP(p)];
+  if(!m)return '<span class="chip" style="border-style:dashed">no RMP</span>';
+  if(m[0]==null)return `<a class="rmp" href="${m[2]}" target="_blank" rel="noopener" title="${esc(normP(p))} is on RateMyProfessors but has no ratings yet">★ — <span class="n">(0)</span></a>`;
+  const tier=m[0]>=4?' hi':m[0]>=3?' mid':' lo';
+  return `<a class="rmp${tier}" href="${m[2]}" target="_blank" rel="noopener" title="${esc(normP(p))} on RateMyProfessors — ${m[1]} rating${m[1]===1?'':'s'}">★ ${m[0].toFixed(1)} <span class="n">(${m[1]})</span></a>`;
+}
+
+const tb=document.getElementById('tb'), q=document.getElementById('q'),
+  dept=document.getElementById('dept'), daysSel=document.getElementById('days'),
+  sess=document.getElementById('sess'), hide=document.getElementById('hide'),
+  count=document.getElementById('count'), dedupe=document.getElementById('dedupe'), budget=document.getElementById('budget'),
+  catSel=document.getElementById('cat'),
+  tabAll=document.getElementById('tab-all'), tabPlan=document.getElementById('tab-plan'),
+  tabNotes=document.getElementById('tab-notes'), notesView=document.getElementById('notesview'),
+  tabConc=document.getElementById('tab-conc'), concView=document.getElementById('concview'),
+  tabRoad=document.getElementById('tab-road'), roadView=document.getElementById('roadview'),
+  tabSrc=document.getElementById('tab-src'), srcView=document.getElementById('srcview'),
+  notesTa=document.getElementById('notes'), noteState=document.getElementById('notestate'),
+  toolbarEl=document.querySelector('.toolbar'), wrapEl=document.querySelector('.tablewrap'),
+  legendEl=document.getElementById('legend'), partTabs=document.getElementById('parttabs'),
+  weekView=document.getElementById('weekview');
+// Planned-tab sub-tabs: one per semester part, Spring 2027 through Spring 2028.
+const PARTS=[['SP27','S1',"Spring 1 '27"],['SP27','S2',"Spring 2 '27"],['FA27','S1',"Fall 1 '27"],['FA27','S2',"Fall 2 '27"],['SP28','S1',"Spring 1 '28"],['SP28','S2',"Spring 2 '28"]];
+let planPart='SP27-S1';
+try{const p=DEMO_STORE.getItem('plan2027part'); if(PARTS.some(x=>x[0]+'-'+x[1]===p))planPart=p;}catch(e){}
+partTabs.addEventListener('click',e=>{
+  const b=e.target.closest('button[data-part]'); if(!b)return;
+  planPart=b.dataset.part;
+  try{DEMO_STORE.setItem('plan2027part',planPart)}catch(err){}
+  render();
+});
+
+// Planned list: shared db when available, DEMO_STORE as a local fallback.
+function loadLocal(){try{return new Set(JSON.parse(DEMO_STORE.getItem('plan2027')||'[]'))}catch(e){return new Set()}}
+function loadLocalPts(){try{return JSON.parse(DEMO_STORE.getItem('plan2027pts')||'{}')}catch(e){return {}}}
+function loadLocalSems(){try{return JSON.parse(DEMO_STORE.getItem('plan2027sems')||'{}')}catch(e){return {}}}
+function saveLocal(){try{DEMO_STORE.setItem('plan2027',JSON.stringify([...planned])); DEMO_STORE.setItem('plan2027pts',JSON.stringify(points)); DEMO_STORE.setItem('plan2027sems',JSON.stringify(sems))}catch(e){}}
+let planned=loadLocal();
+let points=loadLocalPts();
+let sems=loadLocalSems();
+// Bid-history placeholders replaced by real 2027 STEP sections (Oct 27 list): carry saved picks over.
+const MIGRATE={AB104:'66665',AB105:'66666',AB106:'66664',AB107:'66663'};
+for(const [o,n] of Object.entries(MIGRATE)){
+  if(!planned.has(o))continue;
+  planned.delete(o); planned.add(n);
+  if(points[o]!=null&&points[n]==null)points[n]=points[o];
+  if(sems[o]&&!sems[n])sems[n]=sems[o];
+  delete points[o]; delete sems[o];
+  saveLocal();
+}
+// Plan codes: whole semester (full-term courses) or semester-part (half-term courses).
+const SEML={'SP27':"Sp '27",'FA27':"Fa '27",'SP28':"Sp '28",'FA27-1':"Fa '27 · 1",'FA27-2':"Fa '27 · 2",'SP28-1':"Sp '28 · 1",'SP28-2':"Sp '28 · 2"};
+const VALID_SEMS=Object.keys(SEML);
+// Terms a course can be planned into, from evidence in the schedule:
+//  Sp '27 — has a 2027 section that isn't canceled (half-term courses list the part they meet in)
+//  Fa '27 — ran in Fall 2024 (20249 bid sheet), section notes say "fall and spring", or independent study; year-one core excluded
+//  Sp '28 — runs in spring (on the 2027 schedule or in prior springs' bid history); year-one core excluded; Fall '24-only rows excluded
+function availTerms(x){
+  const key=x.c+'|'+x.t, secs=C.filter(c=>c.c+'|'+c.t===key);
+  const halves=[...new Set(secs.map(c=>c.se))].filter(s=>s==='S1'||s==='S2').sort();
+  const half=halves.length>0;
+  const fallOnly=secs.every(c=>c.u.startsWith('F24'));
+  const history=fallOnly||secs.every(c=>c.u.startsWith('AB'));
+  const canceled=secs.every(c=>c.tg.includes('Canceled'));
+  const yr1=secs.some(c=>c.tg.includes('MBA core')||c.tg.includes('Custom core'));
+  const fall=/Independent Study/.test(x.t)||secs.some(c=>c.f24||/fall (and|&) spring/i.test(c.n));
+  const pn=h=>h==='S1'?1:2, out=[];
+  if(!history&&!canceled){ if(half)halves.forEach(h=>out.push(['H:'+h,`Sp '27 · ${pn(h)}`])); else out.push(['SP27',"Sp '27"]); }
+  if(fall&&!yr1){ if(half)['1','2'].forEach(p=>out.push(['FA27-'+p,SEML['FA27-'+p]])); else out.push(['FA27',"Fa '27"]); }
+  if(!yr1&&!fallOnly){ if(half)halves.forEach(h=>out.push(['SP28-'+pn(h),SEML['SP28-'+pn(h)]])); else out.push(['SP28',"Sp '28"]); }
+  return out;
+}
+// Bid budgets per semester (each auction is separate).
+const BUDGETS={SP27:1000,FA27:1500,SP28:1500};
+const BUDGET_LABEL={SP27:"Spring '27",FA27:"Fall '27",SP28:"Spring '28"};
+// The badge shows one semester: whichever you last made a change in (or the part tab you're viewing).
+// Both parts of a semester share its budget; semesters never share points.
+let activeSem='SP27';
+const baseOfCode=c=>(c||'SP27').startsWith('H:')?'SP27':(c||'SP27').split('-')[0];
+let view='all';
+let dbCol=null, notesDoc=null, notesTimer=null;
+function planBody(x){return {u:x.u,course:x.c,title:x.t,professor:x.p,days:x.dy,time:x.tm,room:x.r,notes:x.n,pts:points[x.u]||0,sem:sems[x.u]||'SP27',addedAt:new Date().toISOString()}}
+(async()=>{
+  const db=null; /* demo: no shared db */
+  if(!db)return;
+  dbCol=db.collection('plan');
+  notesDoc=db.doc('notes/main');
+  notesDoc.onSnapshot(snap=>{
+    const t=snap.exists?String((snap.data()||{}).text??''):'';
+    if(document.activeElement!==notesTa&&!snap.metadata.hasPendingWrites){notesTa.value=t; saveLocalNotes();}
+    noteState.textContent=snap.exists?'synced':'a fresh page — syncs when you write';
+  },()=>{});
+  let first=true;
+  dbCol.onSnapshot(snap=>{
+    const remote=new Set(), remotePts={}, remoteSems={};
+    snap.docs.filter(d=>d.exists).forEach(d=>{remote.add(d.id); const dd=d.data()||{}; const p=Number(dd.pts); remotePts[d.id]=isFinite(p)?p:0; remoteSems[d.id]=VALID_SEMS.includes(dd.sem)?dd.sem:'SP27';});
+    for(const [o,n] of Object.entries(MIGRATE)){
+      if(!remote.has(o))continue;
+      const x=C.find(c=>c.u===n);
+      if(x&&!remote.has(n)){
+        dbCol.doc(n).set(Object.assign(planBody(x),{pts:remotePts[o]||0,sem:remoteSems[o]||'SP27'})).catch(()=>{});
+        remote.add(n); remotePts[n]=remotePts[o]||0; remoteSems[n]=remoteSems[o]||'SP27';
+      }
+      dbCol.doc(o).delete().catch(()=>{});
+      remote.delete(o); delete remotePts[o]; delete remoteSems[o];
+    }
+    if(first){
+      first=false;
+      for(const u of planned){
+        if(!remote.has(u)){const x=C.find(c=>c.u===u); if(x){dbCol.doc(u).set(planBody(x)).catch(()=>{}); remote.add(u); remotePts[u]=points[u]||0; remoteSems[u]=sems[u]||'SP27';}}
+      }
+    }
+    planned=remote; points=remotePts; sems=remoteSems; saveLocal(); updateTabs(); render();
+  },()=>{});
+})();
+function updateTabs(){tabPlan.textContent=`Planned (${planned.size})`; updateBudget(); updateConc(); updateRoad();}
+function updateRoad(){
+  const el=document.getElementById('roadprog'); if(!el)return;
+  const cats={'Required core':0,'Custom core':0,'Electives':0,'Japanese language':0,'Abroad':0};
+  for(const u of planned){const x=C.find(c=>c.u===u); if(x)cats[catOf(x)]++;}
+  el.innerHTML=`Your Planned tab so far: <b>${cats['Required core']}</b> of 1 required core · <b>${cats['Custom core']}</b> of 3 custom core · <b>${cats['Electives']+cats['Japanese language']+cats['Abroad']}</b> elective || language || abroad pick${cats['Electives']+cats['Japanese language']+cats['Abroad']===1?'':'s'}`;
+}
+function updateConc(){
+  const el=document.getElementById('concprog'); if(!el)return;
+  const gbPlanned=[...planned].map(u=>C.find(c=>c.u===u)).filter(x=>x&&x.gb==='course');
+  const hrs=gbPlanned.reduce((t,x)=>t+creditsOf(x),0);
+  const hasIB=gbPlanned.some(x=>x.d==='I B');
+  const hasStep=[...planned].some(u=>{const x=C.find(c=>c.u===u); return x&&x.gb==='step';});
+  el.innerHTML=`Planned so far: <b>${hrs}</b> concentration hour${hrs===1?'':'s'}`
+    +(gbPlanned.length?` — ${gbPlanned.map(x=>esc(x.c)).join(', ')}`:'')
+    +(hasStep?', plus a STEP program':'')
+    +`. Toward Option A (12 hrs): I B course ${hasIB?'✓':'still needed'}. Option B (9 hrs): STEP ${hasStep?'✓':'not planned'}.`;
+}
+function totalPts(base){let t=0; for(const u of planned){if((sems[u]||'SP27').split('-')[0]!==base)continue; t+=points[u]||0;} return t}
+function setSem(u,v){
+  if(!VALID_SEMS.includes(v))return;
+  sems[u]=v; saveLocal(); updateBudget();
+  if(view==='plan')render();
+  if(dbCol&&planned.has(u))dbCol.doc(u).update({sem:v}).catch(()=>{});
+}
+function updateBudget(){
+  const b=activeSem, t=totalPts(b), cap=BUDGETS[b], over=t>cap;
+  budget.textContent=`${BUDGET_LABEL[b]} · ${t} / ${cap} pts`;
+  budget.title=over?`Over by ${t-cap} points`:`${cap-t} points left in ${BUDGET_LABEL[b]}`;
+  budget.classList.toggle('over',over);
+}
+function setPoints(u,v){
+  v=Math.max(0,Math.round(Number(v)||0));
+  points[u]=v; activeSem=baseOfCode(sems[u]); saveLocal(); updateBudget();
+  if(dbCol&&planned.has(u))dbCol.doc(u).update({pts:v}).catch(()=>{});
+}
+function setPlanned(u,on){
+  if(on){planned.add(u); if(!sems[u])sems[u]='SP27';} else {planned.delete(u); delete points[u]; delete sems[u];}
+  saveLocal(); updateTabs();
+  render();
+  if(dbCol){
+    const x=C.find(c=>c.u===u);
+    (on&&x?dbCol.doc(u).set(planBody(x)):dbCol.doc(u).delete()).catch(()=>{});
+  }
+}
+function setView(v){
+  if(v!==view)q.value=''; // each tab starts with an empty search
+  view=v;
+  tabAll.setAttribute('aria-selected',String(v==='all'));
+  tabPlan.setAttribute('aria-selected',String(v==='plan'));
+  tabNotes.setAttribute('aria-selected',String(v==='notes'));
+  tabConc.setAttribute('aria-selected',String(v==='conc'));
+  tabRoad.setAttribute('aria-selected',String(v==='road'));
+  tabSrc.setAttribute('aria-selected',String(v==='src'));
+  const n=v==='notes', c=v==='conc', r=v==='road', sr=v==='src';
+  notesView.hidden=!n; concView.hidden=!c; roadView.hidden=!r; srcView.hidden=!sr;
+  const off=n||c||r||sr;
+  toolbarEl.hidden=off; count.hidden=off; wrapEl.hidden=off; legendEl.hidden=off; partTabs.hidden=off||v!=='plan'; weekView.hidden=off||v!=='plan';
+  if(!off)render();
+}
+tabConc.addEventListener('click',()=>setView('conc'));
+tabRoad.addEventListener('click',()=>setView('road'));
+tabSrc.addEventListener('click',()=>setView('src'));
+tabAll.addEventListener('click',()=>setView('all'));
+tabPlan.addEventListener('click',()=>setView('plan'));
+tabNotes.addEventListener('click',()=>setView('notes'));
+function loadLocalNotes(){try{return DEMO_STORE.getItem('plan2027notes')||''}catch(e){return ''}}
+function saveLocalNotes(){try{DEMO_STORE.setItem('plan2027notes',notesTa.value)}catch(e){}}
+notesTa.value=loadLocalNotes();
+notesTa.addEventListener('input',()=>{
+  saveLocalNotes(); noteState.textContent='scribbling…';
+  clearTimeout(notesTimer);
+  notesTimer=setTimeout(()=>{
+    if(!notesDoc){noteState.textContent='saved on this device'; return;}
+    notesDoc.set({text:notesTa.value,updatedAt:new Date().toISOString()})
+      .then(()=>{noteState.textContent='saved'})
+      .catch(()=>{noteState.textContent='saved on this device'});
+  },900);
+});
+tb.addEventListener('change',e=>{
+  const ps=e.target.closest('select.plan-sel');
+  if(ps){
+    const us=ps.dataset.us.split(','), v=ps.value;
+    if(!v){const was=us.find(u=>planned.has(u)); if(was)activeSem=baseOfCode(sems[was]); us.forEach(u=>{if(planned.has(u))setPlanned(u,false)}); return;}
+    activeSem=baseOfCode(v);
+    if(v.startsWith('H:')){
+      const half=v.slice(2), key=ps.dataset.key;
+      const secs=C.filter(c=>c.c+'|'+c.t===key);
+      const target=us.map(u=>C.find(c=>c.u===u)).find(c=>c&&c.se===half)||secs.find(c=>c.se===half);
+      if(!target)return;
+      if(planned.has(target.u)){if((sems[target.u]||'SP27')!=='SP27')setSem(target.u,'SP27'); return;}
+      const prev=secs.find(c=>planned.has(c.u));
+      const carry=prev?(points[prev.u]||0):0;
+      if(prev)setPlanned(prev.u,false);
+      sems[target.u]='SP27';
+      setPlanned(target.u,true);
+      if(carry)setPoints(target.u,carry);
+      return;
+    }
+    const cur=us.find(u=>planned.has(u));
+    if(cur){if((sems[cur]||'SP27')!==v)setSem(cur,v);}
+    else{sems[us[0]]=v; setPlanned(us[0],true);}
+    return;
+  }
+  const pt=e.target.closest('input[type=number]');
+  if(pt)setPoints(pt.dataset.u,pt.value);
+});
+// Live budget feedback while typing; the change event above persists it.
+tb.addEventListener('input',e=>{
+  const pt=e.target.closest('input[type=number]');
+  if(pt){points[pt.dataset.u]=Math.max(0,Math.round(Number(pt.value)||0)); updateBudget();}
+});
+
+[...new Set(C.map(x=>x.d))].sort().forEach(d=>{
+  const o=document.createElement('option'); o.value=d; o.textContent=d; dept.appendChild(o);
+});
+
+let sortKey='code', sortDir='asc';
+// Bid stats follow the semester being planned: a planned row uses its own semester; other rows use the
+// semester on the points badge. Fall plans show Fall 2024 clears, spring plans the Spring '24–'25 averages;
+// a course with only one season's data shows that season, labeled.
+function statsOf(x){
+  const us=x.us||[x.u], pu=us.find(u=>planned.has(u));
+  const want=baseOfCode(pu?sems[pu]:activeSem)==='FA27'?'fa':'sp';
+  const sp=x.st?[x.st[1],x.st[2]]:null, fa=x.f24||null;
+  if(want==='fa'&&fa)return {src:'fa',want,v:fa};
+  if(want==='sp'&&sp)return {src:'sp',want,v:sp};
+  if(sp)return {src:'sp',want,v:sp};
+  if(fa)return {src:'fa',want,v:fa};
+  return null;
+}
+const keyOf={u:x=>x.u, code:x=>x.c, title:x=>x.t, prof:x=>x.p, days:x=>x.dy, start:x=>x.s, room:x=>x.r,
+  seats:x=>x.st?x.st[0]:-1, r1:x=>{const t=statsOf(x); return t&&t.v[0]!=null?t.v[0]:-1}, r2:x=>{const t=statsOf(x); return t&&t.v[1]!=null?t.v[1]:-1},
+  rmp:x=>{const m=RM[normP(x.p)]; return m?(m[0]==null?0:m[0]):-1},
+  walk:x=>{const b=bldOf(x); return b?BLD[b].w:999},
+  gb:x=>x.gb==='course'?2:x.gb==='step'?1:0};
+
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function chipClass(tag){
+  if(tag==='Canceled')return'chip cancel';
+  if(tag==='Custom core'||tag==='MBA core')return'chip core';
+  if(tag==='Worldview'||tag==='R&I')return'chip req';
+  return'chip';
+}
+function render(){
+  const term=q.value.trim().toLowerCase();
+  let rows=C.filter(x=>{
+    if(view==='plan'&&!planned.has(x.u))return false;
+    if(dept.value&&x.d!==dept.value)return false;
+    if(daysSel.value&&x.dy!==daysSel.value)return false;
+    const f24row=x.u.startsWith('F24');
+    if(sess.value==='f24')return f24row||!!x.f24;
+    if(sess.value&&f24row)return false;
+    if(sess.value==='full'&&x.se!=='')return false;
+    if(sess.value==='S1'&&!(x.se===''||x.se==='S1'||x.se==='short'))return false;
+    if(sess.value==='S2'&&!(x.se===''||x.se==='S2'||x.se==='short'))return false;
+    if(catSel.value&&catOf(x)!==catSel.value)return false;
+    if(hide.checked&&(x.tg.includes('Restricted')||x.tg.includes('Canceled')))return false;
+    if(term){
+      const hay=(x.u+' '+x.c+' '+x.t+' '+x.p+' '+x.n+' '+x.tg.join(' ')).toLowerCase();
+      if(!hay.includes(term))return false;
+    }
+    return true;
+  });
+  // One row per course: collapse sections that share course number + title
+  if(dedupe.checked){
+    const groups=new Map();
+    rows.forEach(x=>{const key=x.c+'|'+x.t; if(!groups.has(key))groups.set(key,[]); groups.get(key).push(x);});
+    rows=[...groups.values()].map(g=>{
+      g.sort((a,b)=>a.s-b.s);
+      const r=Object.assign({},g[0]);
+      r.us=g.map(x=>x.u);
+      r.sess=[...new Set(g.map(x=>x.se))];
+      if(g.length>1){
+        const dys=[...new Set(g.map(x=>x.dy))];
+        r.dy=dys.length===1?dys[0]:'varies';
+        r.tm=g.map(x=>dys.length===1?x.tm:(x.dy+' '+x.tm)).join(' · ');
+        r.r=[...new Set(g.map(x=>x.r))].join(', ');
+        r.tg=[...new Set(g.flatMap(x=>x.tg))];
+      }
+      return r;
+    });
+  }else{
+    rows=rows.map(x=>Object.assign({},x,{us:[x.u],sess:[x.se]}));
+  }
+  const k=keyOf[sortKey], dir=sortDir==='asc'?1:-1;
+  rows.sort((a,b)=>{const A=k(a),B=k(b); return (A<B?-1:A>B?1:0)*dir || (a.c<b.c?-1:1);});
+  function bidHTML(v){
+    if(v==null)return '<span style="color:var(--muted)">n/a</span>';
+    if(!v)return '<span style="color:var(--muted)">0</span>';
+    return `<span class="bid${v>=500?' hot':''}">${fmtStat(v)}</span>`;
+  }
+  function planSel(x,checked,u0,n){
+    // Only terms the course is available in. Half-term courses list the part (· 1 / · 2);
+    // picking an Sp '27 part plans the section that meets in that part.
+    const key=x.c+'|'+x.t, opts=availTerms(x);
+    let cur='';
+    if(checked){
+      const code=sems[u0]||'SP27', cu=C.find(c=>c.u===u0);
+      cur=(code==='SP27'&&cu&&(cu.se==='S1'||cu.se==='S2'))?'H:'+cu.se:code;
+      if(!opts.some(o=>o[0]===cur))opts.push([cur,(SEML[cur]||cur)+' (n/a)']);
+    }
+    if(!opts.length)return '<span style="color:var(--muted); font-size:12px">n/a</span>';
+    return `<select class="plan-sel${checked?' on':''}" data-us="${x.us.join(',')}" data-key="${esc(key)}"${n>1?' title="Choosing a term plans the earliest matching section; — removes every section of this course."':''} aria-label="Plan ${esc(x.c)}"><option value="">—</option>${opts.map(o=>`<option value="${o[0]}"${o[0]===cur?' selected':''}>${o[1]}</option>`).join('')}</select>`;
+  }
+  function rowHTML(x,alt){
+    const chips=[...x.sess.filter(s=>s==='S1'||s==='S2').map(s=>s==='S1'?'Spring 1':'Spring 2'),...x.tg]
+      .map(t=>`<span class="${t==='Spring 1'||t==='Spring 2'?'chip':chipClass(t)}">${esc(t)}</span>`).join('');
+    let cls=alt?'alt':'';
+    if(x.tg.includes('Restricted')||x.tg.includes('Canceled'))cls+=(cls?' ':'')+'dim'+(x.tg.includes('Canceled')?' cancel':'');
+    const n=x.us.length, checked=x.us.some(u=>planned.has(u)), u0=x.us.find(u=>planned.has(u));
+    const tip=esc(`Section ${x.us.join(', ')}${x.r&&x.r!=='—'?` · Room ${x.r}`:''}${x.st?` · '25 avg seats ${fmtStat(x.st[0])}`:''}${x.f24s?` · Fall '24: ${x.f24s.map(z=>`${z[0]} ${z[1]} ${z[2]}/${z[3]}`).join('; ')}`:''}${x.n?` · ${x.n}`:''}`).replace(/"/g,'&quot;');
+    return `<tr${cls?` class="${cls}"`:''} title="${tip}">
+      <td class="plan">${planSel(x,checked,u0,n)}</td>
+      <td class="pts">${checked?`<input type="number" class="${(points[u0]||0)>0?'on':''}" min="0" max="${BUDGETS[(sems[u0]||'SP27').split('-')[0]]}" step="10" value="${points[u0]||0}" data-u="${u0}" aria-label="Bid points for ${esc(x.c)}">`:''}</td>
+      <td class="code">${esc(x.c)}${n>1?` <span class="more">+${n-1}</span>`:''}</td>
+      <td class="title"><span class="t">${esc(x.t)}</span>${chips?`<span class="chips">${chips}</span>`:''}</td>
+      <td class="plan">${x.gb==='course'?'<span class="chip gb">GB</span>':x.gb==='step'?'<span class="chip">STEP</span>':''}</td>
+      <td>${esc(x.p)}</td>
+      <td class="rmpc">${x.p==='—'?'':rmpCell(x.p)}</td>
+      <td class="days">${esc(x.dy)}${x.tm&&x.tm!=='—'?' · '+esc(x.tm):''}</td>
+      <td class="room">${locCell(x)}</td>
+      <td class="num" style="text-align:right">${(()=>{const t=statsOf(x); if(!t)return '<span style="color:var(--muted)">— · —</span>';
+        const lab=t.src==='fa'?"Fall '24":t.want==='fa'?'Spring · no fall data':(x.f24?"Spring '24–'25":'');
+        return `${bidHTML(t.v[0])} · ${bidHTML(t.v[1])}${lab?`<div class="stsrc${t.src==='fa'?' fa':''}">${lab}</div>`:''}`;})()}</td>
+    </tr>`;
+  }
+  partTabs.hidden=view!=='plan'; weekView.hidden=view!=='plan';
+  if(view==='plan'){
+    const ptsRow=x=>x.us.reduce((t,u)=>t+(planned.has(u)?(points[u]||0):0),0);
+    const catOrder=['Required core','Custom core','Electives','Japanese language','Abroad'];
+    const codeOf=r=>sems[r.us.find(u=>planned.has(u))]||'SP27';
+    // Which parts of its semester a planned row occupies: an explicit part code (-1/-2),
+    // the 2027 section's half, or both parts for full-term courses.
+    const partsOf=r=>{
+      const c=codeOf(r);
+      if(c.endsWith('-1'))return ['S1'];
+      if(c.endsWith('-2'))return ['S2'];
+      if(c!=='SP27')return ['S1','S2'];
+      const h=new Set(); r.sess.forEach(s=>{if(s==='S1'||s==='S2')h.add(s); else{h.add('S1');h.add('S2');}}); return [...h];
+    };
+    const inPart=(r,b,h)=>codeOf(r).split('-')[0]===b&&(r.s===9999||partsOf(r).includes(h));
+    partTabs.innerHTML=PARTS.map(([b,h,l])=>{
+      const k=b+'-'+h, n=rows.filter(r=>inPart(r,b,h)).length;
+      return `<button type="button" role="tab" data-part="${k}" class="${h==='S2'?'p2':'p1'}" aria-selected="${planPart===k}">${l} <span class="n">${n}</span></button>`;
+    }).join('');
+    const [pb,ph]=planPart.split('-'), plab=PARTS.find(p=>p[0]+'-'+p[1]===planPart)[2];
+    weekView.innerHTML=weekHTML(pb,ph,plab);
+    if(activeSem!==pb){activeSem=pb; updateBudget();}
+    const sub=rows.filter(r=>r.s!==9999&&codeOf(r).split('-')[0]===pb&&partsOf(r).includes(ph));
+    const nosched=rows.filter(r=>r.s===9999&&codeOf(r).split('-')[0]===pb);
+    const hrs=sub.reduce((t,x)=>t+creditsOf(x),0);
+    let html=`<tr class="group half${ph==='S2'?' s2':''}"><td colspan="10">${plab} plan — ${sub.length} course${sub.length===1?'':'s'} · ${hrs} hrs${pb!=='SP27'?" · sections shown are this spring's listings":''}</td></tr>`;
+    if(!sub.length&&!nosched.length){
+      html+=`<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:28px 12px">Nothing planned for ${plab} yet. Switch to All sections and pick it in the Plan column next to a course.</td></tr>`;
+    }
+    const sc={'Required core':'core','Custom core':'cust','Electives':'elec','Japanese language':'jpn','Abroad':'abr'};
+    for(const cg of catOrder){
+      const grp=sub.filter(r=>catOf(r)===cg).sort((a,b)=>ptsRow(b)-ptsRow(a));
+      if(!grp.length)continue;
+      html+=`<tr class="group sub ${sc[cg]}"><td colspan="10">${cg} (${grp.length})</td></tr>`+grp.map((x,i)=>rowHTML(x,i%2===1)).join('');
+    }
+    if(nosched.length)html+=`<tr class="group half plain"><td colspan="10">No set schedule</td></tr>`+nosched.map((x,i)=>rowHTML(x,i%2===1)).join('');
+    tb.innerHTML=html;
+    const nReq=rows.filter(r=>catOf(r)==='Required core').length,
+      nCC=rows.filter(r=>catOf(r)==='Custom core').length,
+      nEl=rows.filter(r=>catOf(r)==='Electives').length,
+      nAb=rows.filter(r=>catOf(r)==='Abroad').length,
+      nJp=rows.filter(r=>catOf(r)==='Japanese language').length;
+    count.textContent=rows.length
+      ?`${rows.length} planned — ${nReq} required core · ${nCC} custom core · ${nEl} elective${nEl===1?'':'s'}${nJp?` · ${nJp} Japanese`:''}${nAb?` · ${nAb} abroad`:''}`
+      :'0 planned sections';
+  }else{
+    tb.innerHTML=rows.map((x,i)=>rowHTML(x,i%2===1)).join('');
+    count.textContent=dedupe.checked
+      ?`${rows.length} courses (of ${C.length} sections)`
+      :`${rows.length} of ${C.length} sections`;
+  }
+}
+// ---- Weekly schedule (Planned tab) ----
+const WK_DAYS=[['M','Mon'],['T','Tue'],['W','Wed'],['TH','Thu'],['F','Fri'],['S','Sat']];
+const WK_PX=0.9; // pixels per minute
+function wkDays(str){return (String(str).replace(/\s+/g,'').match(/TH|M|T|W|F|S/g)||[]);}
+function wkRange(seg){
+  const m=String(seg).match(/(\d{1,2}):(\d{2})([ap])?\s*[–-]\s*(\d{1,2}):(\d{2})([ap])/);
+  if(!m)return null;
+  const to=(h,mi,ap)=>(Number(h)%12+(ap==='p'?12:0))*60+Number(mi);
+  const e=to(m[4],m[5],m[6]);
+  let st=to(m[1],m[2],m[3]||m[6]);
+  if(!m[3]&&st>e)st=to(m[1],m[2],'a');
+  return [st,e];
+}
+// Meetings of one section: [{d,s,e}]. Handles "MW" + "10:30a–12:30p" and per-day strings like "W 5:00–8:00p, F 1:00–4:00p".
+function wkMeetings(x){
+  if(x.s===9999)return [];
+  const out=[];
+  if(/^[MTWFSH]+\s+\d/.test(x.tm)){
+    x.tm.split(/,\s*/).forEach(part=>{const m=part.match(/^([MTWFSH]+)\s+(.*)$/); const r=m&&wkRange(m[2]); if(r)wkDays(m[1]).forEach(d=>out.push({d,s:r[0],e:r[1]}));});
+  }else{
+    const r=wkRange(x.tm); if(r)wkDays(x.dy).forEach(d=>out.push({d,s:r[0],e:r[1]}));
+  }
+  return out;
+}
+function wkFmt(m){const h=Math.floor(m/60), mi=m%60, ap=h>=12?'p':'a'; return `${h%12||12}:${String(mi).padStart(2,'0')}${ap}`;}
+function wkHour(h){return `${h%12||12}${h>=12?'p':'a'}`;}
+// Planned sections that meet in semester pb, part ph (S1/S2).
+function wkSections(pb,ph){
+  const out=[];
+  for(const u of planned){
+    const x=C.find(c=>c.u===u); if(!x)continue;
+    const code=sems[u]||'SP27';
+    if(code.split('-')[0]!==pb)continue;
+    const parts=code.endsWith('-1')?['S1']:code.endsWith('-2')?['S2']
+      :(code==='SP27'&&(x.se==='S1'||x.se==='S2'))?[x.se]:['S1','S2'];
+    if(parts.includes(ph))out.push(x);
+  }
+  return out;
+}
+function weekHTML(pb,ph,plab){
+  const secs=wkSections(pb,ph);
+  const sc={'Required core':'core','Custom core':'cust','Electives':'elec','Japanese language':'jpn','Abroad':'abr'};
+  const evs=[], off=[];
+  secs.forEach(x=>{const ms=wkMeetings(x); if(!ms.length)off.push(x); ms.forEach(m=>evs.push(Object.assign({x},m)));});
+  // Overlaps: same day, time ranges intersect (back-to-back is fine).
+  const clashes=[];
+  for(let i=0;i<evs.length;i++)for(let j=i+1;j<evs.length;j++){
+    const a=evs[i], b=evs[j];
+    if(a.d===b.d&&a.x.u!==b.x.u&&a.s<b.e&&b.s<a.e){a.clash=b.clash=true; clashes.push([a,b]);}
+  }
+  // Group clash pairs by course pair so a TTH clash is one line.
+  const pairs=new Map();
+  clashes.forEach(([a,b])=>{
+    const [p,q]=a.x.u<b.x.u?[a,b]:[b,a], k=p.x.u+'|'+q.x.u;
+    if(!pairs.has(k))pairs.set(k,{p:p.x,q:q.x,days:[],s:Math.max(a.s,b.s),e:Math.min(a.e,b.e)});
+    pairs.get(k).days.push(WK_DAYS.find(w=>w[0]===a.d)[1]);
+  });
+  const hrs=secs.reduce((t,x)=>t+creditsOf(x),0);
+  let head=`<div class="wk-head"><span class="wk-title">Weekly schedule · ${esc(plab)}</span><span class="wk-sum">${secs.length} course${secs.length===1?'':'s'} · ${hrs} hrs${pairs.size?` · <span style="color:#B3261E;font-weight:700">${pairs.size} overlap${pairs.size===1?'':'s'}</span>`:''}${pb!=='SP27'?" · times are the latest listings (Spring '27 or Fall '24)":''}</span></div>`;
+  if(!evs.length){
+    return head+`<div class="wk-notes"><span class="off">${secs.length?'None of these courses has a set weekly time.':`Nothing planned for ${esc(plab)} yet.`}</span>${off.length?`<span class="off">Not on the grid: ${off.map(x=>esc(x.c+' '+x.t)).join(' · ')}</span>`:''}</div>`;
+  }
+  const days=WK_DAYS.filter(w=>w[0]!=='S'||evs.some(e=>e.d==='S'));
+  const h0=Math.min(8,Math.floor(Math.min(...evs.map(e=>e.s))/60)), h1=Math.max(17,Math.ceil(Math.max(...evs.map(e=>e.e))/60));
+  const H=(h1-h0)*60*WK_PX, hourPx=60*WK_PX;
+  const lines=`background-image:repeating-linear-gradient(to bottom,var(--hairline) 0,var(--hairline) 1px,transparent 1px,transparent ${hourPx}px)`;
+  let gut=`<div class="wk-gutter" style="height:${H}px">`;
+  for(let h=h0+1;h<h1;h++)gut+=`<span class="wk-hr" style="top:${(h-h0)*hourPx}px">${wkHour(h)}</span>`;
+  gut+='</div>';
+  const cols=days.map(([d])=>{
+    const list=evs.filter(e=>e.d===d).sort((a,b)=>a.s-b.s||a.e-b.e);
+    // Side-by-side lanes inside each cluster of overlapping blocks.
+    let cluster=[], end=-1; const done=[];
+    const flush=()=>{const lanes=[]; cluster.forEach(e=>{let i=lanes.findIndex(t=>t<=e.s); if(i<0){i=lanes.length; lanes.push(0);} lanes[i]=e.e; e.lane=i;}); cluster.forEach(e=>{e.lanes=lanes.length; done.push(e);}); cluster=[];};
+    list.forEach(e=>{if(cluster.length&&e.s>=end){flush(); end=-1;} cluster.push(e); end=Math.max(end,e.e);});
+    flush();
+    const blocks=done.map(e=>{
+      const x=e.x, top=(e.s-h0*60)*WK_PX, ht=Math.max(18,(e.e-e.s)*WK_PX-2), w=100/e.lanes;
+      const tip=`${x.c} ${x.t} · ${wkFmt(e.s)}–${wkFmt(e.e)} · ${x.r||'room TBD'}${e.clash?' · OVERLAPS another planned course':''}`;
+      return `<div class="wk-ev ${sc[catOf(x)]||''}${e.clash?' clash':''}" style="top:${top}px;height:${ht}px;left:calc(${e.lane*w}% + 2px);width:calc(${w}% - 4px)" title="${esc(tip).replace(/"/g,'&quot;')}">${e.clash?'<span class="wk-flag">Overlap</span>':''}<b>${esc(x.c)}</b><span class="wt">${esc(x.t)}</span><span class="wm">${wkFmt(e.s)}–${wkFmt(e.e)}${x.r?' · '+esc(x.r):''}</span></div>`;
+    }).join('');
+    return `<div class="wk-col" style="height:${H}px;${lines}">${blocks}</div>`;
+  }).join('');
+  const grid=`<div class="wk-scroll"><div class="wk-grid" style="grid-template-columns:40px repeat(${days.length},minmax(104px,1fr));min-width:${40+days.length*104}px"><div></div>${days.map(d=>`<div class="wk-dayh">${d[1]}</div>`).join('')}${gut}${cols}</div></div>`;
+  let notes='<div class="wk-notes">';
+  if(pairs.size)pairs.forEach(c=>{notes+=`<span class="bad">⚠ ${esc(c.p.c)} ${esc(c.p.t)} and ${esc(c.q.c)} ${esc(c.q.t)} overlap ${c.days.join(', ')} ${wkFmt(c.s)}–${wkFmt(c.e)}</span>`;});
+  else notes+='<span class="ok">No overlapping times.</span>';
+  if(off.length)notes+=`<span class="off">Not on the grid (no set weekly time): ${off.map(x=>esc(x.c+' '+x.t)).join(' · ')}</span>`;
+  notes+='</div>';
+  return head+grid+notes;
+}
+function catOf(x){
+  return x.d==='JPN'?'Japanese language'
+    :x.tg.includes('Abroad')?'Abroad'
+    :x.tg.includes('MBA core')?'Required core'
+    :x.tg.includes('Custom core')?'Custom core'
+    :'Electives';
+}
+document.querySelectorAll('th button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    const k=b.dataset.k;
+    if(sortKey===k){sortDir=sortDir==='asc'?'desc':'asc';}else{sortKey=k;sortDir='asc';}
+    document.querySelectorAll('th button').forEach(x=>x.removeAttribute('data-dir'));
+    b.setAttribute('data-dir',sortDir);
+    render();
+  });
+});
+[q,dept,daysSel,sess,catSel,hide,dedupe].forEach(el=>el.addEventListener('input',render));
+updateTabs();
+render();
+</script>
+
+</body></html>
