@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Feedback responses · private</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/demo/site/favicon.ico" sizes="any">
+<style>
+:root{--bg:#0b1018;--ink:#e7eaf0;--muted:rgba(231,234,240,.6);--accent:#5cbfad;--card:#141c28;--line:rgba(255,255,255,.1)}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif;padding:28px 16px 48px}
+.wrap{width:min(900px,100%);margin:0 auto}
+h1{font-size:26px;margin:0 0 4px}
+.sub{color:var(--muted);margin:0 0 20px;font-size:14px}
+.login{display:flex;gap:10px;flex-wrap:wrap;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px}
+input{font:inherit;color:var(--ink);background:#0f1622;border:1px solid var(--line);border-radius:8px;padding:10px 12px;min-width:260px;flex:1}
+button{font:600 14px system-ui,sans-serif;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid var(--accent);background:var(--accent);color:#0b1018;cursor:pointer}
+button.ghost{background:transparent;color:var(--accent)}
+button.del{background:transparent;border-color:rgba(255,120,110,.5);color:#ff9a8f;min-height:32px;padding:0 12px;font-size:13px}
+.tools{display:flex;gap:10px;align-items:center;margin:0 0 14px;flex-wrap:wrap}
+.tools .count{margin-right:auto;color:var(--muted)}
+.item{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:12px}
+.meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-bottom:8px}
+.meta b{color:var(--ink)}
+.meta .sp{margin-left:auto}
+.text{white-space:pre-wrap;word-wrap:break-word;font:16px/1.7 Georgia,"IBM Plex Serif",serif;color:#eef1f6}
+.msg{color:#ff9a8f;font-size:14px}
+.empty{color:var(--muted);text-align:center;padding:40px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Feedback responses</h1>
+  <p class="sub">Private. Everything testers saved from <a href="/feedback/" style="color:var(--accent)">mcgeehenry.com/feedback</a>, newest first.</p>
+  <form class="login" id="login"><input id="key" type="password" placeholder="Admin key" aria-label="Admin key" autocomplete="current-password"><button type="submit">Show responses</button><span class="msg" id="msg" role="alert"></span></form>
+  <div id="out" hidden>
+    <div class="tools"><span class="count" id="count"></span><button class="ghost" id="copy" type="button">Copy all</button><button class="ghost" id="refresh" type="button">Refresh</button><button class="ghost" id="lock" type="button">Lock</button></div>
+    <div id="list"></div>
+  </div>
+</div>
+<script>
+(function () {
+  var $ = function (s) { return document.getElementById(s); }, key = '', items = [];
+  try { key = sessionStorage.getItem('mh-fb-key') || ''; } catch (e) {}
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function when(iso) { var d = new Date(iso); return isNaN(d) ? iso : d.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }); }
+  function call(method, path) { return fetch(path, { method: method, headers: { authorization: 'Bearer ' + key } }).then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Request failed'); return j; }); }); }
+  function render() {
+    $('count').textContent = items.length + (items.length === 1 ? ' response' : ' responses');
+    $('list').innerHTML = items.length ? items.map(function (x) {
+      return '<article class="item"><div class="meta"><b>' + esc(x.name || 'Anonymous') + '</b><span>' + esc(when(x.created_at)) + '</span><span>' + x.body.length.toLocaleString() + ' characters</span><span class="sp"></span><button class="del" type="button" data-id="' + x.id + '">Delete</button></div><div class="text">' + esc(x.body) + '</div></article>';
+    }).join('') : '<p class="empty">No responses yet.</p>';
+  }
+  function load() {
+    $('msg').textContent = '';
+    return call('GET', '/api/feedback/responses').then(function (j) {
+      items = j.responses || []; try { sessionStorage.setItem('mh-fb-key', key); } catch (e) {}
+      $('login').hidden = true; $('out').hidden = false; render();
+    }).catch(function (e) { $('login').hidden = false; $('out').hidden = true; $('msg').textContent = e.message; });
+  }
+  $('login').addEventListener('submit', function (e) { e.preventDefault(); key = $('key').value.trim(); if (key) load(); });
+  $('refresh').addEventListener('click', load);
+  $('lock').addEventListener('click', function () { key = ''; try { sessionStorage.removeItem('mh-fb-key'); } catch (e) {} items = []; $('list').innerHTML = ''; $('out').hidden = true; $('login').hidden = false; $('key').value = ''; });
+  $('copy').addEventListener('click', function () {
+    var text = items.map(function (x) { return (x.name || 'Anonymous') + ' · ' + when(x.created_at) + '\n' + x.body; }).join('\n\n----\n\n');
+    navigator.clipboard.writeText(text).then(function () { $('copy').textContent = 'Copied'; setTimeout(function () { $('copy').textContent = 'Copy all'; }, 1500); });
+  });
+  $('list').addEventListener('click', function (e) {
+    var b = e.target.closest('button.del'); if (!b) return;
+    if (b.dataset.armed !== '1') { b.dataset.armed = '1'; b.textContent = 'Click again to delete'; return; }
+    call('DELETE', '/api/feedback/responses/' + b.dataset.id).then(function () { items = items.filter(function (x) { return String(x.id) !== b.dataset.id; }); render(); }).catch(function (err) { b.textContent = err.message; });
+  });
+  if (key) load(); else $('key').focus();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Feedback · Henry McGee</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/demo/site/favicon.ico" sizes="any">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Serif:wght@400&display=swap">
+<style>
+:root{--bg:#0b1018;--ink:#e7eaf0;--muted:rgba(231,234,240,.6);--accent:#5cbfad;--paper:#fbfaf6;--paper-ink:#1d2430}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;min-height:100%}
+body{background:radial-gradient(80% 60% at 20% 0%,rgba(92,191,173,.10),transparent 60%),var(--bg);color:var(--ink);font:16px/1.6 "IBM Plex Sans",system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;padding:32px 16px 48px}
+header{width:min(820px,100%);display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:18px;flex-wrap:wrap}
+h1{font:800 clamp(28px,4vw,40px)/1 Archivo,sans-serif;text-transform:uppercase;letter-spacing:-.02em;margin:0}
+.lede{margin:8px 0 0;color:var(--muted);font-size:15px;max-width:52ch}
+a.home{color:var(--muted);text-decoration:none;font-size:13px;letter-spacing:.14em;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,.18);padding-bottom:2px}
+a.home:hover{color:var(--accent);border-color:var(--accent)}
+.sheet{width:min(820px,100%);background:var(--paper);color:var(--paper-ink);border-radius:6px;box-shadow:0 24px 60px rgba(0,0,0,.45);padding:28px clamp(18px,4vw,48px) 22px;display:flex;flex-direction:column;gap:12px}
+.name{border:0;border-bottom:1px solid #e3e0d6;background:transparent;font:500 15px "IBM Plex Sans",sans-serif;color:var(--paper-ink);padding:6px 0;outline:0}
+.name:focus{border-color:var(--accent)}
+textarea{width:100%;min-height:min(62vh,640px);resize:vertical;border:0;outline:0;background:transparent;color:var(--paper-ink);font:400 17px/1.75 "IBM Plex Serif",Georgia,serif;padding:6px 0}
+textarea::placeholder,.name::placeholder{color:#9a9586}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;border-top:1px solid #ece9df;padding-top:14px}
+.state{font-size:13px;color:#7d7869;margin-right:auto}
+button{font:700 14px Archivo,sans-serif;letter-spacing:.02em;min-height:44px;padding:0 22px;border-radius:2px;cursor:pointer;border:1px solid var(--accent);background:var(--accent);color:#0b1018}
+button:hover,button:focus-visible{background:#4aa797;border-color:#4aa797}
+button[disabled]{opacity:.5;cursor:default}
+button.ghost{background:transparent;color:var(--paper-ink);border-color:#cfcabb}
+.done{text-align:center;padding:60px 10px}
+.done h2{font:800 28px Archivo,sans-serif;margin:0 0 8px}
+.done p{color:#5d5848;margin:0 0 22px}
+.err{color:#a8352c;font-size:14px}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>Your thoughts</h1><p class="lede">A blank page for anything you noticed while trying the site: what you clicked, what confused you, what you liked. Only Henry reads these.</p></div>
+  <a class="home" href="/">Back to the site</a>
+</header>
+<main class="sheet" id="sheet">
+  <form id="form" autocomplete="off">
+    <input class="name" id="name" maxlength="120" placeholder="Your name (optional)" aria-label="Your name (optional)">
+    <label class="hp" aria-hidden="true">Leave this empty <input id="website" tabindex="-1" autocomplete="off"></label>
+    <textarea id="body" placeholder="Start typing…" aria-label="Your feedback" maxlength="20000"></textarea>
+    <div class="bar"><span class="state" id="state" aria-live="polite">Your draft stays on this device until you save it.</span><span class="err" id="err" role="alert"></span><button id="save" type="submit">Save my notes</button></div>
+  </form>
+</main>
+<script>
+(function () {
+  var KEY = 'mh-feedback-draft', $ = function (s) { return document.getElementById(s); };
+  var body = $('body'), name = $('name'), state = $('state'), err = $('err'), save = $('save');
+  try { var d = JSON.parse(localStorage.getItem(KEY) || '{}'); if (d.body) body.value = d.body; if (d.name) name.value = d.name; } catch (e) {}
+  var t = 0;
+  function keep() { clearTimeout(t); t = setTimeout(function () { try { localStorage.setItem(KEY, JSON.stringify({ body: body.value, name: name.value })); state.textContent = 'Draft kept on this device · ' + body.value.length.toLocaleString() + ' characters'; } catch (e) {} }, 400); }
+  body.addEventListener('input', keep); name.addEventListener('input', keep);
+  body.focus();
+  $('form').addEventListener('submit', function (e) {
+    e.preventDefault(); err.textContent = '';
+    if (!body.value.trim()) { err.textContent = 'Write something first.'; body.focus(); return; }
+    save.disabled = true; save.textContent = 'Saving…';
+    fetch('/api/feedback', { method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ body: body.value, name: name.value, website: $('website').value, page: document.referrer || '' }) })
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+      .then(function (res) {
+        if (!res.ok) throw new Error(res.j && res.j.error || 'Could not save.');
+        try { localStorage.removeItem(KEY); } catch (e) {}
+        $('sheet').innerHTML = '<div class="done"><h2>Thank you</h2><p>Your notes are saved. Henry will read them.</p><button class="ghost" type="button" onclick="location.reload()">Write another</button></div>';
+      })
+      .catch(function (x) { err.textContent = (x && x.message) || 'Could not save. Your draft is still here.'; save.disabled = false; save.textContent = 'Save my notes'; });
+  });
+})();
+</script>
+</body>
+</html>
