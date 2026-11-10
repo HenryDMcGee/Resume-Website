@@ -25,5 +25,14 @@
   // linked after that. The table is created by the script on first use.
   "d1_databases": [
     { "binding": "DB", "database_name": "mcgeehenry-feedback" }
-  ]
+  ],
+
+  // Cloudflare Access app that guards /insights, /feedback/responses and their
+  // APIs. Neither value is a secret. Team domain: Zero Trust > Settings >
+  // Custom pages (like henry.cloudflareaccess.com). AUD: the app's
+  // "Application Audience (AUD) Tag" on its Overview tab.
+  "vars": {
+    "ACCESS_TEAM_DOMAIN": "",
+    "ACCESS_AUD": ""
+  }
 }

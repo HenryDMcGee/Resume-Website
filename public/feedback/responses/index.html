@@ -26,7 +26,7 @@ button.del{background:transparent;border-color:rgba(255,120,110,.5);color:#ff9a8
 .meta b{color:var(--ink)}
 .meta .sp{margin-left:auto}
 .text{white-space:pre-wrap;word-wrap:break-word;font:16px/1.7 Georgia,"IBM Plex Serif",serif;color:#eef1f6}
-.msg{color:#ff9a8f;font-size:14px}
+.msg,#msg{color:var(--muted);font-size:14px}
 .empty{color:var(--muted);text-align:center;padding:40px 0}
 </style>
 </head>
@@ -34,19 +34,23 @@ button.del{background:transparent;border-color:rgba(255,120,110,.5);color:#ff9a8
 <div class="wrap">
   <h1>Feedback responses</h1>
   <p class="sub">Private. Everything testers saved from <a href="/feedback/" style="color:var(--accent)">mcgeehenry.com/feedback</a>, newest first.</p>
-  <form class="login" id="login"><input id="key" type="password" placeholder="Admin key" aria-label="Admin key" autocomplete="current-password"><button type="submit">Show responses</button><span class="msg" id="msg" role="alert"></span></form>
+  <div class="login" id="login"><span id="msg" role="alert">Loading…</span><button class="ghost" type="button" id="reload" hidden>Reload and sign in</button></div>
   <div id="out" hidden>
-    <div class="tools"><span class="count" id="count"></span><button class="ghost" id="copy" type="button">Copy all</button><button class="ghost" id="refresh" type="button">Refresh</button><button class="ghost" id="lock" type="button">Lock</button></div>
+    <div class="tools"><span class="count" id="count"></span><button class="ghost" id="copy" type="button">Copy all</button><button class="ghost" id="refresh" type="button">Refresh</button><button class="ghost" id="lock" type="button">Sign out</button></div>
     <div id="list"></div>
   </div>
 </div>
 <script>
 (function () {
-  var $ = function (s) { return document.getElementById(s); }, key = '', items = [];
-  try { key = sessionStorage.getItem('mh-fb-key') || ''; } catch (e) {}
+  var $ = function (s) { return document.getElementById(s); }, items = [];
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function when(iso) { var d = new Date(iso); return isNaN(d) ? iso : d.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }); }
-  function call(method, path) { return fetch(path, { method: method, headers: { authorization: 'Bearer ' + key } }).then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Request failed'); return j; }); }); }
+  /* Signed in by Cloudflare Access; an expired sign-in comes back as a redirect fetch cannot follow, so reload. */
+  function call(method, path) {
+    return fetch(path, { method: method, credentials: 'same-origin' }).then(function (r) {
+      return r.json().then(function (j) { if (!r.ok) { var er = new Error(j.error || 'Request failed'); er.signin = j.signin; throw er; } return j; });
+    }, function () { var er = new Error('Your sign-in has expired.'); er.signin = true; throw er; });
+  }
   function render() {
     $('count').textContent = items.length + (items.length === 1 ? ' response' : ' responses');
     $('list').innerHTML = items.length ? items.map(function (x) {
@@ -56,13 +60,13 @@ button.del{background:transparent;border-color:rgba(255,120,110,.5);color:#ff9a8
   function load() {
     $('msg').textContent = '';
     return call('GET', '/api/feedback/responses').then(function (j) {
-      items = j.responses || []; try { sessionStorage.setItem('mh-fb-key', key); } catch (e) {}
+      items = j.responses || [];
       $('login').hidden = true; $('out').hidden = false; render();
-    }).catch(function (e) { $('login').hidden = false; $('out').hidden = true; $('msg').textContent = e.message; });
+    }).catch(function (e) { $('login').hidden = false; $('out').hidden = true; $('msg').textContent = e.message; $('reload').hidden = !e.signin; });
   }
-  $('login').addEventListener('submit', function (e) { e.preventDefault(); key = $('key').value.trim(); if (key) load(); });
+  $('reload').addEventListener('click', function () { location.reload(); });
   $('refresh').addEventListener('click', load);
-  $('lock').addEventListener('click', function () { key = ''; try { sessionStorage.removeItem('mh-fb-key'); } catch (e) {} items = []; $('list').innerHTML = ''; $('out').hidden = true; $('login').hidden = false; $('key').value = ''; });
+  $('lock').addEventListener('click', function () { location.href = '/cdn-cgi/access/logout'; });
   $('copy').addEventListener('click', function () {
     var text = items.map(function (x) { return (x.name || 'Anonymous') + ' · ' + when(x.created_at) + '\n' + x.body; }).join('\n\n----\n\n');
     navigator.clipboard.writeText(text).then(function () { $('copy').textContent = 'Copied'; setTimeout(function () { $('copy').textContent = 'Copy all'; }, 1500); });
@@ -72,7 +76,7 @@ button.del{background:transparent;border-color:rgba(255,120,110,.5);color:#ff9a8
     if (b.dataset.armed !== '1') { b.dataset.armed = '1'; b.textContent = 'Click again to delete'; return; }
     call('DELETE', '/api/feedback/responses/' + b.dataset.id).then(function () { items = items.filter(function (x) { return String(x.id) !== b.dataset.id; }); render(); }).catch(function (err) { b.textContent = err.message; });
   });
-  if (key) load(); else $('key').focus();
+  load();
 })();
 </script>
 </body>

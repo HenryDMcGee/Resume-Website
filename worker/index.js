@@ -1,7 +1,7 @@
 // mcgeehenry.com Worker. Static files in ./public are served directly; only /api/* reaches this code.
 //
 //   POST /api/feedback            a tester saves their notes (anyone; honeypot, size cap, daily limit)
-//   GET  /api/feedback/responses  every saved response, newest first (Henry only: needs FEEDBACK_ADMIN_KEY)
+//   GET  /api/feedback/responses  every saved response, newest first (Henry only: signed in through Cloudflare Access)
 //   DELETE /api/feedback/responses/:id   remove one response (Henry only)
 //   POST /api/t                   the hub's visit path log: a batch of decisions from one visit (anyone; capped)
 //   GET  /api/insights?days=30    every logged visit with its events, for /insights/ (Henry only)
@@ -10,8 +10,11 @@
 //   PUT  /api/insights/recording  {"on": true|false} switch recording for the whole site (Henry only)
 //
 // Storage is the D1 database bound as DB. The table is created on first use, so there is no migration step.
-// FEEDBACK_ADMIN_KEY is a Worker secret (Cloudflare dashboard > resume-website > Settings > Variables and Secrets).
-// Until it is set, the responses endpoints refuse every request.
+// Henry's pages and endpoints sit behind Cloudflare Access (Zero Trust > Access > Applications), which asks for an
+// emailed one-time code and then adds a signed token (Cf-Access-Jwt-Assertion) to every request. The Worker checks that
+// token's signature, issuer, audience and expiry itself, so a forged header (say on the workers.dev URL, which Access
+// does not cover) gets nothing. ACCESS_TEAM_DOMAIN and ACCESS_AUD in wrangler.jsonc say which Access app to trust;
+// until both are set, the admin endpoints refuse every request.
 
 const MAX_TEXT = 20000;      // characters per response
 const MAX_NAME = 120;
@@ -65,18 +68,50 @@ async function sha256(text) {
   return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
-// constant-time comparison of two strings
-function sameKey(a, b) {
-  if (typeof a !== 'string' || typeof b !== 'string' || !a || !b) return false;
-  const x = new TextEncoder().encode(a), y = new TextEncoder().encode(b);
-  let diff = x.length ^ y.length;
-  for (let i = 0; i < Math.max(x.length, y.length); i++) diff |= (x[i] || 0) ^ (y[i] || 0);
-  return diff === 0;
+// ---------- Cloudflare Access ----------
+const b64url = (str) => Uint8Array.from(atob(str.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((str.length + 3) % 4)), (c) => c.charCodeAt(0));
+let certCache = { url: '', at: 0, keys: null };
+async function accessKeys(team) {
+  const url = `https://${team}/cdn-cgi/access/certs`;
+  if (certCache.url === url && certCache.keys && Date.now() - certCache.at < 3600e3) return certCache.keys;
+  const r = await fetch(url);
+  if (!r.ok) throw new Error('certs ' + r.status);
+  const { keys } = await r.json();
+  certCache = { url, at: Date.now(), keys: keys || [] };
+  return certCache.keys;
+}
+function teamHost(env) { return String(env.ACCESS_TEAM_DOMAIN || '').trim().replace(/^https?:\/\//, '').replace(/\/.*$/, ''); }
+
+// Returns the signed-in email when the request carries a valid Access token for this app, otherwise null.
+async function accessUser(request, env) {
+  const team = teamHost(env), aud = String(env.ACCESS_AUD || '').trim();
+  const token = request.headers.get('cf-access-jwt-assertion') || '';
+  const parts = token.split('.');
+  if (!team || !aud || parts.length !== 3) return null;
+  let header, claims;
+  try { header = JSON.parse(new TextDecoder().decode(b64url(parts[0]))); claims = JSON.parse(new TextDecoder().decode(b64url(parts[1]))); } catch { return null; }
+  if (header.alg !== 'RS256') return null;
+  const now = Math.floor(Date.now() / 1000);
+  if (!claims.exp || claims.exp < now || (claims.nbf && claims.nbf > now + 60)) return null;
+  if (claims.iss !== `https://${team}`) return null;
+  if (!(Array.isArray(claims.aud) ? claims.aud : [claims.aud]).includes(aud)) return null;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const keys = await accessKeys(team);
+    const jwk = keys.find((k) => k.kid === header.kid);
+    if (!jwk) { certCache.keys = null; continue; }   // keys rotate: refetch once
+    const key = await crypto.subtle.importKey('jwk', jwk, { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['verify']);
+    const ok = await crypto.subtle.verify('RSASSA-PKCS1-v1_5', key, b64url(parts[2]), new TextEncoder().encode(parts[0] + '.' + parts[1]));
+    return ok ? (claims.email || 'signed in') : null;
+  }
+  return null;
 }
 
-function isHenry(request, env) {
-  const auth = request.headers.get('authorization') || '';
-  return sameKey(auth.replace(/^Bearer\s+/i, ''), env.FEEDBACK_ADMIN_KEY || '');
+// null when the request may continue, otherwise the response to send
+async function adminGuard(request, env) {
+  if (!teamHost(env) || !String(env.ACCESS_AUD || '').trim()) return json({ error: 'Cloudflare Access is not connected yet (ACCESS_TEAM_DOMAIN and ACCESS_AUD).' }, 503);
+  let user = null;
+  try { user = await accessUser(request, env); } catch { return json({ error: 'Could not check the sign-in. Try again.' }, 502); }
+  return user ? null : json({ error: 'Your sign-in has expired. Reload the page to sign in again.', signin: true }, 401);
 }
 
 async function saveFeedback(request, env) {
@@ -103,16 +138,14 @@ async function saveFeedback(request, env) {
 }
 
 async function listFeedback(request, env) {
-  if (!env.FEEDBACK_ADMIN_KEY) return json({ error: 'The admin key is not set up yet.' }, 503);
-  if (!isHenry(request, env)) return json({ error: 'Wrong key.' }, 401);
+  const deny = await adminGuard(request, env); if (deny) return deny;
   await ensureTable(env);
   const { results } = await env.DB.prepare('SELECT id, created_at, name, body, page FROM feedback ORDER BY id DESC LIMIT 1000').all();
   return json({ responses: results });
 }
 
 async function deleteFeedback(request, env, id) {
-  if (!env.FEEDBACK_ADMIN_KEY) return json({ error: 'The admin key is not set up yet.' }, 503);
-  if (!isHenry(request, env)) return json({ error: 'Wrong key.' }, 401);
+  const deny = await adminGuard(request, env); if (deny) return deny;
   await ensureTable(env);
   await env.DB.prepare('DELETE FROM feedback WHERE id = ?').bind(id).run();
   return json({ ok: true });
@@ -129,8 +162,7 @@ async function recordingOn(env, fresh) {
 }
 
 async function setRecording(request, env) {
-  if (!env.FEEDBACK_ADMIN_KEY) return json({ error: 'The admin key is not set up yet.' }, 503);
-  if (!isHenry(request, env)) return json({ error: 'Wrong key.' }, 401);
+  const deny = await adminGuard(request, env); if (deny) return deny;
   let data; try { data = await request.json(); } catch { return json({ error: 'Send JSON.' }, 400); }
   await ensureTable(env);
   const on = !!(data && data.on);
@@ -175,8 +207,7 @@ async function logVisit(request, env) {
 }
 
 async function listVisits(request, env, url) {
-  if (!env.FEEDBACK_ADMIN_KEY) return json({ error: 'The admin key is not set up yet.' }, 503);
-  if (!isHenry(request, env)) return json({ error: 'Wrong key.' }, 401);
+  const deny = await adminGuard(request, env); if (deny) return deny;
   await ensureTable(env);
   const days = Math.max(1, Math.min(365, parseInt(url.searchParams.get('days'), 10) || 30));
   const since = new Date(Date.now() - days * 864e5).toISOString();
@@ -189,8 +220,7 @@ async function listVisits(request, env, url) {
 }
 
 async function deleteVisit(request, env, sid) {
-  if (!env.FEEDBACK_ADMIN_KEY) return json({ error: 'The admin key is not set up yet.' }, 503);
-  if (!isHenry(request, env)) return json({ error: 'Wrong key.' }, 401);
+  const deny = await adminGuard(request, env); if (deny) return deny;
   await ensureTable(env);
   await env.DB.batch([
     env.DB.prepare('DELETE FROM visit_events WHERE sid = ?').bind(sid),

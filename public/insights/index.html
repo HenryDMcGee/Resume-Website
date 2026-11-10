@@ -24,7 +24,7 @@ input,select{font:inherit;color:var(--ink);background:#0f1622;border:1px solid v
 button{font:600 14px system-ui,sans-serif;min-height:38px;padding:0 14px;border-radius:8px;border:1px solid var(--accent);background:var(--accent);color:#0b1018;cursor:pointer}
 button.ghost{background:transparent;color:var(--accent)}
 button.del{background:transparent;border-color:rgba(255,120,110,.5);color:#ff9a8f;min-height:28px;padding:0 10px;font-size:12px}
-.msg{color:#ff9a8f;font-size:14px}
+.msg,#msg{color:var(--muted);font-size:14px}
 .filters{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 6px}
 .filters label{display:flex;gap:6px;align-items:center;color:var(--muted);font-size:14px}
 .filters .sp{margin-left:auto}
@@ -93,7 +93,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 <div class="wrap">
   <h1>Visits vs. the happy path</h1>
   <p class="sub">Private. Every visit to <a href="/">mcgeehenry.com</a>, compared with the route I hope a recruiter takes.</p>
-  <form class="login" id="login"><input id="key" type="password" placeholder="Admin key (same as feedback responses)" aria-label="Admin key" autocomplete="current-password"><button type="submit">Show visits</button><span class="msg" id="msg" role="alert"></span></form>
+  <div class="login" id="login"><span id="msg" role="alert">Loading…</span><button class="ghost" type="button" id="reload" hidden>Reload and sign in</button></div>
 
   <div id="out" hidden>
     <div class="switches">
@@ -106,7 +106,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
       <label>Device <select id="dev"><option value="all">All</option><option value="phone">Phones</option><option value="desktop">Laptops and desktops</option></select></label>
       <label><input type="checkbox" id="bounce" checked> Hide visits under 10 seconds</label>
       <label><input type="checkbox" id="newonly"> First visits only</label>
-      <span class="sp"></span><button class="ghost" id="refresh" type="button">Refresh</button><button class="ghost" id="lock" type="button">Lock</button>
+      <span class="sp"></span><button class="ghost" id="refresh" type="button">Refresh</button><button class="ghost" id="lock" type="button">Sign out</button>
     </div>
     <div class="kpis" id="kpis"></div>
 
@@ -158,8 +158,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
   var NOISE = { land: 1, step: 1, music: 1, zoom: 1, close: 1, tut_start: 1, tut_end: 1, app_close: 1 };
   var CHAN = { crm: 'CRM', watch: 'Internship Watch', jobs: 'Public Job Board', jira: 'Jira', github: 'GitHub', starr: 'STARR Story Bank', planner: 'McCombs Course Planner', site: 'Henry Website', mars: 'Mars' };
 
-  var $ = function (s) { return document.getElementById(s); }, key = '', raw = null;
-  try { key = sessionStorage.getItem('mh-fb-key') || ''; } catch (e) {}
+  var $ = function (s) { return document.getElementById(s); }, raw = null;
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function pct(a, b) { return b ? Math.round(a * 100 / b) : 0; }
   function dur(ms) { var s = Math.round(ms / 1000); return s < 60 ? s + 's' : Math.floor(s / 60) + 'm ' + ('0' + (s % 60)).slice(-2) + 's'; }
@@ -346,7 +345,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
   }
   $('recSw').addEventListener('click', function () {
     var want = this.getAttribute('aria-checked') !== 'true', b = this; b.disabled = true;
-    fetch('/api/insights/recording', { method: 'PUT', headers: { authorization: 'Bearer ' + key, 'content-type': 'application/json' }, body: JSON.stringify({ on: want }) })
+    fetch('/api/insights/recording', { method: 'PUT', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ on: want }) })
       .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Request failed'); return j; }); })
       .then(function (j) { raw.recording = j.on; paintSwitches(); })
       .catch(function (e) { $('recTxt').textContent = e.message; })
@@ -357,19 +356,25 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
     try { localStorage.setItem('mh-notrack', want ? '0' : '1'); } catch (e) {}
     paintSwitches();
   });
-  function call(method, path) { return fetch(path, { method: method, headers: { authorization: 'Bearer ' + key } }).then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Request failed'); return j; }); }); }
+  /* Cloudflare Access signs Henry in before this page loads and adds the proof to every request. When the sign-in has
+     expired, Access answers API calls with a redirect to its login page, which fetch cannot follow: reload instead. */
+  function call(method, path) {
+    return fetch(path, { method: method, credentials: 'same-origin' }).then(function (r) {
+      return r.json().then(function (j) { if (!r.ok) { var er = new Error(j.error || 'Request failed'); er.signin = j.signin; throw er; } return j; });
+    }, function () { var er = new Error('Your sign-in has expired.'); er.signin = true; throw er; });
+  }
   function load() {
     $('msg').textContent = '';
     return call('GET', '/api/insights?days=' + $('days').value).then(function (j) {
-      raw = j; try { sessionStorage.setItem('mh-fb-key', key); } catch (e) {}
+      raw = j;
       $('login').hidden = true; $('out').hidden = false; paintSwitches(); render();
-    }).catch(function (e) { $('login').hidden = false; $('out').hidden = true; $('msg').textContent = e.message; });
+    }).catch(function (e) { $('login').hidden = false; $('out').hidden = true; $('msg').textContent = e.message; $('reload').hidden = !e.signin; });
   }
-  $('login').addEventListener('submit', function (e) { e.preventDefault(); key = $('key').value.trim(); if (key) load(); });
+  $('reload').addEventListener('click', function () { location.reload(); });
   $('refresh').addEventListener('click', load);
   $('days').addEventListener('change', load);
   ['dev', 'bounce', 'newonly'].forEach(function (id) { $(id).addEventListener('change', function () { if (raw) render(); }); });
-  $('lock').addEventListener('click', function () { key = ''; raw = null; try { sessionStorage.removeItem('mh-fb-key'); } catch (e) {} $('out').hidden = true; $('login').hidden = false; $('key').value = ''; });
+  $('lock').addEventListener('click', function () { location.href = '/cdn-cgi/access/logout'; });
   $('visits').addEventListener('click', function (e) {
     var b = e.target.closest('button.del');
     if (b) {
@@ -383,7 +388,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
     }
     var r = e.target.closest('.vrow'); if (r) { var l = $('log' + r.dataset.i); l.hidden = !l.hidden; }
   });
-  if (key) load(); else $('key').focus();
+  load();
 })();
 </script>
 </body>
