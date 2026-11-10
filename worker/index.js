@@ -6,6 +6,7 @@
 //   POST /api/t                   the hub's visit path log: a batch of decisions from one visit (anyone; capped)
 //   GET  /api/insights?days=30    every logged visit with its events, for /insights/ (Henry only)
 //   DELETE /api/insights/:sid     drop one visit, e.g. a test run (Henry only)
+//   GET  /api/insights/heat?days=30&ctx=AI-HUB&wc=laptop   mouse heatmap cells for one screen (Henry only)
 //   GET  /api/t/on                whether recording is switched on (anyone; the hub and the Clarity tag ask first)
 //   PUT  /api/insights/recording  {"on": true|false} switch recording for the whole site (Henry only)
 //
@@ -44,7 +45,16 @@ const VISIT_SCHEMA = [
   `CREATE INDEX IF NOT EXISTS visit_events_sid ON visit_events (sid, t)`,
   `CREATE INDEX IF NOT EXISTS visits_started ON visits (started_at)`,
   `CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT)`,
+  // mouse heatmap: per day, screen and window size, how often the pointer was in each cell of an 80 x 45 grid
+  // (moves = tenths of a second of movement) and how many clicks landed there. Totals only, nothing per visit.
+  `CREATE TABLE IF NOT EXISTS heat (
+    day TEXT NOT NULL, ctx TEXT NOT NULL, wc TEXT NOT NULL, cell INTEGER NOT NULL,
+    moves INTEGER NOT NULL DEFAULT 0, clicks INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (day, ctx, wc, cell)
+  )`,
 ];
+const HEAT_CTX = new Set(['Home', 'AI-HUB', 'About me', 'Video', 'AI fluency', 'Leadership', 'Get in touch', 'Walkthrough', 'GitHub list', 'Tutorial']);
+const HEAT_WC = new Set(['small', 'laptop', 'wide']);
 const EVENTS_PER_VISIT = 600;
 const VISITS_PER_ADDRESS_DAY = 60;
 const EVENT_NAMES = new Set(['land', 'screen', 'channel', 'step', 'walk_close', 'close', 'app', 'app_close', 'zoom', 'video',
@@ -108,6 +118,8 @@ async function accessUser(request, env) {
 
 // null when the request may continue, otherwise the response to send
 async function adminGuard(request, env) {
+  // local testing only: .dev.vars DEV_ADMIN=1, and only for requests to localhost
+  if (env.DEV_ADMIN === '1' && /^(localhost|127\.0\.0\.1)$/.test(new URL(request.url).hostname)) return null;
   if (!teamHost(env) || !String(env.ACCESS_AUD || '').trim()) return json({ error: 'Cloudflare Access is not connected yet (ACCESS_TEAM_DOMAIN and ACCESS_AUD).' }, 503);
   let user = null;
   try { user = await accessUser(request, env); } catch { return json({ error: 'Could not check the sign-in. Try again.' }, 502); }
@@ -179,10 +191,13 @@ async function logVisit(request, env) {
   const sid = String((data && data.sid) || '');
   if (!/^[0-9a-f]{12,32}$/.test(sid)) return json({ error: 'Bad visit id.' }, 400);
   const ev = Array.isArray(data.ev) ? data.ev.slice(0, 60).filter((e) => e && EVENT_NAMES.has(e.n) && Number.isFinite(e.t)) : [];
-  if (!ev.length) return json({ ok: true });
+  const heat = Array.isArray(data.heat) ? data.heat.slice(0, 400).filter((h) => Array.isArray(h) && HEAT_CTX.has(h[0]) && HEAT_WC.has(h[1])
+    && Number.isInteger(h[2]) && h[2] >= 0 && h[2] < 3600 && Number.isInteger(h[3]) && Number.isInteger(h[4]) && h[3] >= 0 && h[4] >= 0 && h[3] + h[4] > 0) : [];
+  if (!ev.length && !heat.length) return json({ ok: true });
   if (!(await recordingOn(env))) return json({ ok: true, off: true });   /* switched off: drop silently */
   const now = new Date().toISOString(), day = now.slice(0, 10);
   let visit = await env.DB.prepare('SELECT n FROM visits WHERE sid = ?').bind(sid).first();
+  if (!visit && !ev.length) return json({ ok: true });   // heat only counts for a visit that has been logged
   if (!visit) {
     const ip = request.headers.get('cf-connecting-ip') || 'unknown';
     const visitor = (await sha256(`${env.FEEDBACK_SALT || 'mcgeehenry-feedback'}|visits|${day}|${ip}`)).slice(0, 32);
@@ -197,12 +212,16 @@ async function logVisit(request, env) {
   }
   const room = Math.max(0, EVENTS_PER_VISIT - visit.n);
   const keep = ev.slice(0, room);
-  if (!keep.length) return json({ ok: true });
   const ins = env.DB.prepare('INSERT INTO visit_events (sid, t, name, data, via) VALUES (?, ?, ?, ?, ?)');
-  await env.DB.batch([
+  const up = env.DB.prepare(`INSERT INTO heat (day, ctx, wc, cell, moves, clicks) VALUES (?, ?, ?, ?, ?, ?)
+    ON CONFLICT (day, ctx, wc, cell) DO UPDATE SET moves = moves + excluded.moves, clicks = clicks + excluded.clicks`);
+  const stmts = [
     ...keep.map((e) => ins.bind(sid, Math.max(0, Math.min(864e5, Math.round(e.t))), e.n, e.d ? clip(JSON.stringify(e.d), 300) : null, clip(e.via, 40))),
-    env.DB.prepare('UPDATE visits SET n = n + ?, last_at = ? WHERE sid = ?').bind(keep.length, now, sid),
-  ]);
+    // one batch covers at most ~a minute of movement, so a cell cannot take more than 600 samples or 60 clicks from it
+    ...heat.map((h) => up.bind(day, h[0], h[1], h[2], Math.min(600, h[3]), Math.min(60, h[4]))),
+  ];
+  if (keep.length) stmts.push(env.DB.prepare('UPDATE visits SET n = n + ?, last_at = ? WHERE sid = ?').bind(keep.length, now, sid));
+  if (stmts.length) await env.DB.batch(stmts);
   return json({ ok: true });
 }
 
@@ -217,6 +236,20 @@ async function listVisits(request, env, url) {
     JOIN (SELECT sid FROM visits WHERE started_at >= ? ORDER BY started_at DESC LIMIT 2000) v ON v.sid = e.sid
     ORDER BY e.sid, e.t, e.id`).bind(since).all();
   return json({ days, visits, events, recording: await recordingOn(env, true) });
+}
+
+async function listHeat(request, env, url) {
+  const deny = await adminGuard(request, env); if (deny) return deny;
+  await ensureTable(env);
+  const days = Math.max(1, Math.min(365, parseInt(url.searchParams.get('days'), 10) || 30));
+  const since = new Date(Date.now() - days * 864e5).toISOString().slice(0, 10);
+  const ctx = url.searchParams.get('ctx') || 'AI-HUB', wc = url.searchParams.get('wc') || 'all';
+  const wcSql = HEAT_WC.has(wc) ? ' AND wc = ?' : '';
+  const args = HEAT_WC.has(wc) ? [since, ctx, wc] : [since, ctx];
+  const { results: cells } = await env.DB.prepare(`SELECT cell, SUM(moves) AS m, SUM(clicks) AS c FROM heat WHERE day >= ? AND ctx = ?${wcSql} GROUP BY cell`).bind(...args).all();
+  const { results: totals } = await env.DB.prepare(`SELECT ctx, SUM(moves) AS m, SUM(clicks) AS c FROM heat WHERE day >= ?${wcSql.replace('?', '?')} GROUP BY ctx`)
+    .bind(...(HEAT_WC.has(wc) ? [since, wc] : [since])).all();
+  return json({ days, ctx, wc, cells, totals });
 }
 
 async function deleteVisit(request, env, sid) {
@@ -240,6 +273,7 @@ export default {
       if (url.pathname === '/api/t' && request.method === 'POST') return await logVisit(request, env);
       if (url.pathname === '/api/t/on' && request.method === 'GET') return json({ on: await recordingOn(env) });
       if (url.pathname === '/api/insights/recording' && request.method === 'PUT') return await setRecording(request, env);
+      if (url.pathname === '/api/insights/heat' && request.method === 'GET') return await listHeat(request, env, url);
       if (url.pathname === '/api/insights' && request.method === 'GET') return await listVisits(request, env, url);
       const v = url.pathname.match(/^\/api\/insights\/([0-9a-f]{12,32})$/);
       if (v && request.method === 'DELETE') return await deleteVisit(request, env, v[1]);

@@ -83,6 +83,19 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 .toggle[aria-checked="true"]::after{transform:translateX(22px);background:#0b1018}
 .toggle:disabled{opacity:.5;cursor:wait}
 .offbanner{background:rgba(224,180,90,.12);border:1px solid rgba(224,180,90,.4);color:#f0cf8a;border-radius:10px;padding:10px 14px;font-size:14px;margin:0 0 14px}
+.hm-controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:0 0 10px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{background:transparent;color:var(--muted);border:0;border-radius:0;min-height:36px;font-weight:600}
+.seg button[aria-pressed="true"]{background:var(--accent);color:#0b1018}
+.hm-stage{position:relative;width:100%;overflow:hidden;border-radius:10px;border:1px solid var(--line);background:#05080d}
+.hm-stage iframe{position:absolute;left:0;top:0;border:0;transform-origin:0 0;pointer-events:none}
+.hm-stage canvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair}
+.hm-dim{position:absolute;inset:0;background:rgba(5,8,13,.35);pointer-events:none}
+.hm-tip{position:absolute;pointer-events:none;background:#0b1018;border:1px solid var(--line);border-radius:6px;padding:4px 8px;font-size:12.5px;color:var(--ink);white-space:nowrap;transform:translate(12px,12px)}
+.hm-empty{position:absolute;inset:0;display:grid;place-items:center;color:var(--ink);font-size:15px;text-shadow:0 1px 6px #000;pointer-events:none}
+.hm-foot{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-top:8px;color:var(--muted);font-size:13px}
+.hm-ramp{display:inline-flex;align-items:center;gap:8px}
+.hm-ramp i{display:inline-block;width:140px;height:10px;border-radius:2px;background:linear-gradient(90deg,rgba(150,60,10,.25),rgba(232,110,30,.65),rgba(255,214,140,.92))}
 @media (max-width:760px){.switches{grid-template-columns:1fr}}
 .empty{color:var(--muted);text-align:center;padding:30px 0}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
@@ -127,6 +140,16 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
         <div class="card"><table id="vias"></table></div>
       </div>
     </div>
+
+    <h2>Where the mouse goes</h2>
+    <p class="note">Laptops and desktops only. Brighter means the pointer spent more time there (or, for clicks, more clicks landed there). The screen underneath is the live site. Positions are measured against the visitor's window, so windows of other shapes blur things slightly, and the demo apps can't be measured from the hub.</p>
+    <div class="hm-controls">
+      <label class="filters" style="margin:0">Screen <select id="hmCtx"></select></label>
+      <span class="seg" role="group" aria-label="Layer"><button type="button" id="hmMoves" aria-pressed="true">Movement</button><button type="button" id="hmClicks" aria-pressed="false">Clicks</button></span>
+      <label class="filters" style="margin:0">Window <select id="hmWc"><option value="all">All sizes</option><option value="laptop">Laptop (1000–1599 px)</option><option value="wide">Wide (1600 px+)</option><option value="small">Narrow (under 1000 px)</option></select></label>
+    </div>
+    <div class="hm-stage" id="hmStage"><iframe id="hmFrame" title="Screen preview" tabindex="-1" aria-hidden="true"></iframe><div class="hm-dim"></div><canvas id="hmCanvas" width="1600" height="900" aria-label="Mouse heatmap"></canvas><div class="hm-tip" id="hmTip" hidden></div><div class="hm-empty" id="hmEmpty" hidden></div></div>
+    <div class="hm-foot"><span class="hm-ramp">Less <i></i> More</span><span id="hmSum"></span></div>
 
     <h2>Most common routes</h2>
     <p class="note">Screens in the order visited (repeats collapsed). The happy route is Home → AI-HUB → About me → … → Get in touch.</p>
@@ -358,6 +381,81 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
   });
   /* Cloudflare Access signs Henry in before this page loads and adds the proof to every request. When the sign-in has
      expired, Access answers API calls with a redirect to its login page, which fetch cannot follow: reload instead. */
+  /* ---------- mouse heatmap ---------- */
+  var HM_CTX = ['Home', 'AI-HUB', 'Tutorial', 'Walkthrough', 'GitHub list', 'About me', 'Video', 'AI fluency', 'Leadership', 'Get in touch'];
+  var HM_FRAME = { all: [1600, 900], laptop: [1366, 768], wide: [1920, 1080], small: [900, 680] };
+  var hm = { layer: 'm', data: null, grid: null, total: 0, src: '' };
+  function hmFit() {
+    var f = HM_FRAME[$('hmWc').value], st = $('hmStage'), w = st.clientWidth;
+    st.style.height = Math.round(w * f[1] / f[0]) + 'px';
+    var fr = $('hmFrame'); fr.style.width = f[0] + 'px'; fr.style.height = f[1] + 'px'; fr.style.transform = 'scale(' + (w / f[0]) + ')';
+  }
+  function hmFrameSrc() {
+    var c = $('hmCtx').value, src = '/?mode=demo&tutorial=0&view=' + encodeURIComponent(c);
+    if (src !== hm.src) { hm.src = src; $('hmFrame').src = src; }
+  }
+  function hmLoad() {
+    hmFit(); hmFrameSrc();
+    return call('GET', '/api/insights/heat?days=' + $('days').value + '&ctx=' + encodeURIComponent($('hmCtx').value) + '&wc=' + $('hmWc').value).then(function (j) {
+      hm.data = j; hmOptions(j.totals || []); hmDraw();
+    }).catch(function (e) { $('hmSum').textContent = e.message; });
+  }
+  function hmOptions(totals) {
+    var by = {}; totals.forEach(function (t) { by[t.ctx] = t; });
+    var sel = $('hmCtx'), cur = sel.value || 'AI-HUB';
+    sel.innerHTML = HM_CTX.map(function (c) {
+      var t = by[c], txt = c + (t ? ' · ' + (t.m >= 600 ? Math.round(t.m / 600) + ' min' : Math.round(t.m / 10) + ' s') + ', ' + t.c + ' clicks' : ' · no data');
+      return '<option value="' + esc(c) + '"' + (c === cur ? ' selected' : '') + '>' + esc(txt) + '</option>';
+    }).join('');
+  }
+  function hmDraw() {
+    var cv = $('hmCanvas'), f = HM_FRAME[$('hmWc').value], W = cv.width = f[0], H = cv.height = f[1], g = cv.getContext('2d');
+    g.clearRect(0, 0, W, H);
+    var key = hm.layer, cells = (hm.data && hm.data.cells) || [], grid = new Float32Array(3600), max = 0, total = 0;
+    cells.forEach(function (c) { var v = +c[key] || 0; grid[c.cell] = v; total += v; if (v > max) max = v; });
+    hm.grid = grid; hm.total = total;
+    var mins = 0, clicks = 0; cells.forEach(function (c) { mins += +c.m || 0; clicks += +c.c || 0; });
+    $('hmSum').textContent = cells.length ? (mins >= 600 ? Math.round(mins / 600) + ' min' : Math.round(mins / 10) + ' s') + ' of mouse movement and ' + clicks + ' click' + (clicks === 1 ? '' : 's') + ' on this screen in the period. Brightness is scaled by square root so quieter areas still show.' : '';
+    $('hmEmpty').hidden = total > 0; $('hmEmpty').textContent = 'No ' + (key === 'm' ? 'mouse movement' : 'clicks') + ' recorded on this screen yet.';
+    if (!total) return;
+    /* intensity: soft blobs added together in an offscreen canvas, then coloured through one warm hue */
+    var off = document.createElement('canvas'); off.width = W; off.height = H; var o = off.getContext('2d');
+    var cw = W / 80, ch = H / 45, r = Math.max(cw, ch) * (key === 'm' ? 2.4 : 1.8);
+    o.globalCompositeOperation = 'lighter';
+    for (var i = 0; i < 3600; i++) {
+      if (!grid[i]) continue;
+      var x = (i % 80 + 0.5) * cw, y = (Math.floor(i / 80) + 0.5) * ch, a = Math.sqrt(grid[i] / max) * 0.55;
+      var rg = o.createRadialGradient(x, y, 0, x, y, r); rg.addColorStop(0, 'rgba(0,0,0,' + a + ')'); rg.addColorStop(1, 'rgba(0,0,0,0)');
+      o.fillStyle = rg; o.fillRect(x - r, y - r, r * 2, r * 2);
+    }
+    var img = o.getImageData(0, 0, W, H), d = img.data;
+    for (var p = 0; p < d.length; p += 4) {
+      var t = d[p + 3] / 255; if (t < 0.02) { d[p + 3] = 0; continue; }
+      t = Math.min(1, t * 1.15);
+      /* dim burnt orange -> orange -> pale gold as it gets busier */
+      d[p] = Math.round(150 + 105 * t); d[p + 1] = Math.round(60 + 154 * t * t); d[p + 2] = Math.round(10 + 130 * t * t * t);
+      d[p + 3] = Math.round(255 * (0.22 + 0.72 * t));
+    }
+    g.putImageData(img, 0, 0);
+  }
+  function hmHover(e) {
+    var tip = $('hmTip'); if (!hm.total) { tip.hidden = true; return; }
+    var rc = $('hmCanvas').getBoundingClientRect(), cx = Math.floor((e.clientX - rc.left) / rc.width * 80), cy = Math.floor((e.clientY - rc.top) / rc.height * 45), s = 0;
+    for (var dy = -2; dy <= 2; dy++) for (var dx = -2; dx <= 2; dx++) { var x = cx + dx, y = cy + dy; if (x >= 0 && x < 80 && y >= 0 && y < 45) s += hm.grid[y * 80 + x]; }
+    var share = s / hm.total * 100;
+    tip.textContent = (share >= 1 ? Math.round(share) : share.toFixed(1)) + '% of ' + (hm.layer === 'm' ? 'mouse time' : 'clicks') + ' around here';
+    tip.style.left = (e.clientX - rc.left) + 'px'; tip.style.top = (e.clientY - rc.top) + 'px'; tip.hidden = false;
+  }
+  hmOptions([]);
+  $('hmCanvas').addEventListener('mousemove', hmHover);
+  $('hmCanvas').addEventListener('mouseleave', function () { $('hmTip').hidden = true; });
+  $('hmCtx').addEventListener('change', hmLoad);
+  $('hmWc').addEventListener('change', hmLoad);
+  [['hmMoves', 'm'], ['hmClicks', 'c']].forEach(function (b) {
+    $(b[0]).addEventListener('click', function () { hm.layer = b[1]; $('hmMoves').setAttribute('aria-pressed', b[1] === 'm'); $('hmClicks').setAttribute('aria-pressed', b[1] === 'c'); hmDraw(); });
+  });
+  window.addEventListener('resize', function () { if (!$('out').hidden) hmFit(); });
+
   function call(method, path) {
     return fetch(path, { method: method, credentials: 'same-origin' }).then(function (r) {
       return r.json().then(function (j) { if (!r.ok) { var er = new Error(j.error || 'Request failed'); er.signin = j.signin; throw er; } return j; });
@@ -367,7 +465,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
     $('msg').textContent = '';
     return call('GET', '/api/insights?days=' + $('days').value).then(function (j) {
       raw = j;
-      $('login').hidden = true; $('out').hidden = false; paintSwitches(); render();
+      $('login').hidden = true; $('out').hidden = false; paintSwitches(); render(); hmLoad();
     }).catch(function (e) { $('login').hidden = false; $('out').hidden = true; $('msg').textContent = e.message; $('reload').hidden = !e.signin; });
   }
   $('reload').addEventListener('click', function () { location.reload(); });
