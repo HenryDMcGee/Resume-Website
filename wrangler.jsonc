@@ -27,12 +27,13 @@
     { "binding": "DB", "database_name": "mcgeehenry-feedback" }
   ],
 
-  // Cloudflare Access app that guards /insights, /feedback/responses and their
-  // APIs. Neither value is a secret. Team domain: Zero Trust > Settings >
-  // Custom pages (like henry.cloudflareaccess.com). AUD: the app's
-  // "Application Audience (AUD) Tag" on its Overview tab.
+  // Cloudflare Access guards /insights, /feedback/responses and their APIs.
+  // Neither value is a secret. Same Zero Trust team as internship-watch; the
+  // AUD is the "Application Audience (AUD) Tag" of the Access app that lists
+  // those mcgeehenry.com paths (currently the internship-watch app). Several
+  // apps can be allowed by separating their AUD tags with commas.
   "vars": {
-    "ACCESS_TEAM_DOMAIN": "",
-    "ACCESS_AUD": ""
+    "ACCESS_TEAM_DOMAIN": "royal-band-14be.cloudflareaccess.com",
+    "ACCESS_AUD": "0162b88431b5d036e4cbe75aa8999c7e8c48153f72abf818c8002c0440ad367d"
   }
 }

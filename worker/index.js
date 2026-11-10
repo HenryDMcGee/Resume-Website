@@ -84,17 +84,17 @@ function teamHost(env) { return String(env.ACCESS_TEAM_DOMAIN || '').trim().repl
 
 // Returns the signed-in email when the request carries a valid Access token for this app, otherwise null.
 async function accessUser(request, env) {
-  const team = teamHost(env), aud = String(env.ACCESS_AUD || '').trim();
+  const team = teamHost(env), auds = String(env.ACCESS_AUD || '').split(',').map((x) => x.trim()).filter(Boolean);
   const token = request.headers.get('cf-access-jwt-assertion') || '';
   const parts = token.split('.');
-  if (!team || !aud || parts.length !== 3) return null;
+  if (!team || !auds.length || parts.length !== 3) return null;
   let header, claims;
   try { header = JSON.parse(new TextDecoder().decode(b64url(parts[0]))); claims = JSON.parse(new TextDecoder().decode(b64url(parts[1]))); } catch { return null; }
   if (header.alg !== 'RS256') return null;
   const now = Math.floor(Date.now() / 1000);
   if (!claims.exp || claims.exp < now || (claims.nbf && claims.nbf > now + 60)) return null;
   if (claims.iss !== `https://${team}`) return null;
-  if (!(Array.isArray(claims.aud) ? claims.aud : [claims.aud]).includes(aud)) return null;
+  if (!(Array.isArray(claims.aud) ? claims.aud : [claims.aud]).some((a) => auds.includes(a))) return null;
   for (let attempt = 0; attempt < 2; attempt++) {
     const keys = await accessKeys(team);
     const jwk = keys.find((k) => k.kid === header.kid);
