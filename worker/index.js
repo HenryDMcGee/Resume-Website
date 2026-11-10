@@ -6,6 +6,8 @@
 //   POST /api/t                   the hub's visit path log: a batch of decisions from one visit (anyone; capped)
 //   GET  /api/insights?days=30    every logged visit with its events, for /insights/ (Henry only)
 //   DELETE /api/insights/:sid     drop one visit, e.g. a test run (Henry only)
+//   GET  /api/t/on                whether recording is switched on (anyone; the hub and the Clarity tag ask first)
+//   PUT  /api/insights/recording  {"on": true|false} switch recording for the whole site (Henry only)
 //
 // Storage is the D1 database bound as DB. The table is created on first use, so there is no migration step.
 // FEEDBACK_ADMIN_KEY is a Worker secret (Cloudflare dashboard > resume-website > Settings > Variables and Secrets).
@@ -38,6 +40,7 @@ const VISIT_SCHEMA = [
   )`,
   `CREATE INDEX IF NOT EXISTS visit_events_sid ON visit_events (sid, t)`,
   `CREATE INDEX IF NOT EXISTS visits_started ON visits (started_at)`,
+  `CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT)`,
 ];
 const EVENTS_PER_VISIT = 600;
 const VISITS_PER_ADDRESS_DAY = 60;
@@ -115,6 +118,27 @@ async function deleteFeedback(request, env, id) {
   return json({ ok: true });
 }
 
+// Recording is on unless Henry switched it off on /insights. Read at most once a minute per Worker instance.
+let recCache = { at: 0, on: true };
+async function recordingOn(env, fresh) {
+  if (!fresh && Date.now() - recCache.at < 60000) return recCache.on;
+  await ensureTable(env);
+  const row = await env.DB.prepare("SELECT value FROM settings WHERE key = 'recording'").first();
+  recCache = { at: Date.now(), on: !row || row.value !== 'off' };
+  return recCache.on;
+}
+
+async function setRecording(request, env) {
+  if (!env.FEEDBACK_ADMIN_KEY) return json({ error: 'The admin key is not set up yet.' }, 503);
+  if (!isHenry(request, env)) return json({ error: 'Wrong key.' }, 401);
+  let data; try { data = await request.json(); } catch { return json({ error: 'Send JSON.' }, 400); }
+  await ensureTable(env);
+  const on = !!(data && data.on);
+  await env.DB.prepare("INSERT INTO settings (key, value) VALUES ('recording', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").bind(on ? 'on' : 'off').run();
+  recCache = { at: Date.now(), on };
+  return json({ on });
+}
+
 const clip = (v, n) => (v == null ? null : String(v).slice(0, n));
 
 async function logVisit(request, env) {
@@ -124,7 +148,7 @@ async function logVisit(request, env) {
   if (!/^[0-9a-f]{12,32}$/.test(sid)) return json({ error: 'Bad visit id.' }, 400);
   const ev = Array.isArray(data.ev) ? data.ev.slice(0, 60).filter((e) => e && EVENT_NAMES.has(e.n) && Number.isFinite(e.t)) : [];
   if (!ev.length) return json({ ok: true });
-  await ensureTable(env);
+  if (!(await recordingOn(env))) return json({ ok: true, off: true });   /* switched off: drop silently */
   const now = new Date().toISOString(), day = now.slice(0, 10);
   let visit = await env.DB.prepare('SELECT n FROM visits WHERE sid = ?').bind(sid).first();
   if (!visit) {
@@ -161,7 +185,7 @@ async function listVisits(request, env, url) {
   const { results: events } = await env.DB.prepare(`SELECT e.sid, e.t, e.name, e.data, e.via FROM visit_events e
     JOIN (SELECT sid FROM visits WHERE started_at >= ? ORDER BY started_at DESC LIMIT 2000) v ON v.sid = e.sid
     ORDER BY e.sid, e.t, e.id`).bind(since).all();
-  return json({ days, visits, events });
+  return json({ days, visits, events, recording: await recordingOn(env, true) });
 }
 
 async function deleteVisit(request, env, sid) {
@@ -184,6 +208,8 @@ export default {
       const m = url.pathname.match(/^\/api\/feedback\/responses\/(\d+)$/);
       if (m && request.method === 'DELETE') return await deleteFeedback(request, env, Number(m[1]));
       if (url.pathname === '/api/t' && request.method === 'POST') return await logVisit(request, env);
+      if (url.pathname === '/api/t/on' && request.method === 'GET') return json({ on: await recordingOn(env) });
+      if (url.pathname === '/api/insights/recording' && request.method === 'PUT') return await setRecording(request, env);
       if (url.pathname === '/api/insights' && request.method === 'GET') return await listVisits(request, env, url);
       const v = url.pathname.match(/^\/api\/insights\/([0-9a-f]{12,32})$/);
       if (v && request.method === 'DELETE') return await deleteVisit(request, env, v[1]);
