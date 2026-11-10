@@ -3,6 +3,9 @@
 //   POST /api/feedback            a tester saves their notes (anyone; honeypot, size cap, daily limit)
 //   GET  /api/feedback/responses  every saved response, newest first (Henry only: needs FEEDBACK_ADMIN_KEY)
 //   DELETE /api/feedback/responses/:id   remove one response (Henry only)
+//   POST /api/t                   the hub's visit path log: a batch of decisions from one visit (anyone; capped)
+//   GET  /api/insights?days=30    every logged visit with its events, for /insights/ (Henry only)
+//   DELETE /api/insights/:sid     drop one visit, e.g. a test run (Henry only)
 //
 // Storage is the D1 database bound as DB. The table is created on first use, so there is no migration step.
 // FEEDBACK_ADMIN_KEY is a Worker secret (Cloudflare dashboard > resume-website > Settings > Variables and Secrets).
@@ -22,9 +25,28 @@ const SCHEMA = `CREATE TABLE IF NOT EXISTS feedback (
   day TEXT
 )`;
 
+// One row per visit (a browser tab's session) and one row per decision in it. A visit id is random and made in the
+// browser; nothing ties it to a person. Country comes from Cloudflare; the address itself is never stored.
+const VISIT_SCHEMA = [
+  `CREATE TABLE IF NOT EXISTS visits (
+    sid TEXT PRIMARY KEY, started_at TEXT NOT NULL, last_at TEXT NOT NULL, day TEXT,
+    w INTEGER, h INTEGER, touch INTEGER, ret INTEGER, ref TEXT, utm TEXT, country TEXT, build TEXT,
+    n INTEGER NOT NULL DEFAULT 0, visitor TEXT
+  )`,
+  `CREATE TABLE IF NOT EXISTS visit_events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, sid TEXT NOT NULL, t INTEGER NOT NULL, name TEXT NOT NULL, data TEXT, via TEXT
+  )`,
+  `CREATE INDEX IF NOT EXISTS visit_events_sid ON visit_events (sid, t)`,
+  `CREATE INDEX IF NOT EXISTS visits_started ON visits (started_at)`,
+];
+const EVENTS_PER_VISIT = 600;
+const VISITS_PER_ADDRESS_DAY = 60;
+const EVENT_NAMES = new Set(['land', 'screen', 'channel', 'step', 'walk_close', 'close', 'app', 'app_close', 'zoom', 'video',
+  'tut_start', 'tut_end', 'music', 'contact', 'repo', 'out', 'end']);
+
 let ready = null;
 function ensureTable(env) {
-  if (!ready) ready = env.DB.prepare(SCHEMA).run().catch((e) => { ready = null; throw e; });
+  if (!ready) ready = env.DB.batch([SCHEMA, ...VISIT_SCHEMA].map((q) => env.DB.prepare(q))).catch((e) => { ready = null; throw e; });
   return ready;
 }
 
@@ -93,6 +115,66 @@ async function deleteFeedback(request, env, id) {
   return json({ ok: true });
 }
 
+const clip = (v, n) => (v == null ? null : String(v).slice(0, n));
+
+async function logVisit(request, env) {
+  let data;
+  try { data = JSON.parse(await request.text()); } catch { return json({ error: 'Send JSON.' }, 400); }
+  const sid = String((data && data.sid) || '');
+  if (!/^[0-9a-f]{12,32}$/.test(sid)) return json({ error: 'Bad visit id.' }, 400);
+  const ev = Array.isArray(data.ev) ? data.ev.slice(0, 60).filter((e) => e && EVENT_NAMES.has(e.n) && Number.isFinite(e.t)) : [];
+  if (!ev.length) return json({ ok: true });
+  await ensureTable(env);
+  const now = new Date().toISOString(), day = now.slice(0, 10);
+  let visit = await env.DB.prepare('SELECT n FROM visits WHERE sid = ?').bind(sid).first();
+  if (!visit) {
+    const ip = request.headers.get('cf-connecting-ip') || 'unknown';
+    const visitor = (await sha256(`${env.FEEDBACK_SALT || 'mcgeehenry-feedback'}|visits|${day}|${ip}`)).slice(0, 32);
+    const seen = await env.DB.prepare('SELECT COUNT(*) AS n FROM visits WHERE visitor = ? AND day = ?').bind(visitor, day).first();
+    if (seen && seen.n >= VISITS_PER_ADDRESS_DAY) return json({ ok: true });
+    const m = data.meta || {};
+    await env.DB.prepare(`INSERT OR IGNORE INTO visits (sid, started_at, last_at, day, w, h, touch, ret, ref, utm, country, build, n, visitor)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)`)
+      .bind(sid, now, now, day, Math.round(+m.w) || null, Math.round(+m.h) || null, m.touch ? 1 : 0, m.ret ? 1 : 0,
+        clip(m.ref, 120), clip(m.utm, 60), clip(request.cf && request.cf.country, 4), clip(m.v, 20), visitor).run();
+    visit = { n: 0 };
+  }
+  const room = Math.max(0, EVENTS_PER_VISIT - visit.n);
+  const keep = ev.slice(0, room);
+  if (!keep.length) return json({ ok: true });
+  const ins = env.DB.prepare('INSERT INTO visit_events (sid, t, name, data, via) VALUES (?, ?, ?, ?, ?)');
+  await env.DB.batch([
+    ...keep.map((e) => ins.bind(sid, Math.max(0, Math.min(864e5, Math.round(e.t))), e.n, e.d ? clip(JSON.stringify(e.d), 300) : null, clip(e.via, 40))),
+    env.DB.prepare('UPDATE visits SET n = n + ?, last_at = ? WHERE sid = ?').bind(keep.length, now, sid),
+  ]);
+  return json({ ok: true });
+}
+
+async function listVisits(request, env, url) {
+  if (!env.FEEDBACK_ADMIN_KEY) return json({ error: 'The admin key is not set up yet.' }, 503);
+  if (!isHenry(request, env)) return json({ error: 'Wrong key.' }, 401);
+  await ensureTable(env);
+  const days = Math.max(1, Math.min(365, parseInt(url.searchParams.get('days'), 10) || 30));
+  const since = new Date(Date.now() - days * 864e5).toISOString();
+  const { results: visits } = await env.DB.prepare(`SELECT sid, started_at, last_at, w, h, touch, ret, ref, utm, country, build, n
+    FROM visits WHERE started_at >= ? ORDER BY started_at DESC LIMIT 2000`).bind(since).all();
+  const { results: events } = await env.DB.prepare(`SELECT e.sid, e.t, e.name, e.data, e.via FROM visit_events e
+    JOIN (SELECT sid FROM visits WHERE started_at >= ? ORDER BY started_at DESC LIMIT 2000) v ON v.sid = e.sid
+    ORDER BY e.sid, e.t, e.id`).bind(since).all();
+  return json({ days, visits, events });
+}
+
+async function deleteVisit(request, env, sid) {
+  if (!env.FEEDBACK_ADMIN_KEY) return json({ error: 'The admin key is not set up yet.' }, 503);
+  if (!isHenry(request, env)) return json({ error: 'Wrong key.' }, 401);
+  await ensureTable(env);
+  await env.DB.batch([
+    env.DB.prepare('DELETE FROM visit_events WHERE sid = ?').bind(sid),
+    env.DB.prepare('DELETE FROM visits WHERE sid = ?').bind(sid),
+  ]);
+  return json({ ok: true });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -101,6 +183,10 @@ export default {
       if (url.pathname === '/api/feedback/responses' && request.method === 'GET') return await listFeedback(request, env);
       const m = url.pathname.match(/^\/api\/feedback\/responses\/(\d+)$/);
       if (m && request.method === 'DELETE') return await deleteFeedback(request, env, Number(m[1]));
+      if (url.pathname === '/api/t' && request.method === 'POST') return await logVisit(request, env);
+      if (url.pathname === '/api/insights' && request.method === 'GET') return await listVisits(request, env, url);
+      const v = url.pathname.match(/^\/api\/insights\/([0-9a-f]{12,32})$/);
+      if (v && request.method === 'DELETE') return await deleteVisit(request, env, v[1]);
       if (url.pathname.startsWith('/api/')) return json({ error: 'Not found.' }, 404);
       return env.ASSETS.fetch(request);
     } catch (e) {

@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Visits vs. the happy path · private</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/demo/site/favicon.ico" sizes="any">
+<style>
+:root{--bg:#0b1018;--ink:#e7eaf0;--muted:rgba(231,234,240,.62);--faint:rgba(231,234,240,.38);--accent:#5cbfad;--card:#141c28;--line:rgba(255,255,255,.1);
+  --ok:#5cbfad;--late:#e0b45a;--miss:rgba(231,234,240,.22)}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;padding:28px 16px 64px}
+.wrap{width:min(1080px,100%);margin:0 auto}
+h1{font-size:26px;margin:0 0 4px}
+h2{font-size:18px;margin:34px 0 4px}
+.sub{color:var(--muted);margin:0 0 18px;font-size:14px}
+.note{color:var(--muted);font-size:13px;margin:0 0 12px}
+a{color:var(--accent)}
+.login{display:flex;gap:10px;flex-wrap:wrap;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px}
+input,select{font:inherit;color:var(--ink);background:#0f1622;border:1px solid var(--line);border-radius:8px;padding:9px 12px}
+.login input{min-width:260px;flex:1}
+button{font:600 14px system-ui,sans-serif;min-height:38px;padding:0 14px;border-radius:8px;border:1px solid var(--accent);background:var(--accent);color:#0b1018;cursor:pointer}
+button.ghost{background:transparent;color:var(--accent)}
+button.del{background:transparent;border-color:rgba(255,120,110,.5);color:#ff9a8f;min-height:28px;padding:0 10px;font-size:12px}
+.msg{color:#ff9a8f;font-size:14px}
+.filters{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 6px}
+.filters label{display:flex;gap:6px;align-items:center;color:var(--muted);font-size:14px}
+.filters .sp{margin-left:auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:14px}
+.kpi .v{font-size:28px;font-weight:700;letter-spacing:-.5px}
+.kpi .l{color:var(--muted);font-size:13px}
+/* happy path funnel */
+.hp{display:grid;gap:10px}
+.hp-row{display:grid;grid-template-columns:28px minmax(170px,240px) 1fr;gap:12px;align-items:start}
+.hp-n{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--accent);color:var(--accent);display:grid;place-items:center;font-weight:700;font-size:13px}
+.hp-name b{display:block}
+.hp-name span{color:var(--muted);font-size:13px}
+.bar{position:relative;height:22px;border-radius:0 4px 4px 0;background:rgba(255,255,255,.05)}
+.bar i{position:absolute;left:0;top:0;bottom:0;background:var(--accent);border-radius:0 4px 4px 0;min-width:2px}
+.bar i.any{background:transparent;border:1.5px dashed rgba(92,191,173,.55);border-left:0}
+.bar em{position:absolute;left:8px;top:0;line-height:22px;font-style:normal;font-size:13px;font-weight:600;color:var(--ink);text-shadow:0 0 4px #0b1018}
+.inst{margin:6px 0 0;padding:0;list-style:none;font-size:13px;color:var(--muted)}
+.inst li{display:flex;gap:8px}
+.inst li b{color:var(--ink);font-weight:600;min-width:42px;text-align:right}
+.legend{display:flex;gap:16px;flex-wrap:wrap;color:var(--muted);font-size:13px;margin:4px 0 12px}
+.legend span{display:flex;gap:6px;align-items:center}
+.sw{display:inline-block;width:14px;height:10px;border-radius:2px;background:var(--accent)}
+.sw.any{background:transparent;border:1.5px dashed rgba(92,191,173,.7)}
+/* tables */
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em;padding:6px 8px;border-bottom:1px solid var(--line)}
+td{padding:8px;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:top}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.minibar{display:inline-block;height:8px;border-radius:0 3px 3px 0;background:var(--accent);vertical-align:middle;margin-right:6px}
+/* visits */
+.strip{display:flex;gap:3px;align-items:center}
+.dot{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:700}
+.dot.order{background:var(--ok);color:#0b1018}
+.dot.late{background:transparent;border:2px solid var(--late);color:var(--late)}
+.dot.miss{background:transparent;border:1.5px dashed var(--miss);color:var(--faint)}
+.vrow{cursor:pointer}
+.vrow:hover td{background:rgba(255,255,255,.03)}
+.tl{margin:0;padding:6px 0 4px 0;list-style:none;font-size:13px}
+.tl li{display:grid;grid-template-columns:56px 1fr auto;gap:10px;padding:2px 0;color:var(--muted)}
+.tl li.ms{color:var(--ink)}
+.tl li.ms .what::before{content:"★ ";color:var(--accent)}
+.tl li.dev{color:var(--late)}
+.tl .via{color:var(--faint)}
+.sidtag{font:12px ui-monospace,Menlo,monospace;color:var(--faint)}
+.tag{display:inline-block;font-size:12px;border:1px solid var(--line);border-radius:999px;padding:0 8px;color:var(--muted)}
+.tag.good{border-color:rgba(92,191,173,.6);color:var(--accent)}
+.empty{color:var(--muted);text-align:center;padding:30px 0}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:760px){.two{grid-template-columns:1fr}.hp-row{grid-template-columns:28px 1fr}.hp-row .hp-bar{grid-column:2}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Visits vs. the happy path</h1>
+  <p class="sub">Private. Every visit to <a href="/">mcgeehenry.com</a>, compared with the route I hope a recruiter takes. This browser is left out of the log.</p>
+  <form class="login" id="login"><input id="key" type="password" placeholder="Admin key (same as feedback responses)" aria-label="Admin key" autocomplete="current-password"><button type="submit">Show visits</button><span class="msg" id="msg" role="alert"></span></form>
+
+  <div id="out" hidden>
+    <div class="filters">
+      <label>Period <select id="days"><option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option><option value="90">Last 90 days</option><option value="365">Last year</option></select></label>
+      <label>Device <select id="dev"><option value="all">All</option><option value="phone">Phones</option><option value="desktop">Laptops and desktops</option></select></label>
+      <label><input type="checkbox" id="bounce" checked> Hide visits under 10 seconds</label>
+      <label><input type="checkbox" id="newonly"> First visits only</label>
+      <span class="sp"></span><button class="ghost" id="refresh" type="button">Refresh</button><button class="ghost" id="lock" type="button">Lock</button>
+    </div>
+    <div class="kpis" id="kpis"></div>
+
+    <h2>The happy path</h2>
+    <p class="note">Seven decisions, in this order. The solid bar is visits that made each decision in order (after the ones above it). The dashed extension is visits that made it at some point, but out of order. Under each step: what visitors who stopped there did instead.</p>
+    <div class="legend"><span><i class="sw"></i>In order</span><span><i class="sw any"></i>At any point</span></div>
+    <div class="card hp" id="hp"></div>
+
+    <div class="two">
+      <div>
+        <h2>Walkthroughs</h2>
+        <p class="note">Which channels get opened, and how far people read before closing.</p>
+        <div class="card"><table id="chans"></table></div>
+      </div>
+      <div>
+        <h2>How people move</h2>
+        <p class="note">The input behind each screen change: the top and bottom bars, scrolling, swiping, the arrow keys, or a button.</p>
+        <div class="card"><table id="vias"></table></div>
+      </div>
+    </div>
+
+    <h2>Most common routes</h2>
+    <p class="note">Screens in the order visited (repeats collapsed). The happy route is Home → AI-HUB → About me → … → Get in touch.</p>
+    <div class="card"><table id="routes"></table></div>
+
+    <h2>Every visit</h2>
+    <p class="note">Click a visit for its full decision log. ★ marks a happy-path step reached in order; amber is where it first left the path. To watch the recording, search the visit ID under Custom user ID in Microsoft Clarity's recordings filter.</p>
+    <div class="card"><table id="visits"></table></div>
+  </div>
+</div>
+<script>
+(function () {
+  /* This browser is Henry's: keep it out of the visit log on the main site. */
+  try { localStorage.setItem('mh-notrack', '1'); } catch (e) {}
+
+  /* ---------- the happy path: edit these to change what "on path" means ----------
+     Each step is checked against the visit's events in order; a step only counts as "in order" once every step above
+     it has happened. test(e) gets one event: { name, t (ms since the visit began), d (details), via }. */
+  var HAPPY = [
+    { name: 'Land on Home', desc: 'Sees who Henry is first', test: function (e) { return (e.name === 'land' && e.d && e.d.lp) || (e.name === 'screen' && e.d.to === 'Home'); } },
+    { name: 'Enter AI-HUB', desc: 'Goes to the projects', test: function (e) { return e.name === 'screen' && e.d.to === 'AI-HUB'; } },
+    { name: 'Open a channel', desc: 'Starts any app walkthrough', test: function (e) { return e.name === 'channel'; } },
+    { name: 'Go deep on one app', desc: 'Finishes a walkthrough or opens a demo app', test: function (e) { return (e.name === 'step' && e.d.n === e.d.of) || e.name === 'app'; } },
+    { name: 'Read About me', desc: 'Moves on to the person behind it', test: function (e) { return e.name === 'screen' && e.d.to === 'About me'; } },
+    { name: 'Reach Get in touch', desc: 'Gets to the last screen', test: function (e) { return e.name === 'screen' && e.d.to === 'Get in touch'; } },
+    { name: 'Reach out', desc: 'Clicks Email or LinkedIn', test: function (e) { return e.name === 'contact'; } }
+  ];
+  /* events that are not a choice of direction (they never count as "what they did instead") */
+  var NOISE = { land: 1, step: 1, music: 1, zoom: 1, close: 1, tut_start: 1, tut_end: 1, app_close: 1 };
+  var CHAN = { crm: 'CRM', watch: 'Internship Watch', jobs: 'Public Job Board', jira: 'Jira', github: 'GitHub', starr: 'STARR Story Bank', planner: 'McCombs Course Planner', site: 'Henry Website', mars: 'Mars' };
+
+  var $ = function (s) { return document.getElementById(s); }, key = '', raw = null;
+  try { key = sessionStorage.getItem('mh-fb-key') || ''; } catch (e) {}
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function pct(a, b) { return b ? Math.round(a * 100 / b) : 0; }
+  function dur(ms) { var s = Math.round(ms / 1000); return s < 60 ? s + 's' : Math.floor(s / 60) + 'm ' + ('0' + (s % 60)).slice(-2) + 's'; }
+  function median(a) { if (!a.length) return null; a = a.slice().sort(function (x, y) { return x - y; }); var m = a.length >> 1; return a.length % 2 ? a[m] : (a[m - 1] + a[m]) / 2; }
+  function when(iso) { var d = new Date(iso); return isNaN(d) ? iso : d.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }); }
+  function viaName(v) {
+    if (!v) return '';
+    if (v === 'bar') return 'top/bottom bar';
+    if (v === 'scroll') return 'scrolling';
+    if (v === 'swipe') return 'swipe';
+    if (/^key:/.test(v)) return 'key ' + v.slice(4);
+    var b = { lpWork: 'See the work button', lpNext: 'AI-HUB arrow', lpContact: 'Get in touch button (Home)', toLanding: 'back to Home', toAbout: 'About me button', 'am-back': 'back button', 'lp-next': 'screen arrow' }[v];
+    return b || v;
+  }
+  function label(e) {
+    var d = e.d || {};
+    switch (e.name) {
+      case 'land': return d.lp ? 'arrived on Home' : 'arrived on AI-HUB (returning to the hub)';
+      case 'screen': return 'went to ' + d.to;
+      case 'channel': return 'opened ' + (CHAN[d.id] || d.id);
+      case 'step': return (CHAN[d.id] || d.id) + ' · step ' + d.n + ' of ' + d.of;
+      case 'walk_close': return 'closed ' + (CHAN[d.id] || d.id) + ' at step ' + d.n + ' of ' + d.of;
+      case 'close': return 'closed ' + (d.what === 'folder' ? 'the repo list' : d.what);
+      case 'app': return 'opened demo: ' + (d.name || d.src);
+      case 'app_close': return 'left the demo after ' + dur((d.s || 0) * 1000);
+      case 'zoom': return 'enlarged an image';
+      case 'video': return 'played the video';
+      case 'tut_start': return 'tutorial started';
+      case 'tut_end': return d.n >= d.of ? 'finished the tutorial' : 'skipped the tutorial at ' + d.n + ' of ' + d.of;
+      case 'music': return 'turned music ' + (d.on ? 'on' : 'off');
+      case 'contact': return (d.kind === 'email' ? 'clicked Email' : 'clicked LinkedIn') + (d.where ? ' (' + d.where + ')' : '');
+      case 'repo': return d.name === 'profile' ? 'opened the GitHub profile' : 'opened repo ' + d.name;
+      case 'out': return 'left for ' + d.host;
+      case 'end': return 'left the site';
+    }
+    return e.name;
+  }
+  /* "what they did instead", grouped coarsely so the counts add up */
+  function insteadKey(e) {
+    if (!e) return 'Left the site';
+    var d = e.d || {};
+    if (e.name === 'end') return 'Left the site';
+    if (e.name === 'screen') return 'Went to ' + d.to;
+    if (e.name === 'channel') return 'Opened ' + (CHAN[d.id] || d.id);
+    if (e.name === 'walk_close') return 'Closed ' + (CHAN[d.id] || d.id) + ' early';
+    if (e.name === 'contact') return 'Reached out early';
+    if (e.name === 'out' || e.name === 'repo') return 'Followed a link off the site';
+    if (e.name === 'app') return 'Opened a demo app';
+    if (e.name === 'video') return 'Played the video';
+    return label(e);
+  }
+
+  /* ---------- one visit ---------- */
+  function analyse(v, evs) {
+    var k = 0, hits = HAPPY.map(function () { return { order: null, any: null }; }), devAt = -1, devEv = null, endT = 0;
+    evs.forEach(function (e, i) {
+      endT = Math.max(endT, e.t);
+      HAPPY.forEach(function (h, j) { if (hits[j].any === null && h.test(e)) hits[j].any = e.t; });
+      if (k < HAPPY.length && HAPPY[k].test(e)) { hits[k].order = e.t; e.ms = k; k++; }
+    });
+    /* the first decision after the last in-order step, when the next step never came in order */
+    if (k < HAPPY.length) {
+      var lastT = k > 0 ? hits[k - 1].order : -1, start = false;
+      for (var i = 0; i < evs.length; i++) {
+        var e = evs[i];
+        if (!start) { if (k === 0 || (e.ms === k - 1)) start = true; if (k > 0) continue; }
+        if (e.t < lastT || NOISE[e.name]) continue;
+        devAt = i; devEv = e; break;
+      }
+    }
+    var screens = [];
+    evs.forEach(function (e) {
+      var s = e.name === 'land' ? (e.d && e.d.lp ? 'Home' : 'AI-HUB') : e.name === 'screen' ? e.d.to : null;
+      if (s && screens[screens.length - 1] !== s) screens.push(s);
+    });
+    var phone = v.touch || (v.w && v.w < 760);
+    return { v: v, evs: evs, hits: hits, score: k, devAt: devAt, devEv: devEv, dur: endT, phone: !!phone, screens: screens };
+  }
+
+  function build() {
+    var bySid = {};
+    raw.events.forEach(function (e) {
+      var d = null; try { d = e.data ? JSON.parse(e.data) : null; } catch (x) {}
+      (bySid[e.sid] = bySid[e.sid] || []).push({ name: e.name, t: e.t, d: d, via: e.via });
+    });
+    var dev = $('dev').value, hideB = $('bounce').checked, newOnly = $('newonly').checked;
+    return raw.visits.map(function (v) { return analyse(v, (bySid[v.sid] || []).sort(function (a, b) { return a.t - b.t; })); })
+      .filter(function (a) {
+        if (!a.evs.length) return false;
+        if (hideB && a.dur < 10000) return false;
+        if (newOnly && a.v.ret) return false;
+        if (dev === 'phone' && !a.phone) return false;
+        if (dev === 'desktop' && a.phone) return false;
+        return true;
+      });
+  }
+
+  function render() {
+    var A = build(), n = A.length;
+    /* KPIs */
+    var full = A.filter(function (a) { return a.score === HAPPY.length; }).length;
+    var contacted = A.filter(function (a) { return a.hits[6].any !== null; }).length;
+    var anyChan = A.filter(function (a) { return a.hits[2].any !== null; }).length;
+    var tutS = 0, tutF = 0; A.forEach(function (a) { var s = false, f = false; a.evs.forEach(function (e) { if (e.name === 'tut_start') s = true; if (e.name === 'tut_end' && e.d.n >= e.d.of) f = true; }); if (s) tutS++; if (f) tutF++; });
+    var md = median(A.map(function (a) { return a.dur; })), ms = median(A.map(function (a) { return a.score; }));
+    $('kpis').innerHTML = [
+      [n, 'visits'],
+      [pct(full, n) + '%', 'followed the whole happy path'],
+      [ms == null ? '–' : ms + ' of 7', 'median happy-path steps in order'],
+      [pct(anyChan, n) + '%', 'opened at least one channel'],
+      [pct(contacted, n) + '%', 'clicked Email or LinkedIn'],
+      [md == null ? '–' : dur(md), 'median time on site'],
+      [tutS ? pct(tutF, tutS) + '%' : '–', 'finished the tutorial (of those shown it)']
+    ].map(function (k) { return '<div class="card kpi"><div class="v">' + esc(k[0]) + '</div><div class="l">' + esc(k[1]) + '</div></div>'; }).join('');
+
+    /* funnel with "instead" */
+    $('hp').innerHTML = n ? HAPPY.map(function (h, j) {
+      var ord = A.filter(function (a) { return a.hits[j].order !== null; }).length;
+      var any = A.filter(function (a) { return a.hits[j].any !== null; }).length;
+      var stopped = A.filter(function (a) { return a.score === j; });
+      var counts = {}; stopped.forEach(function (a) { var k = insteadKey(a.devEv); counts[k] = (counts[k] || 0) + 1; });
+      var top = Object.keys(counts).sort(function (x, y) { return counts[y] - counts[x]; }).slice(0, 4);
+      var t = median(A.filter(function (a) { return a.hits[j].order !== null; }).map(function (a) { return a.hits[j].order; }));
+      return '<div class="hp-row"><div class="hp-n">' + (j + 1) + '</div><div class="hp-name"><b>' + esc(h.name) + '</b><span>' + esc(h.desc) + (t != null && j ? ' · typically at ' + dur(t) : '') + '</span></div>' +
+        '<div class="hp-bar"><div class="bar" title="' + ord + ' in order, ' + any + ' at any point, of ' + n + ' visits"><i class="any" style="width:' + pct(any, n) + '%"></i><i style="width:' + pct(ord, n) + '%"></i><em>' + pct(ord, n) + '% in order' + (any > ord ? ' · ' + pct(any, n) + '% at any point' : '') + '</em></div>' +
+        (stopped.length ? '<ul class="inst"><li><span>' + stopped.length + ' visit' + (stopped.length === 1 ? '' : 's') + ' stopped here. Instead they:</span></li>' + top.map(function (k) { return '<li><b>' + pct(counts[k], stopped.length) + '%</b><span>' + esc(k) + '</span></li>'; }).join('') + '</ul>' : '') +
+        '</div></div>';
+    }).join('') : '<p class="empty">No visits in this period yet.</p>';
+
+    /* walkthroughs */
+    var ch = {};
+    A.forEach(function (a) {
+      var seen = {};
+      a.evs.forEach(function (e) {
+        var d = e.d || {}, id = d.id;
+        if (e.name === 'channel') { var c = ch[id] = ch[id] || { opens: 0, visits: 0, done: 0, apps: 0, depth: [] }; c.opens++; if (!seen[id]) { seen[id] = { max: 0 }; c.visits++; } }
+        if (e.name === 'step' && seen[id]) { seen[id].max = Math.max(seen[id].max, d.n); seen[id].of = d.of; }
+        if (e.name === 'app') { var cur = null; for (var i = a.evs.indexOf(e) - 1; i >= 0; i--) if (a.evs[i].name === 'channel') { cur = a.evs[i].d.id; break; } if (cur && seen[cur]) seen[cur].app = true; }
+      });
+      Object.keys(seen).forEach(function (id) { var c = ch[id], s = seen[id]; if (s.of && s.max >= s.of) c.done++; if (s.app) c.apps++; if (s.of) c.depth.push(s.max + '/' + s.of); });
+    });
+    var ids = Object.keys(ch).sort(function (x, y) { return ch[y].visits - ch[x].visits; });
+    var maxV = ids.length ? ch[ids[0]].visits : 1;
+    $('chans').innerHTML = ids.length ? '<tr><th>Channel</th><th class="num">Visits</th><th class="num">Read to the end</th><th class="num">Opened the demo</th><th class="num">Typical depth</th></tr>' + ids.map(function (id) {
+      var c = ch[id], dp = median(c.depth.map(function (x) { return +x.split('/')[0]; })), of = c.depth.length ? c.depth[0].split('/')[1] : '';
+      return '<tr><td><span class="minibar" style="width:' + Math.max(4, Math.round(60 * c.visits / maxV)) + 'px"></span>' + esc(CHAN[id] || id) + '</td><td class="num">' + c.visits + ' (' + pct(c.visits, n) + '%)</td><td class="num">' + pct(c.done, c.visits) + '%</td><td class="num">' + (c.apps ? pct(c.apps, c.visits) + '%' : '–') + '</td><td class="num">' + (dp == null ? '–' : 'step ' + dp + (of ? ' of ' + of : '')) + '</td></tr>';
+    }).join('') : '<tr><td class="empty">No channels opened yet.</td></tr>';
+
+    /* inputs */
+    var vc = {}, vt = 0;
+    A.forEach(function (a) { a.evs.forEach(function (e) { if (e.name !== 'screen') return; var k = viaName(e.via) || 'unknown'; if (/^key /.test(k)) k = 'arrow keys'; var dev = a.phone ? 'p' : 'd'; vc[k] = vc[k] || { p: 0, d: 0 }; vc[k][dev]++; vt++; }); });
+    var vk = Object.keys(vc).sort(function (x, y) { return (vc[y].p + vc[y].d) - (vc[x].p + vc[x].d); });
+    $('vias').innerHTML = vk.length ? '<tr><th>Input</th><th class="num">Phones</th><th class="num">Laptops</th><th class="num">Share</th></tr>' + vk.map(function (k) {
+      var c = vc[k], s = c.p + c.d; return '<tr><td>' + esc(k) + '</td><td class="num">' + c.p + '</td><td class="num">' + c.d + '</td><td class="num"><span class="minibar" style="width:' + Math.max(3, Math.round(50 * s / vt)) + 'px"></span>' + pct(s, vt) + '%</td></tr>';
+    }).join('') : '<tr><td class="empty">No screen changes yet.</td></tr>';
+
+    /* routes */
+    var rc = {}; A.forEach(function (a) { var r = a.screens.join(' → ') || '(none)'; rc[r] = (rc[r] || 0) + 1; });
+    var rk = Object.keys(rc).sort(function (x, y) { return rc[y] - rc[x]; }).slice(0, 12);
+    $('routes').innerHTML = rk.length ? '<tr><th>Route</th><th class="num">Visits</th></tr>' + rk.map(function (r) { return '<tr><td>' + esc(r) + '</td><td class="num">' + rc[r] + ' (' + pct(rc[r], n) + '%)</td></tr>'; }).join('') : '';
+
+    /* visits */
+    $('visits').innerHTML = n ? '<tr><th>When</th><th>Device</th><th>Happy path</th><th>Left the path by</th><th class="num">Time</th><th></th></tr>' + A.map(function (a, i) {
+      var v = a.v, strip = a.hits.map(function (h, j) { var c = h.order !== null ? 'order' : h.any !== null ? 'late' : 'miss'; return '<span class="dot ' + c + '" title="' + esc(HAPPY[j].name) + (c === 'order' ? ': in order' : c === 'late' ? ': out of order' : ': not reached') + '">' + (j + 1) + '</span>'; }).join('');
+      var devTxt = a.score === HAPPY.length ? '<span class="tag good">stayed on path</span>' : esc(insteadKey(a.devEv)) + ' <span class="note">(instead of: ' + esc(HAPPY[a.score].name) + ')</span>';
+      var where = [a.phone ? 'Phone' : 'Laptop', v.w ? v.w + '×' + v.h : '', v.country || '', v.ret ? 'returning' : '', v.ref ? 'from ' + v.ref : '', v.utm ? 'via ' + v.utm : ''].filter(Boolean).join(' · ');
+      return '<tr class="vrow" data-i="' + i + '"><td>' + esc(when(v.started_at)) + '<div class="sidtag">' + esc(v.sid) + '</div></td><td>' + esc(where) + '</td><td><div class="strip">' + strip + '</div></td><td>' + devTxt + '</td><td class="num">' + dur(a.dur) + '</td><td><button class="del" type="button" data-sid="' + esc(v.sid) + '">Delete</button></td></tr>' +
+        '<tr class="vlog" id="log' + i + '" hidden><td colspan="6"><ol class="tl">' + a.evs.map(function (e, j) {
+          var c = e.ms !== undefined ? 'ms' : j === a.devAt ? 'dev' : '';
+          return '<li class="' + c + '"><span>' + dur(e.t) + '</span><span class="what">' + esc(label(e)) + (j === a.devAt ? ' ← left the path here' : '') + '</span><span class="via">' + esc(viaName(e.via)) + '</span></li>';
+        }).join('') + '</ol></td></tr>';
+    }).join('') : '<tr><td class="empty">No visits match these filters.</td></tr>';
+    window.__analysed = A;
+  }
+
+  function call(method, path) { return fetch(path, { method: method, headers: { authorization: 'Bearer ' + key } }).then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Request failed'); return j; }); }); }
+  function load() {
+    $('msg').textContent = '';
+    return call('GET', '/api/insights?days=' + $('days').value).then(function (j) {
+      raw = j; try { sessionStorage.setItem('mh-fb-key', key); } catch (e) {}
+      $('login').hidden = true; $('out').hidden = false; render();
+    }).catch(function (e) { $('login').hidden = false; $('out').hidden = true; $('msg').textContent = e.message; });
+  }
+  $('login').addEventListener('submit', function (e) { e.preventDefault(); key = $('key').value.trim(); if (key) load(); });
+  $('refresh').addEventListener('click', load);
+  $('days').addEventListener('change', load);
+  ['dev', 'bounce', 'newonly'].forEach(function (id) { $(id).addEventListener('change', function () { if (raw) render(); }); });
+  $('lock').addEventListener('click', function () { key = ''; raw = null; try { sessionStorage.removeItem('mh-fb-key'); } catch (e) {} $('out').hidden = true; $('login').hidden = false; $('key').value = ''; });
+  $('visits').addEventListener('click', function (e) {
+    var b = e.target.closest('button.del');
+    if (b) {
+      e.stopPropagation();
+      if (b.dataset.armed !== '1') { b.dataset.armed = '1'; b.textContent = 'Click again'; return; }
+      call('DELETE', '/api/insights/' + b.dataset.sid).then(function () {
+        raw.visits = raw.visits.filter(function (v) { return v.sid !== b.dataset.sid; });
+        raw.events = raw.events.filter(function (v) { return v.sid !== b.dataset.sid; }); render();
+      }).catch(function (err) { b.textContent = err.message; });
+      return;
+    }
+    var r = e.target.closest('.vrow'); if (r) { var l = $('log' + r.dataset.i); l.hidden = !l.hidden; }
+  });
+  if (key) load(); else $('key').focus();
+})();
+</script>
+</body>
+</html>
