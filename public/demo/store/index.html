@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>App Store · AI-HUB</title>
+<style>
+:root{--bg:#0b1220;--card:#131c2e;--line:rgba(255,255,255,.1);--ink:#e8ecf3;--soft:#c4ccd8;--muted:#9aa6b8;--accent:#5cbfad;--accent-ink:#08201c;--gold:#e0b45a;--bad:#ff9a8f}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--accent)}
+button,input,select,textarea{font:inherit;color:inherit}
+.wrap{width:min(1120px,100%);margin:0 auto;padding:18px 24px 48px}
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:16px}
+.top h1{margin:0;font-size:24px;letter-spacing:.01em;display:flex;align-items:center;gap:10px}
+.top .sp{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid rgba(255,255,255,.25);background:transparent;color:var(--ink);font-weight:600;cursor:pointer;text-decoration:none}
+.btn:hover{border-color:rgba(255,255,255,.45)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.small{min-height:34px;padding:0 14px;border-radius:999px;font-size:13px}
+.btn.added{color:var(--muted)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn.danger{border-color:rgba(255,154,143,.5);color:var(--bad)}
+.tools{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:18px}
+.search{flex:1 1 300px;display:flex;align-items:center;gap:10px;min-height:44px;padding:0 14px;border-radius:10px;background:var(--card);border:1px solid rgba(255,255,255,.14)}
+.search input{flex:1;background:transparent;border:0;outline:none;color:var(--ink);font-size:15px}
+.search:focus-within{border-color:var(--accent)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:36px;padding:0 14px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:transparent;color:var(--ink);font-size:13px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+h2{font-size:18px;margin:22px 0 10px}
+.note{color:var(--muted);font-size:13px;margin:0 0 10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.card{display:flex;gap:14px;padding:14px;border-radius:14px;background:var(--card);border:1px solid rgba(255,255,255,.08)}
+.card.mine{border-color:rgba(92,191,173,.55)}
+.tile{flex:none;width:84px;height:84px;border-radius:14px;overflow:hidden;display:block;border:0;padding:0;background:none;cursor:pointer}
+.tile svg{display:block;width:100%;height:100%}
+.card .body{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.card .nm{background:none;border:0;padding:0;color:var(--ink);font-weight:700;font-size:15px;text-align:left;cursor:pointer}
+.card .nm:hover{color:#8fe0d1}
+.meta{font-size:12px;color:var(--muted)}
+.pitch{font-size:13px;color:var(--soft)}
+.card .act{margin-top:6px;display:flex;gap:8px;align-items:center}
+.badge{align-self:flex-start;display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.08em;padding:2px 7px;border-radius:999px;border:1px solid rgba(255,255,255,.22);color:var(--muted);vertical-align:2px;margin-left:6px}
+.badge.demo{border-color:rgba(92,191,173,.6);color:#8fe0d1}
+.badge.mine{border-color:rgba(224,180,90,.7);color:var(--gold)}
+.empty{color:var(--muted);text-align:center;padding:40px 0}
+/* listing */
+.back{display:inline-flex;align-items:center;gap:6px;background:none;border:0;color:var(--accent);font-weight:600;cursor:pointer;padding:6px 0;margin-bottom:10px}
+.lst{display:flex;flex-wrap:wrap;gap:28px}
+.lst .main{flex:999 1 560px;min-width:0;display:flex;flex-direction:column;gap:20px}
+.lst aside{flex:1 1 240px;display:flex;flex-direction:column;gap:12px}
+.hero{display:flex;flex-wrap:wrap;gap:22px;align-items:flex-start}
+.hero .big{flex:none;width:160px;height:160px;border-radius:26px;overflow:hidden}
+.hero .big svg{width:100%;height:100%;display:block}
+.hero h1{margin:0;font-size:32px;line-height:1.1}
+.hero .txt{flex:1 1 260px;display:flex;flex-direction:column;gap:6px}
+.hero .btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+.box{padding:16px;border-radius:14px;background:var(--card);border:1px solid rgba(255,255,255,.08)}
+.box.dash{background:transparent;border:1px dashed rgba(255,255,255,.22)}
+.box h3{margin:0 0 8px;font-size:15px}
+.box ul{margin:6px 0 0;padding-left:18px;font-size:13px;color:var(--muted)}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.mono{font-family:ui-monospace,Menlo,monospace;font-size:13px;color:var(--soft);word-break:break-all}
+/* form */
+.pub{display:flex;flex-wrap:wrap;gap:32px}
+form{flex:999 1 560px;min-width:0;display:flex;flex-direction:column;gap:16px}
+.f{display:flex;flex-direction:column;gap:6px}
+.f label,.f .lbl{font-weight:600;font-size:14px}
+.f .opt{font-weight:400;color:var(--muted)}
+.f input[type=url],.f input[type=text],.f select,.f textarea{min-height:44px;padding:10px 14px;border-radius:10px;background:var(--card);border:1px solid rgba(255,255,255,.16);color:var(--ink)}
+.f textarea{min-height:90px;resize:vertical}
+.f input:focus,.f select:focus,.f textarea:focus{outline:none;border-color:var(--accent)}
+.f .err{color:var(--bad);font-size:13px}
+.f .ok{color:#8fe0d1;font-size:13px}
+.f .hint{color:var(--muted);font-size:13px}
+.f.bad input,.f.bad textarea{border-color:var(--bad)}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.styles{display:flex;flex-wrap:wrap;gap:20px}
+.swatch{width:38px;height:38px;border-radius:50%;border:3px solid transparent;cursor:pointer}
+.swatch[aria-checked="true"]{border-color:var(--ink)}
+.opt-btn{min-height:38px;padding:0 12px;border-radius:8px;border:1px solid rgba(255,255,255,.18);background:transparent;color:var(--ink);cursor:pointer;font-size:13px}
+.opt-btn[aria-checked="true"]{border-color:var(--accent);background:rgba(92,191,173,.16)}
+.ico{width:42px;height:42px;padding:0;display:grid;place-items:center}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:14px}
+.check input{width:18px;height:18px;accent-color:var(--accent);margin-top:2px}
+.preview{flex:1 1 280px;display:flex;flex-direction:column;gap:12px}
+.cap{font-size:12px;font-weight:700;letter-spacing:.1em;color:var(--muted)}
+.dash-tile{width:232px;max-width:100%;aspect-ratio:232/140;border-radius:16px;overflow:hidden;position:relative;border:2px solid rgba(255,255,255,.14)}
+.dash-tile svg{display:block;width:100%;height:100%}
+.dash-tile span{position:absolute;left:12px;bottom:10px;right:12px;font-weight:700;font-size:15px;text-shadow:0 1px 4px rgba(0,0,0,.6)}
+.dash-tile small{display:block;font-weight:500;font-size:12px;opacity:.85}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);display:flex;align-items:center;gap:12px;padding:10px 12px 10px 16px;border-radius:999px;background:#13283a;border:1px solid rgba(92,191,173,.6);box-shadow:0 10px 30px rgba(0,0,0,.45);font-size:14px;z-index:5;max-width:calc(100% - 32px)}
+.proto{font-size:12.5px;color:var(--muted);border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:0 0 16px}
+@media (max-width:640px){.two{grid-template-columns:1fr}.wrap{padding:14px 14px 40px}.hero .big{width:110px;height:110px}.hero h1{font-size:26px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="proto">Prototype: apps you publish and add are saved in this browser only. In the full version the store is shared by every signed-in student.</p>
+
+  <!-- browse -->
+  <section id="v-browse" aria-label="Browse apps">
+    <div class="top">
+      <h1><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#5cbfad" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>App Store</h1>
+      <div class="sp">
+        <button class="btn" type="button" id="toDash">My dashboard</button>
+        <button class="btn primary" type="button" id="toPublish"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Publish your app</button>
+      </div>
+    </div>
+    <div class="tools">
+      <div class="search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9aa6b8" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><label for="q" class="sr" style="position:absolute;left:-9999px">Search apps</label><input id="q" type="search" placeholder="Search apps, authors, categories" autocomplete="off"></div>
+      <div class="chips" id="chips" role="group" aria-label="Categories"></div>
+    </div>
+    <div id="lists"></div>
+  </section>
+
+  <!-- one app -->
+  <section id="v-listing" aria-label="App details" hidden></section>
+
+  <!-- publish / edit -->
+  <section id="v-publish" aria-label="Publish your app" hidden>
+    <button class="back" type="button" data-go="browse"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>App Store</button>
+    <div class="pub">
+      <form id="pubForm" novalidate>
+        <div>
+          <h1 id="pubTitle" style="margin:0;font-size:28px">Publish your app</h1>
+          <p class="note" style="margin:4px 0 0">It goes live in the App Store right away. You can edit or unpublish it anytime.</p>
+        </div>
+        <div class="f" id="f-url">
+          <label for="url">Shared Claude artifact link <span style="color:var(--gold)">*</span></label>
+          <input id="url" type="url" placeholder="https://claude.ai/public/artifacts/…" autocomplete="off" spellcheck="false" aria-describedby="url-msg">
+          <span class="hint" id="url-msg">Share the artifact publicly in Claude first, then paste its link here.</span>
+        </div>
+        <div class="two">
+          <div class="f" id="f-name"><label for="name">App name <span style="color:var(--gold)">*</span></label><input id="name" type="text" maxlength="40" autocomplete="off" aria-describedby="name-msg"><span class="err" id="name-msg"></span></div>
+          <div class="f"><label for="cat">Category <span style="color:var(--gold)">*</span></label><select id="cat"></select></div>
+        </div>
+        <div class="f" id="f-pitch"><label for="pitch">One-line pitch <span style="color:var(--gold)">*</span> <span class="opt" id="pitchCount">0 / 80</span></label><input id="pitch" type="text" maxlength="80" placeholder="What does it do, in one line?" autocomplete="off" aria-describedby="pitch-msg"><span class="err" id="pitch-msg"></span></div>
+        <div class="f"><label for="desc">Description <span class="opt">Optional</span></label><textarea id="desc" maxlength="600" placeholder="What it does, who it's for, how to use it."></textarea></div>
+        <div class="f">
+          <span class="lbl">Tile style</span>
+          <div class="styles">
+            <div role="radiogroup" aria-label="Color" id="colors" style="display:flex;gap:8px;align-items:center"></div>
+            <div role="radiogroup" aria-label="Pattern" id="patterns" style="display:flex;gap:8px"></div>
+            <div role="radiogroup" aria-label="Icon" id="icons" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+          </div>
+        </div>
+        <div class="f box dash" id="f-repo">
+          <label for="repo">GitHub repository <span class="opt">Optional</span></label>
+          <input id="repo" type="url" placeholder="https://github.com/you/repo" autocomplete="off" spellcheck="false" aria-describedby="repo-msg">
+          <span class="hint" id="repo-msg">Listed below your app as Source code, so classmates can view or fork it.</span>
+        </div>
+        <div class="f" id="f-own"><label class="check"><input type="checkbox" id="own"> I made this app and it's OK to share with classmates.</label><span class="err" id="own-msg"></span></div>
+        <div class="row"><button class="btn primary" type="submit" id="pubBtn">Publish</button><button class="btn" type="button" data-go="browse">Cancel</button></div>
+      </form>
+      <aside class="preview" aria-label="Preview">
+        <span class="cap">PREVIEW · IN THE STORE</span>
+        <div class="card" id="pvCard"></div>
+        <span class="cap">ON YOUR DASHBOARD</span>
+        <div class="dash-tile" id="pvTile"></div>
+        <p class="note">Tiles are drawn from these styles only, so no logos or uploaded images appear in the store.</p>
+      </aside>
+    </div>
+  </section>
+</div>
+<div class="toast" id="toast" role="status" hidden><span id="toastMsg"></span><span id="toastAct"></span></div>
+
+<script>
+(function () {
+  'use strict';
+  var SKEY = 'aihub-store-v1';
+  var CATS = ['Recruiting', 'Coursework', 'Productivity', 'Just for fun'];
+  var PAL = { amber: ['#9a6a22', '#8d611f'], teal: ['#2f8f86', '#2a827a'], blue: ['#3b6fb6', '#355f9c'], purple: ['#6a4f9c', '#5f4690'], coral: ['#b85c4a', '#a65242'] };
+  var ICONS = {
+    timer: '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6"/>', chart: '<path d="M4 19V5M4 19h16M8 15l4-4 3 3 5-6"/>',
+    case: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/>', book: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
+    chat: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>', star: '<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',
+    cal: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/>', code: '<path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/>'
+  };
+  var ICON_NAMES = { timer: 'Timer', chart: 'Chart', case: 'Briefcase', book: 'Book', chat: 'Chat', star: 'Star', cal: 'Calendar', code: 'Code' };
+  var PATTERNS = { stripes: 'Stripes', rings: 'Rings', bars: 'Bars' };
+
+  /* Henry's own apps run here as their demo copies (sample data, inside AI-HUB); the rest are sample listings */
+  var SEED = [
+    { id: 'h-crm', name: 'Internship CRM', author: 'Henry M.', cat: 'Recruiting', pitch: 'Networking contacts and the application pipeline in one editable grid.', desc: 'Track who you have met, where each application stands and what to do next. This listing opens the demo copy with sample data.', embed: 'demo/crm/index.html', repo: 'https://github.com/HenryDMcGee/CRM', style: { color: 'teal', pattern: 'stripes', icon: 'case' }, demo: true, added: '2026-11-01' },
+    { id: 'h-watch', name: 'Internship Watch', author: 'Henry M.', cat: 'Recruiting', pitch: 'Real Summer 2027 MBA product internships, checked every morning.', desc: 'Checks about 100 company career sites and keeps only open MBA product internships. This listing opens the demo copy with sample data.', embed: 'demo/watch/index.html', repo: 'https://github.com/HenryDMcGee/internship-watch', style: { color: 'blue', pattern: 'rings', icon: 'chart' }, demo: true, added: '2026-11-01' },
+    { id: 'h-planner', name: 'McCombs Course Planner', author: 'Henry M.', cat: 'Coursework', pitch: 'Plan class bids with schedules, bid history and ratings in one place.', desc: 'Schedule, catalog, bid history and concentration rules for bidding. This listing opens the demo copy with made-up data.', embed: 'demo/planner/index.html', repo: 'https://github.com/HenryDMcGee/mccombs-course-planner', style: { color: 'purple', pattern: 'bars', icon: 'book' }, demo: true, added: '2026-11-01' },
+    { id: 's-timer', name: 'Case Prep Timer', author: 'Sample student', cat: 'Recruiting', pitch: 'Timed case-interview drills with a frameworks checklist.', style: { color: 'amber', pattern: 'stripes', icon: 'timer' }, sample: true, added: '2026-11-09' },
+    { id: 's-coffee', name: 'Coffee Chat Notes', author: 'Sample student', cat: 'Recruiting', pitch: 'Notes and follow-up reminders for every networking chat.', style: { color: 'coral', pattern: 'rings', icon: 'chat' }, sample: true, added: '2026-11-08' },
+    { id: 's-study', name: 'Study Group Finder', author: 'Sample student', cat: 'Coursework', pitch: 'Find classmates studying the same course this week.', style: { color: 'blue', pattern: 'bars', icon: 'cal' }, sample: true, added: '2026-11-06' },
+    { id: 's-cards', name: 'Accounting Flashcards', author: 'Sample student', cat: 'Coursework', pitch: 'Flashcards for the core accounting class, with self-scoring.', style: { color: 'teal', pattern: 'rings', icon: 'book' }, sample: true, added: '2026-11-05' },
+    { id: 's-week', name: 'Week Planner', author: 'Sample student', cat: 'Productivity', pitch: 'Classes, recruiting events and deadlines on one weekly view.', style: { color: 'purple', pattern: 'stripes', icon: 'cal' }, sample: true, added: '2026-11-04' },
+    { id: 's-trivia', name: 'Trivia Night', author: 'Sample student', cat: 'Just for fun', pitch: 'A quick team trivia game for section socials.', style: { color: 'amber', pattern: 'rings', icon: 'star' }, sample: true, added: '2026-11-03' }
+  ];
+
+  var $ = function (s) { return document.getElementById(s); };
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+
+  /* ---------- storage: this browser only (prototype) ---------- */
+  var mem = { published: [], installed: [] };
+  function read() { try { var d = JSON.parse(localStorage.getItem(SKEY)); if (d && Array.isArray(d.installed) && Array.isArray(d.published)) return d; } catch (e) {} return mem; }
+  function write(d) { mem = d; try { localStorage.setItem(SKEY, JSON.stringify(d)); } catch (e) {} }
+  var data = read();
+  function catalog() { return data.published.concat(SEED); }
+  function find(id) { var c = catalog(); for (var i = 0; i < c.length; i++) if (c[i].id === id) return c[i]; return null; }
+  function isAdded(id) { return data.installed.some(function (a) { return a.id === id; }); }
+  /* the dashboard keeps a snapshot of what it needs to draw and open the tile */
+  function snap(a) { return { id: a.id, name: a.name, author: a.author, url: a.url || '', embed: a.embed || '', pitch: a.pitch, style: a.style, sample: !!a.sample }; }
+
+  var inHub = window.parent && window.parent !== window;
+  function tell(action, extra) {
+    if (!inHub) return;
+    var m = { type: 'aihub-store', action: action, installed: data.installed };
+    for (var k in extra) m[k] = extra[k];
+    try { window.parent.postMessage(m, location.origin === 'null' ? '*' : location.origin); } catch (e) {}
+  }
+
+  /* ---------- art: same recipe as the hub's tiles ---------- */
+  function art(st, square) {
+    st = st || {}; var c = PAL[st.color] || PAL.teal, w = square ? 140 : 232, o = '<rect width="' + w + '" height="140" fill="' + c[0] + '"/>', i;
+    if (st.pattern === 'rings') { for (i = 16; i < 280; i += 18) o += '<circle cx="' + (square ? 118 : 196) + '" cy="24" r="' + i + '" fill="none" stroke="' + c[1] + '" stroke-width="8"/>'; }
+    else if (st.pattern === 'bars') { for (i = 0; i < w; i += 30) o += '<rect x="' + i + '" y="0" width="15" height="140" fill="' + c[1] + '"/>'; }
+    else { for (i = -140; i < w; i += 22) o += '<path d="M' + i + ' 140L' + (i + 140) + ' 0" stroke="' + c[1] + '" stroke-width="11"/>'; }
+    var g = square ? 'translate(42 42) scale(2.33)' : 'translate(16 12) scale(2.3)';
+    o += '<g transform="' + g + '" fill="none" stroke="rgba(255,255,255,.92)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + (ICONS[st.icon] || ICONS.star) + '</g>';
+    return '<svg viewBox="0 0 ' + w + ' 140" preserveAspectRatio="xMidYMid slice" aria-hidden="true">' + o + '</svg>';
+  }
+
+  /* ---------- views ---------- */
+  var view = 'browse', cat = 'All', current = null, editing = null;
+  function go(v, id) {
+    view = v; current = id || null;
+    $('v-browse').hidden = v !== 'browse'; $('v-listing').hidden = v !== 'listing'; $('v-publish').hidden = v !== 'publish';
+    if (v === 'browse') renderBrowse();
+    if (v === 'listing') renderListing();
+    window.scrollTo(0, 0);
+  }
+  document.addEventListener('click', function (e) {
+    var g = e.target.closest('[data-go]'); if (g) { e.preventDefault(); if (g.dataset.go === 'publish') openForm(null); else go(g.dataset.go, g.dataset.id); return; }
+    var add = e.target.closest('[data-add]'); if (add) { e.preventDefault(); install(add.dataset.add); return; }
+    var rm = e.target.closest('[data-remove]'); if (rm) { e.preventDefault(); uninstall(rm.dataset.remove); return; }
+    var op = e.target.closest('[data-open]'); if (op) { e.preventDefault(); openApp(op.dataset.open); return; }
+  });
+
+  function badge(a) { return a.demo ? '<span class="badge demo">DEMO</span>' : a.sample ? '<span class="badge">SAMPLE</span>' : a.mine ? '<span class="badge mine">YOURS</span>' : ''; }
+  function addBtn(a) {
+    return isAdded(a.id)
+      ? '<button class="btn small added" type="button" data-go="listing" data-id="' + esc(a.id) + '" aria-label="' + esc(a.name) + ' is on your dashboard"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Added</button>'
+      : '<button class="btn small primary" type="button" data-add="' + esc(a.id) + '" aria-label="Add ' + esc(a.name) + ' to your dashboard">Add</button>';
+  }
+  function cardHTML(a) {
+    return '<div class="card' + (a.mine ? ' mine' : '') + '">' +
+      '<button class="tile" type="button" data-go="listing" data-id="' + esc(a.id) + '" aria-label="' + esc(a.name) + ' details">' + art(a.style, true) + '</button>' +
+      '<div class="body"><button class="nm" type="button" data-go="listing" data-id="' + esc(a.id) + '">' + esc(a.name) + '</button>' + badge(a) +
+      '<span class="meta">by ' + esc(a.author) + ' · ' + esc(a.cat) + '</span><span class="pitch">' + esc(a.pitch) + '</span>' +
+      '<div class="act">' + addBtn(a) + '</div></div></div>';
+  }
+  function renderBrowse() {
+    $('chips').innerHTML = ['All'].concat(CATS).map(function (c) { return '<button class="chip" type="button" data-cat="' + esc(c) + '" aria-pressed="' + (c === cat) + '">' + esc(c) + '</button>'; }).join('');
+    var q = $('q').value.trim().toLowerCase();
+    var list = catalog().filter(function (a) {
+      if (cat !== 'All' && a.cat !== cat) return false;
+      if (!q) return true;
+      return [a.name, a.author, a.cat, a.pitch].join(' ').toLowerCase().indexOf(q) >= 0;
+    });
+    var mine = list.filter(function (a) { return a.mine; });
+    var newest = list.filter(function (a) { return !a.mine; }).sort(function (x, y) { return (y.added || '').localeCompare(x.added || ''); });
+    var html = '';
+    if (mine.length) html += '<h2>Your apps</h2><div class="grid">' + mine.map(cardHTML).join('') + '</div>';
+    html += '<h2>' + (q || cat !== 'All' ? 'Results' : 'All apps, newest first') + '</h2>';
+    html += newest.length ? '<div class="grid">' + newest.map(cardHTML).join('') + '</div>' : (mine.length ? '' : '<p class="empty">No apps match. Try another word or category.</p>');
+    $('lists').innerHTML = html;
+  }
+  $('q').addEventListener('input', renderBrowse);
+  $('chips').addEventListener('click', function (e) { var c = e.target.closest('[data-cat]'); if (c) { cat = c.dataset.cat; renderBrowse(); } });
+  $('toPublish').addEventListener('click', function () { openForm(null); });
+  $('toDash').addEventListener('click', function () { if (inHub) tell('dashboard', {}); else toast('Open the App Store from AI-HUB to see your dashboard.'); });
+
+  function renderListing() {
+    var a = find(current); if (!a) { go('browse'); return; }
+    var added = isAdded(a.id), repo = a.repo ? a.repo.replace(/\/$/, '') : '', rp = repo.replace(/^https:\/\/github\.com\//, '');
+    var where = a.embed ? '<div class="row"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5cbfad" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8"/></svg><span>Demo copy that runs inside AI-HUB</span></div><ul><li>Sample data only. Nothing you change is saved.</li></ul>'
+      : a.url ? '<div class="row"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5cbfad" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg><span>Shared Claude artifact</span></div><p class="mono" style="margin:6px 0 0">' + esc(a.url) + '</p><ul><li>Opens in a new tab. Your data in it stays yours, not the author\'s.</li><li>If it uses Claude, you may need to be signed in to Claude.</li></ul>'
+      : '<p class="note" style="margin:0">Sample listing for testing the store. There is no app behind it.</p>';
+    $('v-listing').innerHTML =
+      '<button class="back" type="button" data-go="browse"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>App Store</button>' +
+      '<div class="lst"><div class="main">' +
+        '<div class="hero"><div class="big">' + art(a.style, true) + '</div><div class="txt">' +
+          '<h1>' + esc(a.name) + '</h1>' +
+          '<span class="meta" style="font-size:14px">by ' + esc(a.author) + ' · ' + esc(a.cat) + (a.added ? ' · added ' + esc(a.added) : '') + '</span>' + (badge(a) ? '<span>' + badge(a).replace('margin-left:6px', '') + '</span>' : '') +
+          '<span class="pitch" style="font-size:15px">' + esc(a.pitch) + '</span>' +
+          '<div class="btns">' +
+            (added ? '<button class="btn danger" type="button" data-remove="' + esc(a.id) + '">Remove from my dashboard</button>' : '<button class="btn primary" type="button" data-add="' + esc(a.id) + '"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Add to my dashboard</button>') +
+            (a.embed ? '<button class="btn" type="button" data-open="' + esc(a.id) + '">Open</button>'
+              : a.url ? '<a class="btn" href="' + esc(a.url) + '" target="_blank" rel="noopener">Open ↗</a>'
+              : '<button class="btn" type="button" disabled>Open</button>') +
+          '</div></div></div>' +
+        (a.desc ? '<section><h3 style="margin:0 0 6px;font-size:17px">About this app</h3><p style="margin:0;color:var(--soft);line-height:1.6">' + esc(a.desc) + '</p></section>' : '') +
+        '<section class="box"><h3>The app</h3>' + where + '</section>' +
+        (repo ? '<section class="box dash"><h3>Source code <span class="meta" style="font-weight:400">· added by the author</span></h3><div class="row"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e8ecf3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/></svg><div style="flex:1 1 220px"><b style="font-size:14px">' + esc(rp) + '</b><div class="meta">GitHub repository</div></div><a class="btn" href="' + esc(repo) + '" target="_blank" rel="noopener">View code ↗</a><a class="btn" href="' + esc(repo) + '/fork" target="_blank" rel="noopener">Fork it ↗</a></div></section>' : '') +
+      '</div><aside>' +
+        '<div class="box"><b>' + esc(a.author) + '</b><div class="meta">' + (a.mine ? 'You published this app' : a.demo ? 'Built AI-HUB and this app' : 'Sample author') + '</div></div>' +
+        (a.mine ? '<div class="box" style="display:flex;flex-direction:column;gap:8px"><button class="btn" type="button" id="editMine">Edit listing</button><button class="btn danger" type="button" id="unpub">Unpublish</button></div>' : '<button class="btn" type="button" id="report" style="align-self:flex-start">Report this app</button>') +
+      '</aside></div>';
+    var em = $('editMine'); if (em) em.addEventListener('click', function () { openForm(a); });
+    var up = $('unpub'); if (up) up.addEventListener('click', function () { unpublish(a, up); });
+    var rp2 = $('report'); if (rp2) rp2.addEventListener('click', function () { toast('Thanks. In the full version reports go to Henry, who can hide the app.'); });
+  }
+
+  /* ---------- actions ---------- */
+  function install(id) {
+    var a = find(id); if (!a || isAdded(id)) return;
+    data.installed.push(snap(a)); write(data); tell('changed', { id: id });
+    toast(a.name + ' was added to your dashboard', inHub ? '<button class="btn small primary" type="button" id="goDash">See it on my dashboard</button>' : '');
+    var gd = $('goDash'); if (gd) gd.addEventListener('click', function () { tell('dashboard', { id: id }); });
+    if (view === 'listing') renderListing(); else renderBrowse();
+  }
+  function uninstall(id) {
+    var a = find(id);
+    data.installed = data.installed.filter(function (x) { return x.id !== id; }); write(data); tell('changed', {});
+    toast((a ? a.name : 'The app') + ' was removed from your dashboard. It is still in the store.');
+    if (view === 'listing') renderListing(); else renderBrowse();
+  }
+  function openApp(id) {
+    var a = find(id); if (!a) return;
+    if (a.embed) { if (inHub) tell('open', { src: a.embed, name: a.name }); else location.href = '../../' + a.embed; return; }
+    if (a.url) window.open(a.url, '_blank', 'noopener');
+  }
+  function unpublish(a, btn) {
+    if (btn.dataset.armed !== '1') { btn.dataset.armed = '1'; btn.textContent = 'Click again to unpublish'; return; }
+    data.published = data.published.filter(function (x) { return x.id !== a.id; });
+    data.installed = data.installed.filter(function (x) { return x.id !== a.id; });
+    write(data); tell('changed', {});
+    toast(a.name + ' was unpublished and taken off your dashboard.');
+    go('browse');
+  }
+
+  /* ---------- publish form ---------- */
+  var style = { color: 'amber', pattern: 'stripes', icon: 'timer' };
+  $('cat').innerHTML = CATS.map(function (c) { return '<option>' + esc(c) + '</option>'; }).join('');
+  function radios() {
+    $('colors').innerHTML = Object.keys(PAL).map(function (k) { return '<button type="button" class="swatch" role="radio" data-color="' + k + '" aria-checked="' + (style.color === k) + '" aria-label="' + k + '" style="background:' + PAL[k][0] + '"></button>'; }).join('');
+    $('patterns').innerHTML = Object.keys(PATTERNS).map(function (k) { return '<button type="button" class="opt-btn" role="radio" data-pattern="' + k + '" aria-checked="' + (style.pattern === k) + '">' + PATTERNS[k] + '</button>'; }).join('');
+    $('icons').innerHTML = Object.keys(ICONS).map(function (k) { return '<button type="button" class="opt-btn ico" role="radio" data-icon="' + k + '" aria-checked="' + (style.icon === k) + '" aria-label="' + ICON_NAMES[k] + '"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e8ecf3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICONS[k] + '</svg></button>'; }).join('');
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-color],[data-pattern],[data-icon]'); if (!b) return;
+    if (b.dataset.color) style.color = b.dataset.color; if (b.dataset.pattern) style.pattern = b.dataset.pattern; if (b.dataset.icon) style.icon = b.dataset.icon;
+    radios(); preview();
+  });
+  var ART_RE = /^https:\/\/claude\.ai\/(public\/artifacts|artifact)\/[A-Za-z0-9_-]{6,}\/?(\?[^\s#]*)?(#\S*)?$/;
+  var REPO_RE = /^https:\/\/github\.com\/[A-Za-z0-9-]{1,39}\/[A-Za-z0-9._-]{1,100}\/?$/;
+  function fieldMsg(id, ok, text) { var f = $('f-' + id), m = $(id + '-msg'); f.classList.toggle('bad', !ok && !!text); m.className = ok ? (text ? 'ok' : 'hint') : 'err'; m.textContent = text; }
+  function checkUrl(show) {
+    var v = $('url').value.trim();
+    if (!v) { if (show) fieldMsg('url', false, 'Paste the shared link to your artifact.'); else fieldMsg('url', true, 'Share the artifact publicly in Claude first, then paste its link here.'); return false; }
+    if (!ART_RE.test(v)) { fieldMsg('url', false, 'That isn\'t a Claude artifact link. It should start with https://claude.ai/public/artifacts/ or https://claude.ai/artifact/'); return false; }
+    var dup = catalog().filter(function (a) { return a.url && a.url.replace(/\/$/, '') === v.replace(/\/$/, '') && (!editing || a.id !== editing.id); })[0];
+    if (dup) { fieldMsg('url', false, 'This link is already in the store as ' + dup.name + '.'); return false; }
+    fieldMsg('url', true, '✓ Looks like a shared Claude artifact link.'); return true;
+  }
+  function checkRepo() {
+    var v = $('repo').value.trim();
+    if (!v) { fieldMsg('repo', true, 'Listed below your app as Source code, so classmates can view or fork it.'); return true; }
+    if (!REPO_RE.test(v)) { fieldMsg('repo', false, 'Use a repository link like https://github.com/you/repo'); return false; }
+    fieldMsg('repo', true, '✓ Will show as Source code on your listing.'); return true;
+  }
+  $('url').addEventListener('input', function () { checkUrl(false); });
+  $('repo').addEventListener('input', checkRepo);
+  ['name', 'pitch', 'cat', 'desc'].forEach(function (id) { $(id).addEventListener('input', preview); });
+  function draft() {
+    return { name: $('name').value.trim() || 'Your app name', author: 'You', cat: $('cat').value, pitch: $('pitch').value.trim() || 'Your one-line pitch', style: { color: style.color, pattern: style.pattern, icon: style.icon } };
+  }
+  function preview() {
+    var d = draft(); $('pitchCount').textContent = $('pitch').value.length + ' / 80';
+    $('pvCard').innerHTML = '<div class="tile" style="cursor:default">' + art(d.style, true) + '</div><div class="body"><b>' + esc(d.name) + '</b><span class="meta">by You · ' + esc(d.cat) + '</span><span class="pitch">' + esc(d.pitch) + '</span></div>';
+    $('pvTile').innerHTML = art(d.style, false) + '<span>' + esc(d.name) + '<small>by You</small></span>';
+  }
+  function openForm(a) {
+    editing = a;
+    $('pubTitle').textContent = a ? 'Edit ' + a.name : 'Publish your app';
+    $('pubBtn').textContent = a ? 'Save changes' : 'Publish';
+    $('url').value = a ? a.url || '' : ''; $('name').value = a ? a.name : ''; $('cat').value = a ? a.cat : CATS[0];
+    $('pitch').value = a ? a.pitch : ''; $('desc').value = a ? a.desc || '' : ''; $('repo').value = a ? a.repo || '' : '';
+    $('own').checked = !!a;
+    style = a ? { color: a.style.color, pattern: a.style.pattern, icon: a.style.icon } : { color: 'amber', pattern: 'stripes', icon: 'timer' };
+    ['name', 'pitch', 'own'].forEach(function (id) { $('f-' + id).classList.remove('bad'); $(id + '-msg').textContent = ''; });
+    checkUrl(false); checkRepo(); radios(); preview();
+    go('publish'); $('url').focus();
+  }
+  $('pubForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var ok = checkUrl(true) & checkRepo();
+    var nm = $('name').value.trim(), pt = $('pitch').value.trim();
+    $('f-name').classList.toggle('bad', !nm); $('name-msg').textContent = nm ? '' : 'Give your app a name.';
+    $('f-pitch').classList.toggle('bad', !pt); $('pitch-msg').textContent = pt ? '' : 'Add a one-line pitch.';
+    $('own-msg').textContent = $('own').checked ? '' : 'Confirm you made this app and it is OK to share.';
+    if (!ok || !nm || !pt || !$('own').checked) { var bad = document.querySelector('.f.bad input, .f.bad textarea') || ($('own').checked ? null : $('own')); if (bad) bad.focus(); return; }
+    var rec = {
+      id: editing ? editing.id : 'p' + Date.now().toString(36), mine: true, author: 'You', added: new Date().toISOString().slice(0, 10),
+      name: nm, cat: $('cat').value, pitch: pt, desc: $('desc').value.trim(), url: $('url').value.trim(), repo: $('repo').value.trim(),
+      style: { color: style.color, pattern: style.pattern, icon: style.icon }
+    };
+    data.published = data.published.filter(function (x) { return x.id !== rec.id; }); data.published.unshift(rec);
+    /* an installed copy follows the edit */
+    data.installed = data.installed.map(function (x) { return x.id === rec.id ? snap(rec) : x; });
+    write(data); tell('changed', {});
+    var wasEdit = !!editing; editing = null;
+    go('listing', rec.id);
+    toast(wasEdit ? 'Saved. Your listing is updated.' : rec.name + ' is live in the App Store.');
+  });
+
+  /* ---------- toast ---------- */
+  var tt = 0;
+  function toast(msg, actHTML) {
+    $('toastMsg').textContent = msg; $('toastAct').innerHTML = actHTML || ''; $('toast').hidden = false;
+    clearTimeout(tt); tt = setTimeout(function () { $('toast').hidden = true; }, 6000);
+  }
+
+  /* another tab or the hub changed the store */
+  window.addEventListener('storage', function (e) { if (e.key === SKEY) { data = read(); if (view === 'listing') renderListing(); else if (view === 'browse') renderBrowse(); } });
+  go('browse');
+})();
+</script>
+</body>
+</html>
